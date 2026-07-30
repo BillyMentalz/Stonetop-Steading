@@ -1,0 +1,88 @@
+@font-face {
+    font-family:historicalFell;
+    src: url(historical-felltyperoman-opentype.otf);
+}
+
+body {
+    font-family:historicalFell;
+    max-height:100vh;
+    max-width:100vw;
+    margin:0;
+    background-color:#eacfba;
+    color:#551f19;
+    font-weight:lighter;
+    display:flex;
+    flex-direction:column;
+    justify-content: space-between;
+    align-items:flex-start;
+}
+
+h1 {
+    display:flex;
+    text-align:left;
+    font-size:4rem;
+    padding-left:1rem;
+}
+
+button{
+    -moz-appearance:textfield;
+    outline:none;
+    border:none;
+    padding:0;
+    background-color:inherit;
+    font-family:historicalFell;
+    color:inherit;
+    font-size:2rem;
+    max-width:8rem;
+    text-align:right;
+}
+
+input[type='text']{
+    outline:none;
+    border:none;
+    padding:0;
+    background-color:inherit;
+    font-family:historicalFell;
+    border-bottom: 1px solid #551f19;
+    color:inherit;
+    width:50%;
+    font-size:inherit;
+}
+input[type='submit']{
+    outline:none;
+    border:none;
+    padding:0;
+    background-color:inherit;
+    font-family:historicalFell;
+    color:inherit;
+    font-size:inherit;
+}
+
+#central {
+    position: relative;
+    height:100%;
+    width:100%;
+}
+
+#login {
+    z-index:1;
+    margin-left:1rem;
+    width:20rem;
+    height:10rem;
+    border:solid;
+    font-size:2rem;
+    position: absolute;
+    color:inherit
+}
+
+label {
+    min-width:50%;
+    font-size:inherit;
+}
+
+img {
+    object-fit:cover;
+    position: absolute;
+    width:100%;
+    height:100%;
+}

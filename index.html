@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8zo">
+    <meta name="viewport" content="width=device.width, initial-scale=1.0">
+    <title> Stonetop | Home</title>
+    <link rel="stylesheet" href="/css/styles.css" type="text/css">
+    <link rel="icon" href="assets/favicon.png">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+    <div class="left-side">
+        <div id="sidebar">
+            <div id="stonetop">
+            Stonetop</div>
+            <div class="topunit">
+                <div class="subunits">
+                    <img src="assets/fortune1.png" alt="">
+                    <div class="subdiv">
+                        <p class="S">
+                            Fortunes
+                        </p>
+                        <form class="check" id="Fortunes">
+                            <div class="checkbox">
+                                <input type="radio" name="Fortunes" value="-1">
+                                <p class="radioChoice">-1</p>
+                            </div>
+                            <div class="checkbox">
+                                <input type="radio" name="Fortunes" value="+0">
+                                <p class="radioChoice">+0</p>
+                            </div>
+                            <div class="checkbox">
+                                <input type="radio" name="Fortunes" value="+1">
+                                <p class="radioChoice">+1</p>
+                            </div>
+                            <div class="checkbox">
+                                <input type="radio" name="Fortunes" value="+2">
+                                <p class="radioChoice">+2</p>
+                            </div>
+                            <div class="checkbox">
+                                <input type="radio" name="Fortunes" value="+3">
+                                <p class="radioChoice">+3</p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="subunits">
+                    <img src="assets/surplus.png" alt="">
+                    <div class="subdiv">
+                        <p class="S">
+                            Surplus
+                        </p>
+                        <div class="check">
+                            <div class="checkbox">
+                                <input type="radio" name="Surplus" value="-1">
+                                <p class="radioChoice">-1</p>
+                            </div>
+                            <div class="checkbox">
+                                <input type="radio" name="Surplus" value="+0">
+                                <p class="radioChoice">+0</p>
+                            </div>
+                            <div class="checkbox">
+                                <input type="radio" name="Surplus" value="+1">
+                                <p class="radioChoice">+1</p>
+                            </div>
+                            <div class="checkbox">
+                                <input type="radio" name="Surplus" value="+2">
+                                <p class="radioChoice">+2</p>
+                            </div>
+                            <div class="checkbox">
+                                <input type="radio" name="Surplus" value="+3">
+                                <p class="radioChoice">+3</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="subunits">
+                    <img src="assets/debilites.png" alt="">
+                    <div class="subdiv">
+                        <p class="S">
+                        Debilities
+                        </p>
+                       <input type="checkbox" name="Diminished" value="Diminished"> 
+                        <label>diminished</label> 
+                       <input type="checkbox" name="Lacking" value="Lacking"> 
+                       <label>lacking</label> 
+                       <input type="checkbox" name="Malcontent" value="Malcontent"> 
+                       <label >malcontent</label> 
+                </div>
+                </div>
+                <div class="units" style="flex-grow:1;display:flex;flex-direction:column;font-size:1.8rem;">
+                    <div style="">Size:</div>
+                    <div class="custom-select">
+                        <select name="Stonetop-Size" >
+                            <option value="Hamlet">Hamlet</option>
+                            <option selected="selected" value="Village">Village</option>
+                            <option value="Town">Town</option>
+                            <option value="City">City</option>
+                        </select>
+                    </div>
+                    <div>Population:</div>
+                    <input type="number" name="Population">
+                    <div>Season:</div>
+                    <div class="custom-select">
+                        <select name="Season">
+                            <option value="Spring">Spring</option>
+                            <option value="Summer">Summer</option>
+                            <option value="Autumn">Autumn</option>
+                            <option value="Winter">Winter</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="units">
+                <div class="column1">
+                    <div class="coltitle">
+                        <p class="C">
+                            Prosperity
+                        </p>
+                        <p class="S">Starts at 0</p>
+                    </div>
+                    <div class="check">
+                        <div class="checkbox">
+                            <input type="radio" name="Prosperity" value="-1">
+                            <p class="radioChoice">-1</p>
+                        </div>
+                        <div class="checkbox">
+                            <input type="radio" name="Prosperity" value="+0">
+                            <p class="radioChoice">+0</p>
+                        </div>
+                        <div class="checkbox">
+                            <input type="radio" name="Prosperity" value="+1">
+                            <p class="radioChoice">+1</p>
+                        </div>
+                        <div class="checkbox">
+                            <input type="radio" name="Prosperity" value="+2">
+                            <p class="radioChoice">+2</p>
+                        </div>
+                        <div class="checkbox">
+                            <input type="radio" name="Prosperity" value="+3">
+                            <p class="radioChoice">+3</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="column2">
+                    <p class="S">
+                        Resources
+                    </p>
+                    <ul class="w" id="Resources" >
+                    </ul>
+                    <ul class="w">
+                        <li>
+                            <input type="text" id="Input-Resources">
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="units">
+                <div class="column1">
+                    <div class="coltitle">
+                        <p class="C">
+                            Defenses
+                        </p>
+                        <p class="S">Starts at 0</p>
+                    </div>
+                    <div class="check">
+                        <div class="checkbox">
+                            <input type="radio" name="Defenses" value="-1">
+                            <p class="radioChoice">-1</p>
+                        </div>
+                        <div class="checkbox">
+                            <input type="radio" name="Defenses" value="+0">
+                            <p class="radioChoice">+0</p>
+                        </div>
+                        <div class="checkbox">
+                            <input type="radio" name="Defenses" value="+1">
+                            <p class="radioChoice">+1</p>
+                        </div>
+                        <div class="checkbox">
+                            <input type="radio" name="Defenses" value="+2">
+                            <p class="radioChoice">+2</p>
+                        </div>
+                        <div class="checkbox">
+                            <input type="radio" name="Defenses" value="+3">
+                            <p class="radioChoice">+3</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="column2">
+                    <p class="S">
+                        Fortifications, etc.
+                    </p>
+                    <ul class="w" id="Fortifications">
+                    </ul>
+                    <ul class="w">
+                        <li>
+                            <input type="text" id="Input-Fortifications">
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="right-side">
+         <div id="topbar">
+            <div id="guide"> </div>
+            <div id="menu">
+                <div class="menuItem"> Locations 
+                </div>
+                <div class="menuItem"> Characters </div>
+                <div class="menuItem"> Maps 
+                    <div class ="menuContent">
+                        Coming soon!
+                    </div>
+                </div>
+                <div class="menuItem"> Assets </div>
+                <div class="menuItem"> 
+                    Improvments
+                    <div class ="menuContent">
+                        Coming soon!
+                    </div>
+                </div>
+            </div>
+         </div> 
+        <div id="map">
+            <div id="Legend-Stonetop-1" class="indicators draggable"><p class="markers">A</p></div>
+            <div id="Legend-Stonetop-2" class="indicators draggable"><p class="markers">B</p></div>
+            <div id="Legend-Stonetop-3" class="indicators draggable"><p class="markers">C</p></div>
+            <div id="Legend-Stonetop-4" class="indicators draggable"><p class="markers">D</p></div>
+            <div id="Legend-Stonetop-5" class="indicators draggable"><p class="markers">E</p></div>
+            <div id="Legend-Stonetop-6" class="indicators draggable"><p class="markers">F</p></div>
+            <div id="Legend-Stonetop-7" class="indicators draggable"><p class="markers">F</p></div>
+            <div id="Legend-Stonetop-8" class="indicators draggable"><p class="markers">F</p></div>
+            <div class="Places">
+                <p class="C" style="display:none" >
+                Places of Interest
+                </p>
+            </div>
+            <img src="assets/Stonetop.png" alt="" class="photo">
+        </div>
+        <div id="legend"style="display:none"> </div>
+
+    </div>
+</body>
+<div id="templates">
+    
+    <template id='marker'>
+        <div id='marker' class="indicators draggable"><p class="markers"></p></div>
+        </template>
+</div>
+<script type="module" src="bundle.js"></script>
+</html>
