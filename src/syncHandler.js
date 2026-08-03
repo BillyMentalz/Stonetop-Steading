@@ -42,20 +42,19 @@ const loadOperator = (create) => {
     const log = JSON.parse(localStorage.getItem(key));
     const element = loadTable[key](sum.index, sum.row);
     log[sum.index] = sum.row;
-    localStorage.setItem(key,log);
+    localStorage.setItem(key,JSON.stringify(log));
     updateIndicate(element);
     
 }
 
 const updateOperator = (update) => {
-    console.log(update);
     const [key, value] = Object.entries(update)[0];
     localStorage.setItem('time', value.latestModified);
     const sum = convertRow(convertTable[key], value);
     const log = JSON.parse(localStorage.getItem(key));
     const element = updateTable[key](sum.index, sum.row);
     log[sum.index] = sum.row;
-    localStorage.setItem(key,log);
+    localStorage.setItem(key,JSON.stringify(log));
     updateIndicate(element);
 }
 
@@ -93,7 +92,6 @@ const convertRow  = ( identifiers , row) => {
 
 const storeNewRows = (check) => {
     for (const [key, value] of Object.entries(check)){
-        console.log(check)
         if (key == 'deleteRecords') {
             deleteOperation(value);
         }
@@ -104,7 +102,6 @@ const storeNewRows = (check) => {
             var current = JSON.parse(localStorage.getItem(key))||{};
             value.forEach(row => {
                 const add = convertRow(convertTable[key], row); 
-                console.log(add)
                 const action =  current.hasOwnProperty(add.index);
                 const element = action ? updateTable[key](add.index,add.row) : loadTable[key](add.index, add.row);
                 updateIndicate(element);

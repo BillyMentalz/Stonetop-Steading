@@ -1,16 +1,76 @@
 (() => {
+  // src/document.js
+  var socket = io();
+  var templates = document.getElementById("templates");
+  var sidebar = document.getElementById("sidebar");
+  var topbar = document.getElementById("topbar");
+  var guide = document.getElementById("guide");
+  var map = document.getElementById("map");
+  var guidebook = document.getElementById("guide");
+  var menu = document.getElementById("menu");
+  var maps = document.getElementById("worldMaps");
+  var characters = document.getElementById("characters");
+  var locations = document.getElementById("locations");
+  var assets = document.getElementById("assets");
+  var Node = class {
+    constructor(element) {
+      this.element = element;
+      this.prev = null;
+      this.next = null;
+    }
+  };
+  var LinkedList = class {
+    constructor() {
+      this.head = null;
+      this.end = this.head;
+    }
+    append(element) {
+      let newNode = new Node(element);
+      if (!this.head) {
+        this.head = newNode;
+        this.end = newNode;
+      } else {
+        newNode.prev = this.end;
+        this.end.next = newNode;
+        this.end = newNode;
+      }
+      element.__nodeRef = newNode;
+      return newNode;
+    }
+    popNode(node) {
+      if (!this.head) return;
+      if (this.head === node) {
+        this.head = node.next;
+        if (this.head) this.head.prev = null;
+        if (node === this.end) this.end = null;
+      } else {
+        if (node.prev) node.prev.next = node.next;
+        if (node.next) node.next.prev = node.prev;
+        if (node === this.end) this.end = node.prev;
+      }
+      if (node.element) delete node.element.__nodeRef;
+      return node;
+    }
+  };
+
   // src/dataHandler/homesHandler.js
   var homesOperator = (key, value) => {
-    const thing = document.getElementById("locationList");
-    console.log(thing);
-    return thing;
+    const element = document.createElement("div");
+    element.classList.add("S");
+    element.textContent = key;
+    element.id = key;
+    maps.appendChild(element);
+    return element;
   };
   var homesUpdateOperator = (key, value) => {
-    console.log("Update", key);
-    return document.getElementById("locationList");
+    const element = maps.getElementById(key);
+    element.textContent = key;
+    return element;
   };
   var homesDeleteOperator = (key, value) => {
-    console.log("Delete", key);
+    const element = maps.getElementById(key);
+    console.log(element);
+    element.remove();
   };
 
   // src/dataHandler/statsHandler.js
@@ -70,6 +130,7 @@
 
   // src/animation.js
   var indicateTimers = /* @__PURE__ */ new Map();
+  var tablists = new LinkedList();
   var updateIndicate = (el) => {
     const prior = indicateTimers.get(el);
     if (prior) clearTimeout(prior);
@@ -117,18 +178,17 @@
     const log = JSON.parse(localStorage.getItem(key));
     const element = loadTable[key](sum.index, sum.row);
     log[sum.index] = sum.row;
-    localStorage.setItem(key, log);
+    localStorage.setItem(key, JSON.stringify(log));
     updateIndicate(element);
   };
   var updateOperator = (update) => {
-    console.log(update);
     const [key, value] = Object.entries(update)[0];
     localStorage.setItem("time", value.latestModified);
     const sum = convertRow(convertTable[key], value);
     const log = JSON.parse(localStorage.getItem(key));
     const element = updateTable[key](sum.index, sum.row);
     log[sum.index] = sum.row;
-    localStorage.setItem(key, log);
+    localStorage.setItem(key, JSON.stringify(log));
     updateIndicate(element);
   };
   var convertTable = {
@@ -159,7 +219,6 @@
   };
   var storeNewRows = (check) => {
     for (const [key, value] of Object.entries(check)) {
-      console.log(check);
       if (key == "deleteRecords") {
         deleteOperation(value);
       } else if (key == "time") {
@@ -168,7 +227,6 @@
         var current = JSON.parse(localStorage.getItem(key)) || {};
         value.forEach((row) => {
           const add = convertRow(convertTable[key], row);
-          console.log(add);
           const action = current.hasOwnProperty(add.index);
           const element = action ? updateTable[key](add.index, add.row) : loadTable[key](add.index, add.row);
           updateIndicate(element);
@@ -213,47 +271,72 @@
   };
 
   // src/editHandler.js
-  var listEdit = (socket2, element) => {
+  var listEdit = (element) => {
     let newInput = document.createElement("input");
     let spanElement = element.querySelector("[data-field]");
     newInput.type = "text";
     newInput.value = spanElement.textContent;
+    newInput.dataset.original = spanElement.textContent;
     newInput.id = element.id;
-    let id = element.id.split("/%/");
-    let name = id[0];
-    console.log("Name:" + name);
-    let torder = id[1];
-    console.log("order:" + torder);
     newInput.dataset.field = "listText";
     spanElement.replaceWith(newInput);
-    newInput.addEventListener("change", (e) => {
-      socket2.emit(e.target.value == "" ? "delete" : "update", {
-        table: "lists",
-        name,
-        order: torder,
-        text: e.target.value
-      });
-    });
+  };
+  var listRevert = (element) => {
+    let spanElement = document.createElement("span");
+    spanElement.textContent = element.dataset.original;
+    spanElement.dataset.field = "listText";
+    element.replaceWith(spanElement);
   };
   var edit = {
     "lists": listEdit
   };
-  var startEditing = (socket2, element, table) => {
-    edit[table](socket2, element);
+  var revert = {
+    "listText": listRevert
+  };
+  var startEditing = (element, table) => {
+    edit[table](element);
+  };
+  var revertEditing = (element) => {
+    revert[element.dataset.field](element);
   };
 
   // src/start.js
-  var socket = io();
-  var templates = document.getElementById("templates");
-  var sidebar = document.getElementById("sidebar");
-  var guide = document.getElementById("guide");
+  var sidebarEvents = ["radio", "select-one", "number", "checkbox"];
+  var tablists2 = new LinkedList();
   var isUpdatingFromServer = 0;
-  var space = document.querySelector("#town");
-  var draggables = document.querySelectorAll(".indicators");
-  function drags(event) {
-    let boundaries = space.getBoundingClientRect();
-    let newleft = (event.clientX - event.currentTarget.offsetWidth / 2 - boundaries.left) / space.offsetWidth * 100;
-    let newtop = (event.clientY - event.currentTarget.offsetHeight / 2 - boundaries.top) / space.offsetHeight * 100;
+  var indicatorDragMap = /* @__PURE__ */ new Map();
+  var guideBookToggle = false;
+  function motherEventFactory(parent, mEvent, selector, handler) {
+    parent.addEventListener(mEvent, (e) => {
+      const element = e.target.closest(selector);
+      if (!element) return;
+      handler(element, e);
+    });
+  }
+  motherEventFactory(map, "mousedown", ".draggable", (draggable, e) => {
+    let dragHandler = (e2) => drags(map, e2);
+    draggable.addEventListener("mousemove", dragHandler);
+    indicatorDragMap.set(draggable, dragHandler);
+  });
+  motherEventFactory(map, "mouseup", ".draggable", (draggable, event) => {
+    for (const [key, value] of indicatorDragMap) {
+      key.removeEventListener("mousemove", value);
+      indicatorDragMap.delete(key);
+    }
+  });
+  motherEventFactory(map, "mousedown", ".tabs", (draggable, event) => {
+    tablists2.popNode(draggable.__nodeRef);
+    tablists2.append(draggable);
+    caltab();
+    draggable.addEventListener("mousemove", tabDrag);
+  });
+  motherEventFactory(map, "mouseup", ".tabs", (draggable, event) => {
+    draggable.removeEventListener("mousemove", tabDrag);
+  });
+  function drags(box, event) {
+    let boundaries = box.getBoundingClientRect();
+    let newleft = (event.clientX - event.currentTarget.offsetWidth / 2 - boundaries.left) / box.offsetWidth * 100;
+    let newtop = (event.clientY - event.currentTarget.offsetHeight / 2 - boundaries.top) / box.offsetHeight * 100;
     if (newleft < -5) newleft = -5;
     if (newleft > 97.5) newleft = 97.5;
     if (newtop < -5) newtop = -5;
@@ -261,37 +344,30 @@
     event.currentTarget.style.left = `${newleft}%`;
     event.currentTarget.style.top = `${newtop}%`;
   }
-  draggables.forEach((element) => {
-    element.addEventListener("mousedown", () => {
-      element.addEventListener("mousemove", drags);
-    });
-    element.addEventListener("mouseup", () => {
-      element.removeEventListener("mousemove", drags);
-      socket.emit("markerChange", {
-        id: element.id,
-        left: element.style.left,
-        top: element.style.top
-      });
-    });
-  });
-  var guidebook = document.querySelector("#guide");
-  var menu = document.querySelector("#menu");
-  var menuToggle = false;
+  function tabDrag(event) {
+    let newleft = event.clientX;
+    let newtop = event.clientY;
+    if (newleft < event.currentTarget.offsetWidth / 2) newleft = event.currentTarget.offsetWidth / 2;
+    if (newtop < event.currentTarget.offsetHeight / 2) newtop = event.currentTarget.offsetHeight / 2;
+    if (newleft > window.innerWidth - event.currentTarget.offsetWidth / 2) newleft = window.innerWidth - event.currentTarget.offsetWidth / 2;
+    if (newtop > window.innerHeight - event.currentTarget.offsetHeight / 2) newtop = window.innerHeight - event.currentTarget.offsetHeight / 2;
+    event.currentTarget.style.left = `${newleft}px`;
+    event.currentTarget.style.top = `${newtop}px`;
+  }
   guidebook.addEventListener("click", (e) => {
-    if (menuToggle) {
+    if (guideBookToggle) {
       e.target.style.backgroundPosition = "100px 50px";
       menu.style.width = "0%";
       menu.style.overflow = "hidden";
-      menuToggle = false;
+      guideBookToggle = false;
     } else {
       e.target.style.backgroundPosition = "50px 50px";
       menu.style.width = "100%";
       menu.style.overflow = "visible";
-      menuToggle = true;
+      guideBookToggle = true;
     }
   });
-  var sidebarEvents = ["radio", "select-one", "number"];
-  sidebar.addEventListener("change", (event) => {
+  document.addEventListener("change", (event) => {
     if (isUpdatingFromServer > 0) return;
     const eType = event.target.type;
     if (sidebarEvents.includes(eType)) {
@@ -299,24 +375,60 @@
         table: "stats",
         name: event.target.name,
         type: event.target.type,
-        value: event.target.value
+        value: eType == "checkbox" ? event.target.checked.toString() : event.target.value
       });
-    } else if (eType == "checkbox") {
-      console.log(event.target.checked.toString());
-      socket.emit("update", {
-        table: "stats",
-        name: event.target.name,
-        type: event.target.type,
-        value: event.target.checked.toString()
+    } else if (eType == "text") {
+      let tId = event.target.id.split("/%/");
+      let name = tId[0];
+      let torder = tId[1];
+      if (event.target.value == "") {
+        if (!window.confirm("Delete Item? \n Item:" + event.target.dataset.original)) {
+          revertEditing(event.target);
+          return;
+        }
+      }
+      socket.emit(event.target.value == "" ? "delete" : "update", {
+        table: "lists",
+        name,
+        order: torder,
+        text: event.target.value
       });
     }
   });
-  document.addEventListener("dblclick", (e) => {
-    const editable = e.target.closest("[data-editable]");
-    if (!editable) return;
-    startEditing(socket, editable, editable.dataset.editable);
+  motherEventFactory(menu, "click", ".openTab", (input, event) => {
+    const tab = document.getElementById(input.dataset.toggle);
+    if (!tab) return;
+    displayToggle(tab);
   });
-  loadTables();
+  motherEventFactory(document, "click", ".listContain", (input, event) => {
+    const modify = input.querySelector(`#${input.dataset.contain}`);
+    const last = modify.lastElementChild;
+    const num = last ? (parseInt(last.dataset.index) + 1).toString() : "1";
+    console.log(num);
+  });
+  function displayToggle(element) {
+    if (!element) return;
+    if (element.style.display == "") {
+      element.style.display = "flex";
+      tablists2.append(element);
+      caltab();
+    } else {
+      element.style.display = "";
+      tablists2.popNode(element.__nodeRef.element);
+    }
+  }
+  function caltab() {
+    let temp = tablists2.head;
+    let count = 10;
+    while (temp != null) {
+      temp.element.style.zIndex = count;
+      count += 1;
+      temp = temp.next;
+    }
+  }
+  motherEventFactory(document, "dblclick", (editable, event) => {
+    startEditing(editable, editable.dataset.editable);
+  });
   socket.on("connect", () => {
     let check = localStorage.getItem("time") || 0;
     socket.emit("checkSync", check);
@@ -333,12 +445,12 @@
   });
   socket.on("delete", (deleted) => {
     isUpdatingFromServer++;
-    console.log(deleted);
     deleteOperation([deleted]);
     isUpdatingFromServer--;
   });
   socket.on("checkSync", (check) => {
     storeNewRows(check);
   });
+  loadTables();
 })();
 //# sourceMappingURL=bundle.js.map

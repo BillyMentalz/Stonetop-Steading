@@ -61,8 +61,8 @@ const createOperation = (creation) => {
         }
     catch (e) {
         database.exec('ROLLBACK');
-        console.log(`createOperation failed.Paramters: ${info}`);
-        throw new Error(`createOperation failed: Parameters:${info}`);
+        console.log(`createOperation failed.Paramters: ${creation}`);
+        throw new Error(`createOperation failed: Parameters:${creation}`);
     }
 }
 

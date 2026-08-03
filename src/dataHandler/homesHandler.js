@@ -1,17 +1,24 @@
+import { maps } from '../document.js'
 const homesOperator = (key, value )=>{
-    const thing = document.getElementById('locationList');
-    console.log(thing);
-    return thing;
+    const element = document.createElement("div")
+    element.classList.add('S');
+    element.textContent = key;
+    element.id = key;
+    maps.appendChild(element);
+    return element;
 }
 
 
 const homesUpdateOperator = (key, value)=> {
-    console.log("Update",key);
-    return document.getElementById('locationList');
+    const element = maps.getElementById(key);
+    element.textContent = key;
+    return element;
 }
 
 const homesDeleteOperator = (key, value)=> {
-    console.log("Delete", key);
+    const element = maps.getElementById(key);
+    console.log(element);
+    element.remove();
 }
 
 
