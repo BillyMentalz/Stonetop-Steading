@@ -64,7 +64,9 @@ CREATE TABLE IF NOT EXISTS characters (
     characterHome TEXT NOT NULL DEFAULT 'At World''s End' REFERENCES homes(homeName) ON DELETE SET DEFAULT,
     characterName TEXT NOT NULL,
     characterPronouns TEXT, 
+    characterOccupation TEXT,
     characterTraits TEXT,
+    characterInfo TEXT,
     characterCreationDate TEXT NOT NULL,
     latestModified TEXT NOT NULL
 );
@@ -102,7 +104,7 @@ CREATE TABLE IF NOT EXISTS deleteRecords (
     tableName TEXT NOT NULL,
     deletedItem TEXT NOT NULL,
     deletedAt TEXT NOT NULL, 
-    PRIMARY KEY (tableName, deletedItem)
+    PRIMARY KEY (tableName, deletedItem, deletedAt)
 );
 
 CREATE TABLE IF NOT EXISTS lastTimeSync (

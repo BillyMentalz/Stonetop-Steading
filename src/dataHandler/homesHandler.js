@@ -10,7 +10,7 @@ const homesOperator = (key, value )=>{
 
 
 const homesUpdateOperator = (key, value)=> {
-    const element = maps.getElementById(key);
+    const element = maps.querySelector(`[id="${key}"]`);
     element.textContent = key;
     return element;
 }

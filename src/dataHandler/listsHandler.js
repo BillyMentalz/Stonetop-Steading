@@ -26,7 +26,6 @@ const listsUpdateOperator = (key, value)=> {
 
 const listsDeleteOperator = (key) => {
     const listElement = document.getElementById(key);
-    console.log(listElement)
     listElement.remove();
 }
 

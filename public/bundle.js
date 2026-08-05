@@ -12,6 +12,7 @@
   var characters = document.getElementById("characters");
   var locations = document.getElementById("locations");
   var assets = document.getElementById("assets");
+  var addBox = document.getElementById("addBox");
   var Node = class {
     constructor(element) {
       this.element = element;
@@ -63,7 +64,7 @@
     return element;
   };
   var homesUpdateOperator = (key, value) => {
-    const element = maps.getElementById(key);
+    const element = maps.querySelector(`[id="${key}"]`);
     element.textContent = key;
     return element;
   };
@@ -124,8 +125,38 @@
   };
   var listsDeleteOperator = (key) => {
     const listElement = document.getElementById(key);
-    console.log(listElement);
     listElement.remove();
+  };
+
+  // src/dataHandler/charactersHandler.js
+  var tableShown = ["characterName", "characterOccupation", "characterTraits"];
+  var characterTable = characters.querySelector("#characterTable");
+  var charactersOperator = (key, value) => {
+    let characterElement = document.createElement("tr");
+    characterElement.id = key;
+    for (const [head, data] of Object.entries(value)) {
+      const tabdata = document.createElement("td");
+      console.log(head);
+      tabdata.dataset.head = head;
+      tabdata.textContent = data;
+      tabdata.style.display = tableShown.includes(head) ? "flex" : "none";
+      characterElement.append(tabdata);
+    }
+    characterTable.append(characterElement);
+    return characterElement;
+  };
+  var charactersUpdateOperator = (key, value) => {
+    let characterElement = document.querySelector(`tr#${key}`);
+    for (const [head, data] of Object.entries(value)) {
+      const tabdata = characterElement.querySelector(`[data-head="${head}"]`);
+      tabdata.textContent = data;
+    }
+    ;
+    return characterElement;
+  };
+  var charactersDeleteOperator = (key) => {
+    const characterElement = characters.querySelector(`#${key}`);
+    characterElement.remove();
   };
 
   // src/animation.js
@@ -149,29 +180,28 @@
   var loadTable = {
     "homes": homesOperator,
     "stats": statsOperator,
-    "lists": listsOperator
-    //    'characters': charactersSync, 
+    "lists": listsOperator,
+    "characters": charactersOperator
     //   'locations': locationsSync,
     //    'markers': markersSync 
   };
   var updateTable = {
     "homes": homesUpdateOperator,
     "stats": statsOperator,
-    "lists": listsUpdateOperator
-    //'characters': 
+    "lists": listsUpdateOperator,
+    "characters": charactersUpdateOperator
     //'locations': 
     //'markers': 
   };
   var deleteTable = {
     "homes": homesDeleteOperator,
     //'stats': statsOperator,
-    "lists": listsDeleteOperator
-    // 'characters'
+    "lists": listsDeleteOperator,
+    "characters": charactersDeleteOperator
     // 'locations'
     // 'markers'
   };
   var loadOperator = (create) => {
-    console.log(create);
     const [key, value] = Object.entries(create)[0];
     localStorage.setItem("time", value.latestModified);
     const sum = convertRow(convertTable[key], value);
@@ -240,6 +270,7 @@
     deletion.forEach((del) => {
       let store = null;
       let marks = null;
+      localStorage.setItem("time", del.deletedAt);
       switch (del.tableName) {
         case "homes":
           localStorage.clear();
@@ -272,14 +303,43 @@
 
   // src/editHandler.js
   var listEdit = (element) => {
-    let newInput = document.createElement("input");
+    const newEntry = addBox.cloneNode(true);
+    newEntry.style.display = "flex";
+    let newInput = document.createElement("textarea");
     let spanElement = element.querySelector("[data-field]");
-    newInput.type = "text";
     newInput.value = spanElement.textContent;
     newInput.dataset.original = spanElement.textContent;
     newInput.id = element.id;
     newInput.dataset.field = "listText";
     spanElement.replaceWith(newInput);
+    element.append(newEntry);
+    const lId = newInput.id.split("/%/");
+    const name = lId[0];
+    const order = lId[1];
+    element.querySelector('button[name="Change"]').addEventListener("click", (e) => {
+      socket.emit("update", {
+        table: "lists",
+        name,
+        order,
+        text: newInput.value
+      });
+      newEntry.remove();
+    });
+    element.querySelector('button[name="Delete"]').addEventListener("click", (e) => {
+      if (!window.confirm("Delete Item? \n Item:" + newInput.dataset.original)) {
+        revertEditing(newInput);
+        newEntry.remove();
+        return;
+      }
+      socket.emit("delete", {
+        table: "lists",
+        name,
+        order: parseInt(order)
+      });
+      newEntry.remove();
+    });
+  };
+  var characterEdit = (element) => {
   };
   var listRevert = (element) => {
     let spanElement = document.createElement("span");
@@ -287,8 +347,50 @@
     spanElement.dataset.field = "listText";
     element.replaceWith(spanElement);
   };
+  var formatAddTable = {
+    "lists": (element) => {
+      const last = element.lastElementChild;
+      const num = last ? parseInt(last.dataset.index) + 1 : 1;
+      return {
+        table: "lists",
+        name: element.id,
+        order: parseInt(num),
+        text: "Etc...."
+      };
+    },
+    "characters": (element) => {
+      return {
+        table: "characters",
+        id: crypto.randomUUID(),
+        home: `At World's End`,
+        name: "Add here...",
+        pronouns: "",
+        occupation: "",
+        info: "New fellow...",
+        traits: ""
+      };
+    },
+    "locations": (element) => {
+      const last = element.lastElementChild;
+      let sig = null;
+      if (last) {
+        sig = last.querySelector(".signifier").textContent;
+        sig = String.fromCharCode(sig.charCodeAt(0) + 1);
+      } else {
+        sig = "A";
+      }
+      return {
+        table: "locations",
+        home: element.id,
+        signifier: sig,
+        name: "",
+        text: ""
+      };
+    }
+  };
   var edit = {
-    "lists": listEdit
+    "lists": listEdit,
+    "characters": characterEdit
   };
   var revert = {
     "listText": listRevert
@@ -324,15 +426,16 @@
       indicatorDragMap.delete(key);
     }
   });
-  motherEventFactory(map, "mousedown", ".tabs", (draggable, event) => {
+  motherEventFactory(document, "mousedown", ".tabs", (draggable, event) => {
     tablists2.popNode(draggable.__nodeRef);
     tablists2.append(draggable);
     caltab();
     draggable.addEventListener("mousemove", tabDrag);
   });
-  motherEventFactory(map, "mouseup", ".tabs", (draggable, event) => {
+  motherEventFactory(document, "mouseup", ".tabs", (draggable, event) => {
     draggable.removeEventListener("mousemove", tabDrag);
   });
+  motherEventFactory(characters, "click");
   function drags(box, event) {
     let boundaries = box.getBoundingClientRect();
     let newleft = (event.clientX - event.currentTarget.offsetWidth / 2 - boundaries.left) / box.offsetWidth * 100;
@@ -367,7 +470,7 @@
       guideBookToggle = true;
     }
   });
-  document.addEventListener("change", (event) => {
+  var statChange = (event) => {
     if (isUpdatingFromServer > 0) return;
     const eType = event.target.type;
     if (sidebarEvents.includes(eType)) {
@@ -377,35 +480,25 @@
         type: event.target.type,
         value: eType == "checkbox" ? event.target.checked.toString() : event.target.value
       });
-    } else if (eType == "text") {
-      let tId = event.target.id.split("/%/");
-      let name = tId[0];
-      let torder = tId[1];
-      if (event.target.value == "") {
-        if (!window.confirm("Delete Item? \n Item:" + event.target.dataset.original)) {
-          revertEditing(event.target);
-          return;
-        }
-      }
-      socket.emit(event.target.value == "" ? "delete" : "update", {
-        table: "lists",
-        name,
-        order: torder,
-        text: event.target.value
-      });
     }
-  });
+  };
+  sidebar.addEventListener("change", statChange);
+  assets.addEventListener("change", statChange);
   motherEventFactory(menu, "click", ".openTab", (input, event) => {
     const tab = document.getElementById(input.dataset.toggle);
     if (!tab) return;
     displayToggle(tab);
   });
-  motherEventFactory(document, "click", ".listContain", (input, event) => {
-    const modify = input.querySelector(`#${input.dataset.contain}`);
-    const last = modify.lastElementChild;
-    const num = last ? (parseInt(last.dataset.index) + 1).toString() : "1";
-    console.log(num);
-  });
+  var entryAdd = (input, event) => {
+    const contain = input.closest(".Contain");
+    console.log(contain);
+    const addItem = contain.querySelector(`#${contain.dataset.contain}`);
+    const result = formatAddTable[addItem.dataset.tabletype](addItem);
+    socket.emit("create", result);
+  };
+  motherEventFactory(sidebar, "click", ".tabIcon", entryAdd);
+  motherEventFactory(assets, "click", ".tabIcon", entryAdd);
+  motherEventFactory(characters, "click", ".tabIcon", entryAdd);
   function displayToggle(element) {
     if (!element) return;
     if (element.style.display == "") {
@@ -426,7 +519,7 @@
       temp = temp.next;
     }
   }
-  motherEventFactory(document, "dblclick", (editable, event) => {
+  motherEventFactory(document, "dblclick", "[data-editable]", (editable, event) => {
     startEditing(editable, editable.dataset.editable);
   });
   socket.on("connect", () => {

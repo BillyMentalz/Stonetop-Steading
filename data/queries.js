@@ -37,8 +37,8 @@ const insertSchemas = {
         'columns': ['name', 'order', 'text', 'time']
     },
     'characters':{
-        'statement':database.prepare(`INSERT INTO characters (characterId, characterHome, characterName, characterPronouns, characterTraits, characterCreationDate ,latestModified) VALUES (?,?,?,?,?,?,?) RETURNING *`),
-        'columns': ['id', 'home', 'name', 'pronouns', 'text', 'time','time']
+        'statement':database.prepare(`INSERT INTO characters (characterId, characterHome, characterName, characterPronouns, characterOccupation,  characterTraits,  characterInfo, characterCreationDate ,latestModified) VALUES (?,?,?,?,?,?,?,?,?) RETURNING *`),
+        'columns': ['id', 'home', 'name', 'pronouns', 'occupation', 'traits',  'info', 'time','time']
     },
     'locations':{
         'statement':database.prepare(`INSERT INTO locations (locationHome,locationSignifier, locationName, locationInfo, latestModified) VALUES (?,?,?,?,?) RETURNING *`),
@@ -61,8 +61,7 @@ const createOperation = (creation) => {
         }
     catch (e) {
         database.exec('ROLLBACK');
-        console.log(`createOperation failed.Paramters: ${creation}`);
-        throw new Error(`createOperation failed: Parameters:${creation}`);
+        console.log(`createOperation failed.Paramters: ${e.message}`);
     }
 }
 
@@ -112,9 +111,9 @@ const updateSchemas = {
     },
     'characters':{
         'statement':database.prepare(`UPDATE characters 
-        SET characterHome = ?, characterName = ?, characterPronouns = ?, characterTraits = ?, latestModified = ? 
+        SET characterHome = ?, characterName = ?, characterPronouns = ?, characterOccupation = ?, characterTraits = ?, characterInfo = ?, latestModified = ? 
         WHERE characterId = ? RETURNING *`),
-        'columns':['home', 'name', 'pronouns', 'traits','time', 'id']
+        'columns': [ 'home', 'name', 'pronouns', 'occupation', 'traits',  'info', 'time', 'id' ]
     },
     'locations':{
         'statement':database.prepare(`UPDATE locations SET locationName = ?, locationInfo = ?, latestModified = ? WHERE locationHome = ? AND locationSignifier = ? RETURNING *`),
@@ -169,16 +168,20 @@ const deleteSchemas  = {
         'columns':['home', 'signifier', 'order']
     }
 }
-
+const deleteRecordExists = database.prepare(
+    `SELECT  EXISTS(SELECT 1 FROM deleteRecords WHERE tableName = ? AND deletedItem = ?)`);
 const deleteRecordStatement  = database.prepare(`INSERT INTO deleteRecords (tableName, deletedItem, deletedAt) VALUES (?,?,?) RETURNING *`)
+const deleteRecordUpdate = database.prepare(`UPDATE deleteRecords SET deletedAt = ? WHERE tableName = ? AND deletedItem = ? RETURNING *`);
 const deleteOperation  = (deletion) => {
     try {
         database.exec('BEGIN');            
         const info = extractFields(deletion, deleteSchemas[deletion.table].columns);
         const time = updateTime.get('deleteRecords').syncTimeStamp;
         const result = deleteSchemas[deletion.table].statement.get(...info);
-        const deleteRecord = deleteRecordStatement.get(deletion.table, info.join('/%/'), time);
+        const hasOld = deleteRecordExists.get(deletion.table, info.join('/%/'));
+        const deleteRecord = hasOld ? deleteRecordUpdate.get(time, deletion.table , info.join('/%/')): deleteRecordStatement.get(deletion.table, info.join('/%/'), time);
         database.exec('COMMIT');
+        console.log(deleteRecord);
         return deleteRecord;
         }
     catch (e) {

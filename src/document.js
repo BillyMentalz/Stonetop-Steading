@@ -6,11 +6,11 @@ const guide = document.getElementById("guide");
 const map = document.getElementById("map");
 const guidebook = document.getElementById('guide');
 const menu = document.getElementById('menu');
-const maps = document.getElementById('worldMaps')
-const characters = document.getElementById('characters')
-const locations = document.getElementById('locations')
-const assets = document.getElementById('assets')
-
+const maps = document.getElementById('worldMaps');
+const characters = document.getElementById('characters');
+const locations = document.getElementById('locations');
+const assets = document.getElementById('assets');
+const addBox = document.getElementById('addBox');
 
 
 class Node {
@@ -71,5 +71,6 @@ export {
     maps,
     characters,
     locations,
-    assets
+    assets,
+    addBox,
     };

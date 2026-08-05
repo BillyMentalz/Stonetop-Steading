@@ -1,5 +1,5 @@
 import {storeNewRows, loadTables ,loadOperator, updateOperator, deleteOperation } from './syncHandler.js'
-import { startEditing, revertEditing} from './editHandler.js';
+import { startEditing, revertEditing,formatAddTable } from './editHandler.js';
 import * as constants from './document.js';
 const sidebarEvents = ['radio' , 'select-one', 'number', 'checkbox'];
 const tablists = new constants.LinkedList();
@@ -28,15 +28,17 @@ motherEventFactory(constants.map, 'mouseup', '.draggable', (draggable, event)=> 
         indicatorDragMap.delete(key);
     }
 }) 
-motherEventFactory(constants.map, 'mousedown', '.tabs', (draggable, event)=> {
+motherEventFactory(document, 'mousedown', '.tabs', (draggable, event)=> {
     tablists.popNode(draggable.__nodeRef);
     tablists.append(draggable);
     caltab();
     draggable.addEventListener ("mousemove", tabDrag)
 })
-motherEventFactory(constants.map, 'mouseup', '.tabs', (draggable, event)=> {
+motherEventFactory(document, 'mouseup', '.tabs', (draggable, event)=> {
     draggable.removeEventListener ("mousemove", tabDrag)
 })
+
+motherEventFactory(constants.characters, 'click', )
 
 function drags(box , event) {// This is for sharable indicators
     let boundaries =  box.getBoundingClientRect();
@@ -78,7 +80,8 @@ constants.guidebook.addEventListener("click" , (e)=> {
     }
 })
 // CHANGE  MANAGEMENT
-document.addEventListener('change', (event) => {
+
+const statChange = (event) => {
     if(isUpdatingFromServer > 0 )return;
     const eType = event.target.type;
     if (sidebarEvents.includes(eType)) {
@@ -89,24 +92,9 @@ document.addEventListener('change', (event) => {
         value: (eType == 'checkbox') ? event.target.checked.toString() :  event.target.value
         });
     }
-    else if (eType == 'text'){
-        let tId = event.target.id.split('/%/');
-        let name = tId[0];
-        let torder = tId[1];
-        if (event.target.value == "") {
-            if (!window.confirm("Delete Item? \n Item:" + event.target.dataset.original )) {
-                revertEditing(event.target);
-                return;
-            }
-        }
-        constants.socket.emit(event.target.value == "" ? 'delete': 'update', {
-            table: 'lists',
-            name: name,
-            order: torder, 
-            text: event.target.value
-        })    
-    }
-});
+}
+constants.sidebar.addEventListener('change', statChange);
+constants.assets.addEventListener('change', statChange);
 
 motherEventFactory(constants.menu, 'click', '.openTab', (input, event)=> {
     const tab = document.getElementById(input.dataset.toggle);
@@ -114,14 +102,17 @@ motherEventFactory(constants.menu, 'click', '.openTab', (input, event)=> {
     displayToggle(tab);
 
 });
+const entryAdd  = (input, event)=> {
+    const contain = input.closest('.Contain');
+    console.log(contain)
+    const addItem = contain.querySelector(`#${contain.dataset.contain}`);
+    const result = formatAddTable[addItem.dataset.tabletype](addItem);
+    constants.socket.emit('create', result);
+}
 
-motherEventFactory(document ,'click', '.listContain', (input, event)=> {
-    const modify = input.querySelector(`#${input.dataset.contain}`);
-    const last = modify.lastElementChild
-    const num  =  last ? (parseInt(last.dataset.index) + 1).toString() : '1';
-    console.log(num);
-})
-
+motherEventFactory(constants.sidebar ,'click', '.tabIcon', entryAdd )
+motherEventFactory(constants.assets ,'click', '.tabIcon', entryAdd )
+motherEventFactory(constants.characters ,'click', '.tabIcon', entryAdd )
 function displayToggle(element) {
     if(!element) return;
     if (element.style.display == ''){ // '' is equivalent to display none. Browser defines none as an empty string, at least that's what I think it does.
@@ -144,7 +135,7 @@ function caltab () {
     }
 };
 
-motherEventFactory(document, 'dblclick' , (editable,event ) => {
+motherEventFactory(document, 'dblclick' ,'[data-editable]', (editable,event ) => {
     startEditing(editable, editable.dataset.editable);
 })
 // the constants.socket on 

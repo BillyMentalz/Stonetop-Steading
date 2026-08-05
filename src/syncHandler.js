@@ -1,8 +1,8 @@
 import { homesOperator, homesUpdateOperator, homesDeleteOperator} from './dataHandler/homesHandler.js';
 import { statsOperator } from './dataHandler/statsHandler.js';
 import { listsOperator, listsUpdateOperator, listsDeleteOperator} from './dataHandler/listsHandler.js';
+import {  charactersOperator, charactersUpdateOperator, charactersDeleteOperator } from './dataHandler/charactersHandler.js';
 /*
-import { charactersSync } from './dataHandler/characterssHandler.js';
 import { locationsSync } from './dataHandler/locationsHandler.js'; */
 //import { markersOperator, markersUpdateOperator, markersDeleteOperator } from './dataHandler/markersHandler.js'; 
 import {updateIndicate} from './animation.js';
@@ -10,8 +10,8 @@ import {updateIndicate} from './animation.js';
 const loadTable = {
    'homes': homesOperator,
    'stats': statsOperator,
-   'lists': listsOperator
-//    'characters': charactersSync, 
+   'lists': listsOperator,
+   'characters': charactersOperator, 
 //   'locations': locationsSync,
 //    'markers': markersSync 
 }
@@ -20,7 +20,7 @@ const updateTable = {
     'homes': homesUpdateOperator,
     'stats': statsOperator,
     'lists': listsUpdateOperator, 
-    //'characters': 
+    'characters': charactersUpdateOperator, 
     //'locations': 
     //'markers': 
 }
@@ -29,13 +29,12 @@ const deleteTable = {
     'homes': homesDeleteOperator,
     //'stats': statsOperator,
     'lists': listsDeleteOperator,
-    // 'characters'
+    'characters': charactersDeleteOperator,
     // 'locations'
     // 'markers'
 }
 
 const loadOperator = (create) => {
-    console.log(create);
     const [key, value] = Object.entries(create)[0];
     localStorage.setItem('time', value.latestModified);
     const sum = convertRow(convertTable[key], value);
@@ -114,7 +113,8 @@ const storeNewRows = (check) => {
 const deleteOperation = (deletion) => {
     deletion.forEach(del => {
         let store = null;
-        let marks = null;
+        let marks = null; 
+        localStorage.setItem('time', del.deletedAt);
         switch(del.tableName) {
             case 'homes':
                 localStorage.clear()

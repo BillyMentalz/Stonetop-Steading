@@ -1,37 +1,37 @@
-const charactersLoader = (payload)=> {
-    for (const [key, value] of Object.entries(payload)){
-        charactersOperator(key, value);
-    }
-}
-const parent = document.querySelector('#charactertable')
+import { characters } from '../document.js'
+const tableShown = ['characterName', 'characterOccupation', 'characterTraits']
+const characterTable = characters.querySelector('#characterTable');
 const charactersOperator = (key, value )=>{
     let  characterElement = document.createElement("tr");
-    characterElement.dataset.id = key;
+    characterElement.id = key;
     for ( const [head, data] of Object.entries(value)) {
-        let tabdata = document.createElement("td");
+        const tabdata = document.createElement("td");
+        console.log(head)
         tabdata.dataset.head = head;
         tabdata.textContent = data;
+        tabdata.style.display = tableShown.includes(head) ? 'flex': 'none';
         characterElement.append(tabdata);
     }
-    parent.append(characterElement);
-
-
+    characterTable.append(characterElement);
+    return characterElement;
 }
 
 const charactersUpdateOperator = (key, value)=> {
     let  characterElement = document.querySelector(`tr#${key}`);
-    characterElement.dataset.id = key;
     for ( const [head, data] of Object.entries(value)) {
-        let tabdata = document.createElement("td");
-        tabdata.dataset.head = head;
+        const tabdata = characterElement.querySelector(`[data-head="${head}"]`);
         tabdata.textContent = data;
-        characterElement.append(tabdata);
-    }
+    };
+    return characterElement;
 }
 
+const charactersDeleteOperator = (key)=> {
+    const characterElement = characters.querySelector(`#${key}`);
+    characterElement.remove();
+}
 
 export {
-    charactersLoader,
     charactersOperator,
-    charactersUpdateOperator
+    charactersUpdateOperator,
+    charactersDeleteOperator
 }

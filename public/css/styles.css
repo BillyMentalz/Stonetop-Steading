@@ -1,7 +1,6 @@
 :root {
     --primary-color: #551f19;
     --primary-bg-color:#eacfba;
-
 }
 
 @font-face {
@@ -48,6 +47,14 @@ input::-webkit-inner-spin-button {
     -webkit-appearance:none;
     margin:0;
 }
+textarea {
+    max-width:12rem;
+    background-color:inherit;
+    color:inherit;
+    font-family:inherit;
+    border:none;
+    border-bottom:0.13rem solid ;
+}
 
 
 input[type='text']{
@@ -86,6 +93,16 @@ body {
     box-sizing: border-box;
 }
 
+table {
+    width:100%;
+}
+th {
+    font-size:1.2rem;
+}
+tr {
+    display:flex;
+    justify-content: space-between;
+}
 svg {
     height:1rem;
     fill:var(--primary-color);
@@ -173,7 +190,7 @@ option {
 .column1 {
     max-height: 100%;
     padding:0.3rem 0rem 1rem 0.5rem;
-
+    
 }
 
 .column2::-webkit-scrollbar{
@@ -408,3 +425,27 @@ option {
 .tabHeaders:hover .tabIcon {
     display:flex;
 }
+
+#characters {
+    box-sizing: border-box;
+    flex-direction:row;
+    justify-content: space-around;
+    width:50rem;
+    height:30rem;
+    padding: 1rem 0rem 1rem;
+}
+
+#characterSelector {
+    width:60%;
+}
+
+
+.characterInfo {
+    width:35%;
+}
+
+.slice {
+    width:0;
+    border-left: 0.13rem solid;
+}
+
