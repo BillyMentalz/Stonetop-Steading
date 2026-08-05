@@ -47,6 +47,7 @@ const loadOperator = (create) => {
 }
 
 const updateOperator = (update) => {
+    console.log(update);
     const [key, value] = Object.entries(update)[0];
     localStorage.setItem('time', value.latestModified);
     const sum = convertRow(convertTable[key], value);

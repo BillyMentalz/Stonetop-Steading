@@ -168,8 +168,7 @@ const deleteSchemas  = {
         'columns':['home', 'signifier', 'order']
     }
 }
-const deleteRecordExists = database.prepare(
-    `SELECT  EXISTS(SELECT 1 FROM deleteRecords WHERE tableName = ? AND deletedItem = ?)`);
+const deleteRecordExists = database.prepare(`SELECT EXISTS(SELECT 1 FROM deleteRecords WHERE tableName = ? AND deletedItem = ?) AS hasOld`);
 const deleteRecordStatement  = database.prepare(`INSERT INTO deleteRecords (tableName, deletedItem, deletedAt) VALUES (?,?,?) RETURNING *`)
 const deleteRecordUpdate = database.prepare(`UPDATE deleteRecords SET deletedAt = ? WHERE tableName = ? AND deletedItem = ? RETURNING *`);
 const deleteOperation  = (deletion) => {
@@ -179,9 +178,10 @@ const deleteOperation  = (deletion) => {
         const time = updateTime.get('deleteRecords').syncTimeStamp;
         const result = deleteSchemas[deletion.table].statement.get(...info);
         const hasOld = deleteRecordExists.get(deletion.table, info.join('/%/'));
-        const deleteRecord = hasOld ? deleteRecordUpdate.get(time, deletion.table , info.join('/%/')): deleteRecordStatement.get(deletion.table, info.join('/%/'), time);
-        database.exec('COMMIT');
+        console.log(hasOld)
+        const deleteRecord = hasOld.hasOld ? deleteRecordUpdate.get(time, deletion.table , info.join('/%/')): deleteRecordStatement.get(deletion.table, info.join('/%/'), time);
         console.log(deleteRecord);
+        database.exec('COMMIT');
         return deleteRecord;
         }
     catch (e) {

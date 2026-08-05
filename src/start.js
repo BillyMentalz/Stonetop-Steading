@@ -38,7 +38,21 @@ motherEventFactory(document, 'mouseup', '.tabs', (draggable, event)=> {
     draggable.removeEventListener ("mousemove", tabDrag)
 })
 
-motherEventFactory(constants.characters, 'click', )
+motherEventFactory(constants.characters, 'click',  'tr' , (row, event)=> {
+    if ( constants.characterInfo.querySelector("button")) return;
+    constants.characterInfo.dataset.characterId = row.dataset.id;
+    const thing = row.children;
+    for ( let i = 0; i < thing.length ; i++) {
+        const exist = thing.item(i);
+        const lister = constants.characterInfo.querySelector(`.${exist.dataset.head}`);
+        if (lister) {
+            lister.innerHTML = '';
+            const spanElement = document.createElement('span');
+            spanElement.textContent = exist.textContent;
+            lister.append(spanElement);
+        }
+    }
+})
 
 function drags(box , event) {// This is for sharable indicators
     let boundaries =  box.getBoundingClientRect();
@@ -136,6 +150,7 @@ function caltab () {
 };
 
 motherEventFactory(document, 'dblclick' ,'[data-editable]', (editable,event ) => {
+    // You know there is a bug here. Fix before deployment
     startEditing(editable, editable.dataset.editable);
 })
 // the constants.socket on 

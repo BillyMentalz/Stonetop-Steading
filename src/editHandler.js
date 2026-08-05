@@ -38,7 +38,65 @@ const listEdit = (element) => {
     });
 }
 
-const characterEdit = (element) => {}
+const characterEditables = [
+    '.characterHome',
+    '.characterName',
+    '.characterPronouns',
+    '.characterOccupation',
+    '.characterInfo',
+    '.characterTraits']
+const characterEdit = (element) => {
+    if (!element.dataset.characterId ) return;
+    const newEntry = addBox.cloneNode(true);
+    newEntry.style.display = "flex";
+    const thing = element.children;
+    for (const detail of characterEditables) {
+        const exist = element.querySelector(detail);
+        const newInput = document.createElement('textarea');
+        const spanElement = exist.querySelector('span');
+        newInput.dataset.original = spanElement.textContent;
+        newInput.value = spanElement.textContent;
+        spanElement.replaceWith(newInput);        
+    }
+    element.append(newEntry);
+    element.querySelector('button[name="Change"]').addEventListener('click', (e)=> {
+        socket.emit( 'update', {
+            table: 'characters',
+            id: element.dataset.characterId ,
+            home: element.querySelector(`.characterHome textarea`).value,
+            name: element.querySelector(`.characterName textarea`).value,
+            pronouns: element.querySelector(`.characterPronouns textarea`).value,
+            occupation:element.querySelector(`.characterOccupation textarea`).value,
+            info : element.querySelector(`.characterInfo textarea`).value,
+            traits: element.querySelector(`.characterTraits textarea`).value
+        })
+        newEntry.remove()
+        clear(element);
+    });
+    element.querySelector('button[name="Delete"]').addEventListener('click', (e)=> {
+        if (!window.confirm("Delete Character? \n Character:"   )) {
+            revertEditing(element); 
+            newEntry.remove(); 
+            return;
+        }
+        socket.emit( 'delete',  {
+        table: 'characters',
+        id: element.dataset.characterId,
+        })
+        newEntry.remove(); 
+        clear(element);
+    });
+}
+
+const clear = (element) => {
+    delete element.dataset.characterId ;
+    for (const detail of characterEditables){
+        const exist = element.querySelector(detail);
+        const damned = exist.lastElementChild;
+        const spanElement = document.createElement('span');
+        damned.replaceWith(spanElement);
+    }
+}
 
 const listRevert = (element)=> {
     let  spanElement  = document.createElement("span")
@@ -47,6 +105,15 @@ const listRevert = (element)=> {
     element.replaceWith(spanElement);
 }
 
+const characterRevert = (element)=> {
+    for (const detail of characterEditables){
+        const exist = element.querySelector(detail);
+        const inputElement = exist.querySelector('textarea');
+        const spanElement = document.createElement('span');
+        spanElement.textContent = inputElement.dataset.original;
+        inputElement.replaceWith(spanElement);
+    }
+}
 const formatAddTable = {
     'lists': (element)=> {
         const last = element.lastElementChild;
@@ -64,10 +131,10 @@ const formatAddTable = {
             id: crypto.randomUUID(),
             home: `At World's End`,
             name: 'Add here...',
-            pronouns: '',
-            occupation: '',
+            pronouns: '(They/them)',
+            occupation: 'New Occupation',
             info : 'New fellow...',
-            traits: ''
+            traits: 'Friendly'
         }
     },
     'locations': (element) => {
@@ -96,11 +163,12 @@ const edit = {
 }
 
 const revert = {
-    'listText': listRevert
+    'listText': listRevert,
+    'characters': characterRevert
 }
 
 
-const startEditing = ( element, table)=> {
+const startEditing = (element, table)=> {
     edit[table](element);
 }
 

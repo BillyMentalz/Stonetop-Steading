@@ -3,10 +3,9 @@ const tableShown = ['characterName', 'characterOccupation', 'characterTraits']
 const characterTable = characters.querySelector('#characterTable');
 const charactersOperator = (key, value )=>{
     let  characterElement = document.createElement("tr");
-    characterElement.id = key;
+    characterElement.dataset.id = key;
     for ( const [head, data] of Object.entries(value)) {
         const tabdata = document.createElement("td");
-        console.log(head)
         tabdata.dataset.head = head;
         tabdata.textContent = data;
         tabdata.style.display = tableShown.includes(head) ? 'flex': 'none';
@@ -17,7 +16,7 @@ const charactersOperator = (key, value )=>{
 }
 
 const charactersUpdateOperator = (key, value)=> {
-    let  characterElement = document.querySelector(`tr#${key}`);
+    const  characterElement = document.querySelector(`[data-id="${key}"]`);
     for ( const [head, data] of Object.entries(value)) {
         const tabdata = characterElement.querySelector(`[data-head="${head}"]`);
         tabdata.textContent = data;
@@ -26,7 +25,7 @@ const charactersUpdateOperator = (key, value)=> {
 }
 
 const charactersDeleteOperator = (key)=> {
-    const characterElement = characters.querySelector(`#${key}`);
+    const  characterElement = document.querySelector(`[data-id="${key}"]`);
     characterElement.remove();
 }
 

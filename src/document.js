@@ -11,7 +11,7 @@ const characters = document.getElementById('characters');
 const locations = document.getElementById('locations');
 const assets = document.getElementById('assets');
 const addBox = document.getElementById('addBox');
-
+const characterInfo = document.getElementById('characterInfo');
 
 class Node {
     constructor(element){
@@ -73,4 +73,5 @@ export {
     locations,
     assets,
     addBox,
+    characterInfo
     };

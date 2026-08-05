@@ -13,6 +13,7 @@
   var locations = document.getElementById("locations");
   var assets = document.getElementById("assets");
   var addBox = document.getElementById("addBox");
+  var characterInfo = document.getElementById("characterInfo");
   var Node = class {
     constructor(element) {
       this.element = element;
@@ -133,10 +134,9 @@
   var characterTable = characters.querySelector("#characterTable");
   var charactersOperator = (key, value) => {
     let characterElement = document.createElement("tr");
-    characterElement.id = key;
+    characterElement.dataset.id = key;
     for (const [head, data] of Object.entries(value)) {
       const tabdata = document.createElement("td");
-      console.log(head);
       tabdata.dataset.head = head;
       tabdata.textContent = data;
       tabdata.style.display = tableShown.includes(head) ? "flex" : "none";
@@ -146,7 +146,7 @@
     return characterElement;
   };
   var charactersUpdateOperator = (key, value) => {
-    let characterElement = document.querySelector(`tr#${key}`);
+    const characterElement = document.querySelector(`[data-id="${key}"]`);
     for (const [head, data] of Object.entries(value)) {
       const tabdata = characterElement.querySelector(`[data-head="${head}"]`);
       tabdata.textContent = data;
@@ -155,7 +155,7 @@
     return characterElement;
   };
   var charactersDeleteOperator = (key) => {
-    const characterElement = characters.querySelector(`#${key}`);
+    const characterElement = document.querySelector(`[data-id="${key}"]`);
     characterElement.remove();
   };
 
@@ -212,6 +212,7 @@
     updateIndicate(element);
   };
   var updateOperator = (update) => {
+    console.log(update);
     const [key, value] = Object.entries(update)[0];
     localStorage.setItem("time", value.latestModified);
     const sum = convertRow(convertTable[key], value);
@@ -339,13 +340,79 @@
       newEntry.remove();
     });
   };
+  var characterEditables = [
+    ".characterHome",
+    ".characterName",
+    ".characterPronouns",
+    ".characterOccupation",
+    ".characterInfo",
+    ".characterTraits"
+  ];
   var characterEdit = (element) => {
+    if (!element.dataset.characterId) return;
+    const newEntry = addBox.cloneNode(true);
+    newEntry.style.display = "flex";
+    const thing = element.children;
+    for (const detail of characterEditables) {
+      const exist = element.querySelector(detail);
+      const newInput = document.createElement("textarea");
+      const spanElement = exist.querySelector("span");
+      newInput.dataset.original = spanElement.textContent;
+      newInput.value = spanElement.textContent;
+      spanElement.replaceWith(newInput);
+    }
+    element.append(newEntry);
+    element.querySelector('button[name="Change"]').addEventListener("click", (e) => {
+      socket.emit("update", {
+        table: "characters",
+        id: element.dataset.characterId,
+        home: element.querySelector(`.characterHome textarea`).value,
+        name: element.querySelector(`.characterName textarea`).value,
+        pronouns: element.querySelector(`.characterPronouns textarea`).value,
+        occupation: element.querySelector(`.characterOccupation textarea`).value,
+        info: element.querySelector(`.characterInfo textarea`).value,
+        traits: element.querySelector(`.characterTraits textarea`).value
+      });
+      newEntry.remove();
+      clear(element);
+    });
+    element.querySelector('button[name="Delete"]').addEventListener("click", (e) => {
+      if (!window.confirm("Delete Character? \n Character:")) {
+        revertEditing(element);
+        newEntry.remove();
+        return;
+      }
+      socket.emit("delete", {
+        table: "characters",
+        id: element.dataset.characterId
+      });
+      newEntry.remove();
+      clear(element);
+    });
+  };
+  var clear = (element) => {
+    delete element.dataset.characterId;
+    for (const detail of characterEditables) {
+      const exist = element.querySelector(detail);
+      const damned = exist.lastElementChild;
+      const spanElement = document.createElement("span");
+      damned.replaceWith(spanElement);
+    }
   };
   var listRevert = (element) => {
     let spanElement = document.createElement("span");
     spanElement.textContent = element.dataset.original;
     spanElement.dataset.field = "listText";
     element.replaceWith(spanElement);
+  };
+  var characterRevert = (element) => {
+    for (const detail of characterEditables) {
+      const exist = element.querySelector(detail);
+      const inputElement = exist.querySelector("textarea");
+      const spanElement = document.createElement("span");
+      spanElement.textContent = inputElement.dataset.original;
+      inputElement.replaceWith(spanElement);
+    }
   };
   var formatAddTable = {
     "lists": (element) => {
@@ -364,10 +431,10 @@
         id: crypto.randomUUID(),
         home: `At World's End`,
         name: "Add here...",
-        pronouns: "",
-        occupation: "",
+        pronouns: "(They/them)",
+        occupation: "New Occupation",
         info: "New fellow...",
-        traits: ""
+        traits: "Friendly"
       };
     },
     "locations": (element) => {
@@ -393,7 +460,8 @@
     "characters": characterEdit
   };
   var revert = {
-    "listText": listRevert
+    "listText": listRevert,
+    "characters": characterRevert
   };
   var startEditing = (element, table) => {
     edit[table](element);
@@ -435,7 +503,21 @@
   motherEventFactory(document, "mouseup", ".tabs", (draggable, event) => {
     draggable.removeEventListener("mousemove", tabDrag);
   });
-  motherEventFactory(characters, "click");
+  motherEventFactory(characters, "click", "tr", (row, event) => {
+    if (characterInfo.querySelector("button")) return;
+    characterInfo.dataset.characterId = row.dataset.id;
+    const thing = row.children;
+    for (let i = 0; i < thing.length; i++) {
+      const exist = thing.item(i);
+      const lister = characterInfo.querySelector(`.${exist.dataset.head}`);
+      if (lister) {
+        lister.innerHTML = "";
+        const spanElement = document.createElement("span");
+        spanElement.textContent = exist.textContent;
+        lister.append(spanElement);
+      }
+    }
+  });
   function drags(box, event) {
     let boundaries = box.getBoundingClientRect();
     let newleft = (event.clientX - event.currentTarget.offsetWidth / 2 - boundaries.left) / box.offsetWidth * 100;

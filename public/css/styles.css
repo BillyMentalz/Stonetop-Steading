@@ -103,6 +103,10 @@ tr {
     display:flex;
     justify-content: space-between;
 }
+
+td {
+    border-bottom:0.13rem solid;
+}
 svg {
     height:1rem;
     fill:var(--primary-color);
@@ -440,7 +444,7 @@ option {
 }
 
 
-.characterInfo {
+#characterInfo {
     width:35%;
 }
 
