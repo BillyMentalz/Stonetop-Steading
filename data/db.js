@@ -72,32 +72,26 @@ CREATE TABLE IF NOT EXISTS characters (
 );
 
 CREATE TABLE IF NOT EXISTS locations (
+    locationId TEXT NOT NULL,
     locationHome TEXT NOT NULL,
     locationSignifier TEXT NOT NULL,
     locationName TEXT NOT NULL,
     locationInfo TEXT ,
     latestModified TEXT NOT NULL,
     FOREIGN KEY (locationHome) REFERENCES homes(homeName),
-    PRIMARY KEY (locationHome, locationSignifier)
+    PRIMARY KEY (locationHome, locationId)
 );
 
-INSERT OR IGNORE INTO locations (locationHome, locationSignifier, locationName ,locationInfo, latestModified) VALUES
-('Stonetop', 'A', 'The Stone', '',CURRENT_TIMESTAMP),
-('Stonetop', 'B', 'The Granary', '',CURRENT_TIMESTAMP),
-('Stonetop', 'C', 'Public House & Stables', '',CURRENT_TIMESTAMP),
-('Stonetop', 'D', 'Cistern', '',CURRENT_TIMESTAMP),
-('Stonetop', 'E' ,'Pavilion of the Gods', '',CURRENT_TIMESTAMP),
-('Stonetop', 'F' ,'Watchtowers', '',CURRENT_TIMESTAMP);
-
 CREATE TABLE IF NOT EXISTS markers (
+    markerId TEXT NOT NULL,
     markerHome TEXT NOT NULL,
     markerSignifier TEXT NOT NULL,
     markerOrder INTEGER NOT NULL, 
     markerX REAL NOT NULL DEFAULT 0,
     markerY REAL NOT NULL DEFAULT 0,
     latestModified TEXT NOT NULL,
-    FOREIGN KEY (markerHome, markerSignifier) REFERENCES locations(locationHome, locationSignifier) ON DELETE CASCADE,
-    PRIMARY KEY (markerHome, markerSignifier, markerOrder)
+    FOREIGN KEY (markerHome, markerId , markerSignifier) REFERENCES locations(locationHome, locationId, locationSignifier) ON UPDATE CASCADE ON DELETE CASCADE,
+    PRIMARY KEY (markerHome, markerId, markerOrder)
 );
 
 CREATE TABLE IF NOT EXISTS deleteRecords (

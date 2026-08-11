@@ -150,6 +150,7 @@ function caltab () {
 };
 
 motherEventFactory(document, 'dblclick' ,'[data-editable]', (editable,event ) => {
+    if (editable.querySelector('button'))return;
     // You know there is a bug here. Fix before deployment
     startEditing(editable, editable.dataset.editable);
 })

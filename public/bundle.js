@@ -177,6 +177,72 @@
   };
 
   // src/syncHandler.js
+  var graphNode = class {
+    constructor(name, identifiers, children, createOperator, updateOperator2, deleteOperator) {
+      this.name = name;
+      this.identifiers = identifiers;
+      this.table = {};
+      this.children = children;
+      this.createOperator = createOperator;
+      this.updateOperator = updateOperator2;
+      this.deleteOperator = deleteOperator;
+    }
+    convertRow(row) {
+      const formattedRow = this.identifiers.map((item) => {
+        const element = row[item];
+        delete row[item];
+        return element;
+      });
+      const index = formattedRow.join("/%/");
+      return { index, row };
+    }
+    createRow(value) {
+      const formattedRow = this.convertRow(value);
+      const element = this.createOperator(formattedRow.index, formattedRow.row);
+      this.table[formattedRow.index] = formattedRow.row;
+      updateIndicate(element);
+    }
+    updateRow(value) {
+      const formattedRow = this.convertRow(value);
+      const element = this.updateOperator(formattedRow.index, formattedRow.row);
+      this.table[formattedRow.index] = formattedRow.row;
+      updateIndicate(element);
+      for (const thing of this.cascade) {
+        thing.updateCascade(formattedRow.index, formattedRow.row);
+      }
+    }
+    updateCascade(id, row) {
+      for (const [key, value] of Object.entries(this.table)) {
+        if (key.startsWith(id)) {
+          for (const [subkey, subvalue] of Object.entries(row)) {
+            value[subkey] = row[subkey];
+          }
+          const element = this.updateOperator({ index: key, row: value });
+          updateIndicate(element);
+        }
+      }
+    }
+    deleteRow(deletedItem) {
+      delete this.table[deletedItem];
+      this.deleteOperator(deletedItem);
+      for (const thing of this.cascade) {
+        thing.deleteCascade(deletedItem);
+      }
+    }
+    deleteCascade(id) {
+      for (const [key, value] of Object.entries(this.table)) {
+        if (key.startsWith(id)) {
+          this.deleteRow(key);
+        }
+      }
+    }
+  };
+  var markerNode = graphNode("markers", ["markerHome", "markerId", "markerOrder"], {}, markersOperator, markersUpdateOperator, markersDeleteOperator);
+  var locationNode = graphNode("locations", ["locationHome", "locationId"], { markerNode }, locationsOperator, locationsUpdateOperator, locationsDeleteOperator);
+  var characterNode = graphNode("characters", ["characterId"], {}, charactersOperator, charactersUpdateOperator, charactersDeleteOperator);
+  var listNode = graphNode("lists", ["listName", "listOrder"], {}, listsOperator, listsUpdateOperator, listsDeleteOperator);
+  var statNode = graphNode("stats", ["statName"], {}, statsOperator, statsOperator, statsOperator);
+  var homeNode = graphNode("homes", ["homeName"], { characterNode, locationNode }, homesOperator, homesUpdateOperator, homesDeleteOperator);
   var loadTable = {
     "homes": homesOperator,
     "stats": statsOperator,
@@ -602,6 +668,7 @@
     }
   }
   motherEventFactory(document, "dblclick", "[data-editable]", (editable, event) => {
+    if (editable.querySelector("button")) return;
     startEditing(editable, editable.dataset.editable);
   });
   socket.on("connect", () => {

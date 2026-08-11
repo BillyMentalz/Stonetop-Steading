@@ -5,6 +5,7 @@ const locationsLoader = (payload)=> {
 }
 const locationsOperator = (key, value )=>{
     let parent = document.createElement('div');
+
     const locationIndex = key.split('/%/');
     parent  = document.querySelector(`ul#${locationIndex[0]}`)
     let  locationElement = document.createElement("li");

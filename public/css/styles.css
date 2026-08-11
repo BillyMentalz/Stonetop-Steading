@@ -359,11 +359,7 @@ option {
     background-color:var(--primary-bg-color) ;
 }
 
-.sampletab {
-    width:50rem;
-    height:30rem;
-    flex-direction: column; 
-}
+
 
 #assets {
     width:25rem;
@@ -453,3 +449,19 @@ option {
     border-left: 0.13rem solid;
 }
 
+#locations {
+    box-sizing:border-box;
+    justify-content: space-around;
+    width:30rem;
+    height:20rem;
+    flex-direction: row; 
+    padding: 1rem 0rem 1rem;
+}
+
+#locationSelector {
+    width:40%;
+}
+
+#markers {
+    width:50%;
+}
