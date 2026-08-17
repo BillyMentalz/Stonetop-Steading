@@ -114,11 +114,9 @@ motherEventFactory(constants.menu, 'click', '.openTab', (input, event)=> {
     const tab = document.getElementById(input.dataset.toggle);
     if (!tab) return;
     displayToggle(tab);
-
 });
 const entryAdd  = (input, event)=> {
     const contain = input.closest('.Contain');
-    console.log(contain)
     const addItem = contain.querySelector(`#${contain.dataset.contain}`);
     const result = formatAddTable[addItem.dataset.tabletype](addItem);
     constants.socket.emit('create', result);
@@ -127,6 +125,7 @@ const entryAdd  = (input, event)=> {
 motherEventFactory(constants.sidebar ,'click', '.tabIcon', entryAdd )
 motherEventFactory(constants.assets ,'click', '.tabIcon', entryAdd )
 motherEventFactory(constants.characters ,'click', '.tabIcon', entryAdd )
+
 function displayToggle(element) {
     if(!element) return;
     if (element.style.display == ''){ // '' is equivalent to display none. Browser defines none as an empty string, at least that's what I think it does.
@@ -150,8 +149,7 @@ function caltab () {
 };
 
 motherEventFactory(document, 'dblclick' ,'[data-editable]', (editable,event ) => {
-    if (editable.querySelector('button'))return;
-    // You know there is a bug here. Fix before deployment
+    if (editable.querySelector('button')) return;
     startEditing(editable, editable.dataset.editable);
 })
 // the constants.socket on 

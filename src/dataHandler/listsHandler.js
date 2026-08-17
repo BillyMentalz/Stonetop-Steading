@@ -1,36 +1,34 @@
-const listsOperator = (key, value )=>{
-    const listIndex = key.split('/%/');
-    const parent = document.querySelector(`ul#${listIndex[0]}`)
-    let  listElement = document.createElement("li");
-    let  spanElement  = document.createElement("span")
-    spanElement.textContent = value.listText;
-    spanElement.dataset.field = 'listText' ;
-    listElement.append(spanElement);
-    listElement.dataset.index = listIndex[1];
-    listElement.dataset.editable = 'lists';
-    listElement.id = key;
-    parent.append(listElement);
-    return listElement;
+import {listsRow} from 'root/inject/lists.js'
+import {graphNode} from 'root/document.js'
+const listsOperator = (row )=>{
+    const parent = document.querySelector(`ul#${row.listName}`)
+    const element = listsRow(row.listOrder , row.listText);
+    parent.append(element);
+    return element;
+};
+
+const listsUpdateOperator = (row)=> {
+    const element = row.element;
+    const newelement = listsRow(row.listOrder, row.listText);
+    element.replaceWith(newelement);
+    row.element = newelement;
+    return row.element;
+};
+
+const listsDeleteOperator = (row) => {
+    row.element.remove();
 }
 
-const listsUpdateOperator = (key, value)=> {
-    const listIndex = key.split('/%/');
-    const listElement = document.getElementById(key);
-    let para = listElement.querySelector('[data-field]');
-    let  spanElement  = document.createElement("span")
-    spanElement.textContent = value.listText;
-    spanElement.dataset.field = 'listText' ;
-    para.replaceWith(spanElement);
-    return listElement;
-}
-
-const listsDeleteOperator = (key) => {
-    const listElement = document.getElementById(key);
-    listElement.remove();
-}
-
-export {
+const listNode = graphNode(
+    'lists',
+    ['listName', 'listOrder'],
+    [],
+    {},
     listsOperator,
     listsUpdateOperator,
     listsDeleteOperator
+);
+
+export { 
+    listNode,
 }

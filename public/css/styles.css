@@ -13,21 +13,10 @@ html {
     color:var(--primary-color);
     font-size:1.5vh;
 }
-
-.radioChoice {
-    font-family: "Lucida Console";
-    margin:0;
-}
-
-.w {
+ul {
     margin:0;
     padding-left:1rem;
-}
-
-.norm {
-    font-family: historicalFell;
-    margin:0;
-}
+} 
 
 input[type='radio'] {
     box-sizing: border-box;
@@ -40,6 +29,11 @@ input[type='radio'] {
 
 input[type='radio']:checked {
     background:var(--primary-color);
+}
+
+.radioChoice {
+    font-family: "Lucida Console";
+    margin:0;
 }
 
 input::-webkit-outer-spin-button,
@@ -55,6 +49,7 @@ textarea {
     border:none;
     border-bottom:0.13rem solid ;
 }
+
 
 
 input[type='text']{
@@ -112,6 +107,20 @@ svg {
     fill:var(--primary-color);
 }
 
+select {
+    appearance:none;
+    width:100%;
+    background-color:inherit;
+    border:none;
+    font-family:historicalFell;
+    cursor:pointer;
+    color:inherit;
+    font-size:inherit;
+}
+
+option {
+    appearance:none;
+}
 .left-side {
     display:grid;
     grid-template-rows: 1fr 11fr;
@@ -176,20 +185,7 @@ svg {
     display:flex;
     flex-direction:column;
 }
-select {
-    appearance:none;
-    width:100%;
-    background-color:inherit;
-    border:none;
-    font-family:historicalFell;
-    cursor:pointer;
-    color:inherit;
-    font-size:inherit;
-}
 
-option {
-    appearance:none;
-}
 
 .column1 {
     max-height: 100%;
@@ -224,12 +220,12 @@ option {
     font-size:1.2rem;
     margin:0;
 }
-.check {
+.radioContainer {
     display:flex;
     flex-direction: column;
     justify-content: space-around;
 }
-.checkbox {
+.radioBox {
     display:flex;
     flex-direction: row;
     align-items:center;
@@ -281,6 +277,7 @@ option {
     position:relative;
     width:100%;
 }
+
 #map img {
     opacity: 60%;
     width:100%;

@@ -28,10 +28,10 @@ const insertSchemas = {
         'statement': database.prepare(`INSERT INTO homes (homeName, latestModified) VALUES (?,?) RETURNING *`),
         'columns': ['name','time']
     },
-    /*'stats': {
-        'statement': database.prepare(`INSERT INTO stats(statName, statType, statValue, latestModified) VALUES (?,?,?,?) RETURNING *`),
-        'columns': ['name', 'type', 'value', 'time'] 
-    },*/
+    'stats': {
+        'statement': database.prepare(`INSERT INTO stats(statName, statType, statOptions, statValue, latestModified) VALUES (?,?,?,?,?) RETURNING *`),
+        'columns': ['name', 'type','options', 'value', 'time'] 
+    },
     'lists': {
         'statement': database.prepare(`INSERT INTO lists (listName, listOrder, listText, latestModified) VALUES (?,?,?,?) RETURNING *`),
         'columns': ['name', 'order', 'text', 'time']
@@ -41,11 +41,11 @@ const insertSchemas = {
         'columns': ['id', 'home', 'name', 'pronouns', 'occupation', 'traits',  'info', 'time','time']
     },
     'locations':{
-        'statement':database.prepare(`INSERT INTO locations (locationHome,locationSignifier, locationName, locationInfo, latestModified) VALUES (?,?,?,?,?) RETURNING *`),
+        'statement':database.prepare(`INSERT INTO locations (locationHome, locationId, locationSignifier, locationName, locationInfo, latestModified) VALUES (?,?,?,?,?,?) RETURNING *`),
         'columns': ['home', 'signifier', 'name', 'text', 'time']
     }, 
     'markers':{
-        'statement':database.prepare(`INSERT INTO markers (markerHome, markerSignifier , markerOrder, markerX, markerY, latestModified) VALUES (?,?,?,?,?,?) RETURNING *`),
+        'statement':database.prepare(`INSERT INTO markers (markerHome, markerId, markerSignifier, markerOrder, markerX, markerY, latestModified) VALUES (?,?,?,?,?,?,?) RETURNING *`),
         'columns':['home', 'signifier', 'order', 'x','y', 'time']
     } 
 };
@@ -116,12 +116,12 @@ const updateSchemas = {
         'columns': [ 'home', 'name', 'pronouns', 'occupation', 'traits',  'info', 'time', 'id' ]
     },
     'locations':{
-        'statement':database.prepare(`UPDATE locations SET locationName = ?, locationInfo = ?, latestModified = ? WHERE locationHome = ? AND locationSignifier = ? RETURNING *`),
-        'columns':['name','text','time', 'home', 'signifier']
+        'statement':database.prepare(`UPDATE locations SET locationName = ?, locationInfo = ?, latestModified = ? WHERE locationHome = ? AND locationId = ? RETURNING *`),
+        'columns':['name','text','time', 'home', 'id']
     },
     'markers': {
-        'statement': database.prepare(`UPDATE markers SET markerX = ? ,markerY = ?, latestModified = ? WHERE markerHome = ? AND markerSignifier = ? AND markerOrder = ? RETURNING *`),
-        'columns':['x', 'y','time', 'home', 'signifier', 'number']
+        'statement': database.prepare(`UPDATE markers SET markerX = ? ,markerY = ?, latestModified = ? WHERE markerHome = ? AND markerId = ? AND markerOrder = ? RETURNING *`),
+        'columns':['x', 'y','time', 'home', 'id', 'number']
     }
 }
 
@@ -160,12 +160,12 @@ const deleteSchemas  = {
         'columns': ['id']
     },
     'locations':{
-        'statement':database.prepare(`DELETE from locations WHERE locationHome = ? AND locationSignifier = ? RETURNING *`),
-        'columns': ['home', 'signifier']
+        'statement':database.prepare(`DELETE from locations WHERE locationHome = ? AND locationId = ? RETURNING *`),
+        'columns': ['home','id']
     }, 
     'markers':{
-        'statement':database.prepare(`DELETE from markers WHERE markerHome = ? AND markerSignifier = ? AND markerOrder = ? RETURNING *`),
-        'columns':['home', 'signifier', 'order']
+        'statement':database.prepare(`DELETE from markers WHERE markerHome = ? AND markerId = ? AND markerOrder = ? RETURNING *`),
+        'columns':['home','id', 'order']
     }
 }
 const deleteRecordExists = database.prepare(`SELECT EXISTS(SELECT 1 FROM deleteRecords WHERE tableName = ? AND deletedItem = ?) AS hasOld`);

@@ -1,30 +1,35 @@
-const locationsLoader = (payload)=> {
-    for (const [key, value] of Object.entries(payload)){
-        locationsOperator(key, value);
-    }
+import {characterRow } from 'root/inject/characters.js' 
+import {graphNode} from 'root/document.js'
+import {markerNode } from './markersHandler.js'
+const locationCreateOperator = (row )=>{
+    if (false) return;  // Placeholder code 
+    const element = characterRow(row);
+    parent.append(element);
+    return element;
+};
+
+const locationsUpdateOperator = (row)=> {
+    if (false) return; 
+    const locationElement = row.element;
+    const newElement = characterRow(row);
+    locationElement.replaceWith(newElement);
+    row.element = newElement;
+    return row.element; 
+};
+
+const locationDeleteOperator = (row) => {
+    row.element.remove();
 }
-const locationsOperator = (key, value )=>{
-    let parent = document.createElement('div');
 
-    const locationIndex = key.split('/%/');
-    parent  = document.querySelector(`ul#${locationIndex[0]}`)
-    let  locationElement = document.createElement("li");
-    locationElement.dataset.index = locationIndex[1];
-    locationElement.innerHTML = value.locationText;
-    parent.append(locationElement);
-
-
-}
-
-const locationsUpdateOperator = (key, value)=> {
-    const locationElement = document.querySelector(`p#${1} [data-index='${[1]}']`)
-    locationElement.textContent = value.locationText;
-
-}
-
-
+const locationNode = graphNode(
+    'location',
+    ['locationName', 'locationId'],
+    [markerNode],
+    {},
+    locationCreateOperator,
+    locationsUpdateOperator,
+    locationDeleteOperator
+)
 export {
-    locationsLoader,
-    locationsOperator,
-    locationsUpdateOperator
+    locationNode 
 }

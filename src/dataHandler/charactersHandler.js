@@ -1,36 +1,37 @@
-import { characters } from '../document.js'
+import { characters ,graphNode} from 'root/document.js'
+import { charRow} from 'root/inject/characters.js'
 const tableShown = ['characterName', 'characterOccupation', 'characterTraits']
 const characterTable = characters.querySelector('#characterTable');
-const charactersOperator = (key, value )=>{
-    let  characterElement = document.createElement("tr");
-    characterElement.dataset.id = key;
-    for ( const [head, data] of Object.entries(value)) {
-        const tabdata = document.createElement("td");
-        tabdata.dataset.head = head;
-        tabdata.textContent = data;
-        tabdata.style.display = tableShown.includes(head) ? 'flex': 'none';
-        characterElement.append(tabdata);
-    }
+
+const characterCreateOperator = (row )=>{
+    const characterElement =  charRow(row);
     characterTable.append(characterElement);
     return characterElement;
 }
 
-const charactersUpdateOperator = (key, value)=> {
-    const  characterElement = document.querySelector(`[data-id="${key}"]`);
-    for ( const [head, data] of Object.entries(value)) {
-        const tabdata = characterElement.querySelector(`[data-head="${head}"]`);
-        tabdata.textContent = data;
-    };
-    return characterElement;
+const characterUpdateOperator = (row)=> {
+    const  characterElement = row.element;
+    const newElement = charRow(row);
+    characterElement.replaceWith(newElement);
+    row.element = newElement; 
+    return row.element;
 }
 
-const charactersDeleteOperator = (key)=> {
-    const  characterElement = document.querySelector(`[data-id="${key}"]`);
+const characterDeleteOperator = (row)=> {
+    const  characterElement = row.element;
     characterElement.remove();
-}
+};
+
+const characterNode = graphNode(
+    'characters',
+    ['characterId'],
+    [],
+    {},
+    characterCreateOperator,
+    characterUpdateOperator,
+    characterDeleteOperator
+)
 
 export {
-    charactersOperator,
-    charactersUpdateOperator,
-    charactersDeleteOperator
+    characterNode
 }

@@ -18,6 +18,9 @@ const io = new Server(server, {
 });
 const ctx = await esbuild.context({
     entryPoints: ['src/start.js'],
+    alias: {
+        'root':path.resolve( __dirname, 'src'),
+    },
     bundle: true,
     outfile: 'public/bundle.js',
     sourcemap: true,

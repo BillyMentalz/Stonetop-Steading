@@ -11,194 +11,93 @@
 </head>
 
 <body>
+    <svg style="diplay:none;width:0;height:0;" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 512 512" xml:space="preserve">
+        <defs>
+        <g id="icon-Inkwell"> <g> <g> <path d="M306.036,422.4l-44.218-22.109c-3.491-2.327-6.982-5.818-6.982-10.473v-22.109c13.964-4.655,23.273-17.455,23.273-32.582 c0-19.782-15.127-34.909-34.909-34.909H128c-19.782,0-34.909,15.127-34.909,34.909c0,19.782,15.127,34.909,34.909,34.909h69.818 c6.982,0,11.636-4.655,11.636-11.636s-4.655-11.636-11.636-11.636H128c-6.982,0-11.636-4.655-11.636-11.636 s4.655-11.636,11.636-11.636h116.364c6.982,0,11.636,4.655,11.636,11.636s-4.655,11.636-11.636,11.636 s-11.636,4.655-11.636,11.636v32.582c0,12.8,6.982,25.6,19.782,31.418l44.218,22.109c3.491,2.327,6.982,5.818,6.982,10.473v23.273 c0,6.982-4.655,11.636-11.636,11.636H81.454c-6.982,0-11.636-4.655-11.636-11.636v-23.273c0-4.655,2.327-8.146,6.982-10.473 l44.218-22.109c11.636-5.818,19.782-17.455,19.782-31.418c0-6.982-4.655-11.636-11.636-11.636s-11.636,4.655-11.636,11.636 c0,4.655-2.327,8.145-6.982,10.473l-44.218,22.109c-12.8,4.655-19.782,17.455-19.782,30.255v23.273 c0,19.782,15.127,34.909,34.909,34.909h209.455c19.782,0,34.909-15.127,34.909-34.909v-23.273 C325.818,441.018,318.836,428.218,306.036,422.4z"></path> </g> </g> <g> <g> <path d="M438.691,3.491C436.364,1.164,432.873,0,429.382,0s-6.982,2.327-8.145,4.655L211.782,272.291 c-3.491,4.655-3.491,12.8,2.327,16.291c2.327,1.164,4.655,2.327,6.982,2.327c3.491,0,6.982-1.164,9.309-4.655l200.145-256 c8.145,12.8,11.636,30.255,11.636,51.2c0,33.745-17.455,53.527-25.6,62.836L371.2,159.418c-3.491,1.164-6.982,4.655-8.145,9.309 c-1.164,3.491,1.164,8.145,3.491,10.473l18.618,16.291c-24.436,22.109-52.364,39.564-97.745,48.873 c-5.818,1.164-10.473,8.145-9.309,13.964c1.164,5.818,8.146,10.473,13.964,9.309c60.509-12.8,91.927-38.4,117.527-64 c2.327-2.327,3.491-6.982,3.491-10.473c0-2.327-2.327-4.655-3.491-6.982l-12.8-11.636l29.091-10.473 c1.164,0,3.491-2.327,4.655-3.491c23.273-20.945,34.909-48.873,34.909-79.127C465.455,47.709,456.145,20.945,438.691,3.491z"></path> </g> </g> </g>
+        </defs>
+    </svg>
     <div class="left-side">
         <div id="stonetop">
             Stonetop
         </div>
-        <div id="sidebar">
+        <div data-listener="stats" id="sidebar">
             <div class="topunit">
                 <div class="subunits">
                     <img src="assets/fortune1.png" alt="">
-                    <div class="subdiv">
-                        <p class="S">
-                            Fortunes
-                        </p>
-                        <form class="check" id="Fortunes">
-                            <div class="checkbox">
-                                <input type="radio" name="Fortunes" value="-1">
-                                <p class="radioChoice">-1</p>
-                            </div>
-                            <div class="checkbox">
-                                <input type="radio" name="Fortunes" value="+0">
-                                <p class="radioChoice">+0</p>
-                            </div>
-                            <div class="checkbox">
-                                <input type="radio" name="Fortunes" value="+1">
-                                <p class="radioChoice">+1</p>
-                            </div>
-                            <div class="checkbox">
-                                <input type="radio" name="Fortunes" value="+2">
-                                <p class="radioChoice">+2</p>
-                            </div>
-                            <div class="checkbox">
-                                <input type="radio" name="Fortunes" value="+3">
-                                <p class="radioChoice">+3</p>
-                            </div>
-                        </form>
+                    <div data-entrypoint="radio" class="subdiv" id="Fortunes" >
+                        <label class="S"> Fortunes </label>
                     </div>
                 </div>
                 <div class="subunits">
                     <img src="assets/surplus.png" alt="">
-                    <div class="subdiv">
-                        <p class="S">
-                            Surplus
-                        </p>
-                        <div class="check">
-                            <div class="checkbox">
-                                <input type="radio" name="Surplus" value="-1">
-                                <p class="radioChoice">-1</p>
-                            </div>
-                            <div class="checkbox">
-                                <input type="radio" name="Surplus" value="+0">
-                                <p class="radioChoice">+0</p>
-                            </div>
-                            <div class="checkbox">
-                                <input type="radio" name="Surplus" value="+1">
-                                <p class="radioChoice">+1</p>
-                            </div>
-                            <div class="checkbox">
-                                <input type="radio" name="Surplus" value="+2">
-                                <p class="radioChoice">+2</p>
-                            </div>
-                            <div class="checkbox">
-                                <input type="radio" name="Surplus" value="+3">
-                                <p class="radioChoice">+3</p>
-                            </div>
-                        </div>
+                    <div data-entrypoint="radio" class="subdiv" id="Surplus" >
+                        <label class="S"> Surplus </label>
                     </div>
                 </div>
                 <div class="subunits">
                     <img src="assets/debilites.png" alt="">
                     <div class="subdiv">
-                        <p class="S">
-                        Debilities
-                        </p>
-                       <input type="checkbox" name="Diminished" value="Diminished"> 
-                        <label>diminished</label> 
-                       <input type="checkbox" name="Lacking" value="Lacking"> 
-                       <label>lacking</label> 
-                       <input type="checkbox" name="Malcontent" value="Malcontent"> 
-                       <label >malcontent</label> 
-                </div>
+                        <label class="S"> Debilities </label >
+                        <div data-entrypoint="checkbox" id="Diminished">
+                            <label> diminished </label>
+                        </div> 
+                        <div data-entrypoint="checkbox" id="Lacking">
+                            <label> lacking </label>
+                        </div> 
+                        <div data-entrypoint="checkbox" id="Malcontent">
+                            <label> malcontent </label>
+                        </div> 
+                    </div>
                 </div>
                 <div class="units" style="flex-grow:1;display:flex;flex-direction:column;font-size:1.8rem;">
-                    <div style="">Size:</div>
-                    <div class="custom-select">
-                        <select name="Stonetop-Size" >
-                            <option value="Hamlet">Hamlet</option>
-                            <option selected="selected" value="Village">Village</option>
-                            <option value="Town">Town</option>
-                            <option value="columnTitleity">City</option>
-                        </select>
+                    <div data-entrypoint="select" id="Stonetop-Size">
+                        <label>Size: </label>
                     </div>
-                    <div>Population:</div>
-                    <input type="number" name="Population">
-                    <div>Season:</div>
-                    <div class="custom-select">
-                        <select name="Season">
-                            <option value="Spring">Spring</option>
-                            <option value="Summer">Summer</option>
-                            <option value="Autumn">Autumn</option>
-                            <option value="Winter">Winter</option>
-                        </select>
+                    <div data-entrypoint="number" id="Population">
+                        <label>Population:</label>
+                    </div>
+                    <div data-entrypoint="select" id="Season">
+                        <label>Season:</label>
                     </div>
                 </div>
             </div>
             <div class="units">
-                <div class="column1">
+                <div data-entrypoint="radio" class="column1" id="Prosperity" >
                     <div class="coltitle">
-                        <p class="columnTitle">
-                            Prosperity
-                        </p>
+                        <p class="columnTitle">Prosperity</p>
                         <p class="S">Starts at 0</p>
                     </div>
-                    <div class="check">
-                        <div class="checkbox">
-                            <input type="radio" name="Prosperity" value="-1">
-                            <p class="radioChoice">-1</p>
-                        </div>
-                        <div class="checkbox">
-                            <input type="radio" name="Prosperity" value="+0">
-                            <p class="radioChoice">+0</p>
-                        </div>
-                        <div class="checkbox">
-                            <input type="radio" name="Prosperity" value="+1">
-                            <p class="radioChoice">+1</p>
-                        </div>
-                        <div class="checkbox">
-                            <input type="radio" name="Prosperity" value="+2">
-                            <p class="radioChoice">+2</p>
-                        </div>
-                        <div class="checkbox">
-                            <input type="radio" name="Prosperity" value="+3">
-                            <p class="radioChoice">+3</p>
-                        </div>
-                    </div>
                 </div>
-                <div class="column2 Contain" data-contain='Resources'>
+                <div data-listener="lists" data-entrypoint='lists' class="column2 Contain" data-contain='Resources'> <!-- REMEMBER TO REMOVE DATA CONTAIN! -->
                     <div class="tabHeaders">
-                        <p class="S">
-                            Resources
-                        </p>
+                        <p class="S">Resources</p>
                         <svg class='tabIcon' xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 512 512" xml:space="preserve">
-                            <path d="M306.036,422.4l-44.218-22.109c-3.491-2.327-6.982-5.818-6.982-10.473v-22.109c13.964-4.655,23.273-17.455,23.273-32.582 c0-19.782-15.127-34.909-34.909-34.909H128c-19.782,0-34.909,15.127-34.909,34.909c0,19.782,15.127,34.909,34.909,34.909h69.818 c6.982,0,11.636-4.655,11.636-11.636s-4.655-11.636-11.636-11.636H128c-6.982,0-11.636-4.655-11.636-11.636 s4.655-11.636,11.636-11.636h116.364c6.982,0,11.636,4.655,11.636,11.636s-4.655,11.636-11.636,11.636 s-11.636,4.655-11.636,11.636v32.582c0,12.8,6.982,25.6,19.782,31.418l44.218,22.109c3.491,2.327,6.982,5.818,6.982,10.473v23.273 c0,6.982-4.655,11.636-11.636,11.636H81.454c-6.982,0-11.636-4.655-11.636-11.636v-23.273c0-4.655,2.327-8.146,6.982-10.473 l44.218-22.109c11.636-5.818,19.782-17.455,19.782-31.418c0-6.982-4.655-11.636-11.636-11.636s-11.636,4.655-11.636,11.636 c0,4.655-2.327,8.145-6.982,10.473l-44.218,22.109c-12.8,4.655-19.782,17.455-19.782,30.255v23.273 c0,19.782,15.127,34.909,34.909,34.909h209.455c19.782,0,34.909-15.127,34.909-34.909v-23.273 C325.818,441.018,318.836,428.218,306.036,422.4z"></path> </g> </g> <g> <g> <path d="M438.691,3.491C436.364,1.164,432.873,0,429.382,0s-6.982,2.327-8.145,4.655L211.782,272.291 c-3.491,4.655-3.491,12.8,2.327,16.291c2.327,1.164,4.655,2.327,6.982,2.327c3.491,0,6.982-1.164,9.309-4.655l200.145-256 c8.145,12.8,11.636,30.255,11.636,51.2c0,33.745-17.455,53.527-25.6,62.836L371.2,159.418c-3.491,1.164-6.982,4.655-8.145,9.309 c-1.164,3.491,1.164,8.145,3.491,10.473l18.618,16.291c-24.436,22.109-52.364,39.564-97.745,48.873 c-5.818,1.164-10.473,8.145-9.309,13.964c1.164,5.818,8.146,10.473,13.964,9.309c60.509-12.8,91.927-38.4,117.527-64 c2.327-2.327,3.491-6.982,3.491-10.473c0-2.327-2.327-4.655-3.491-6.982l-12.8-11.636l29.091-10.473 c1.164,0,3.491-2.327,4.655-3.491c23.273-20.945,34.909-48.873,34.909-79.127C465.455,47.709,456.145,20.945,438.691,3.491z"></path> 
+                            <use href="#icon-Inkwell">
                         </svg>
                     </div>
-                    <ul class="w" id="Resources" data-tableType='lists'>
+                    <ul  id="Resources" data-tableType='lists'>
                     </ul>
                 </div>
             </div>
             <div class="units">
-                <div class="column1">
+                <div data-entrypoint="radio" class="column1" id="Defenses">
                     <div class="coltitle">
                         <p class="columnTitle">
                             Defenses
                         </p>
                         <p class="S">Starts at 0</p>
                     </div>
-                    <div class="check">
-                        <div class="checkbox">
-                            <input type="radio" name="Defenses" value="-1">
-                            <p class="radioChoice">-1</p>
-                        </div>
-                        <div class="checkbox">
-                            <input type="radio" name="Defenses" value="+0">
-                            <p class="radioChoice">+0</p>
-                        </div>
-                        <div class="checkbox">
-                            <input type="radio" name="Defenses" value="+1">
-                            <p class="radioChoice">+1</p>
-                        </div>
-                        <div class="checkbox">
-                            <input type="radio" name="Defenses" value="+2">
-                            <p class="radioChoice">+2</p>
-                        </div>
-                        <div class="checkbox">
-                            <input type="radio" name="Defenses" value="+3">
-                            <p class="radioChoice">+3</p>
-                        </div>
-                    </div>
                 </div>
-                <div class="column2 Contain" data-contain='Fortifications'>
+                <div data-listener="entryAdd" data-entrypoint="lists" class="column2 Contain" data-contain='Fortifications'>
                     <div class="tabHeaders">
                         <p class="S">
                             Fortifications, etc.
                         </p>
                         <svg class='tabIcon' xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 512 512" xml:space="preserve">
-                            <path d="M306.036,422.4l-44.218-22.109c-3.491-2.327-6.982-5.818-6.982-10.473v-22.109c13.964-4.655,23.273-17.455,23.273-32.582 c0-19.782-15.127-34.909-34.909-34.909H128c-19.782,0-34.909,15.127-34.909,34.909c0,19.782,15.127,34.909,34.909,34.909h69.818 c6.982,0,11.636-4.655,11.636-11.636s-4.655-11.636-11.636-11.636H128c-6.982,0-11.636-4.655-11.636-11.636 s4.655-11.636,11.636-11.636h116.364c6.982,0,11.636,4.655,11.636,11.636s-4.655,11.636-11.636,11.636 s-11.636,4.655-11.636,11.636v32.582c0,12.8,6.982,25.6,19.782,31.418l44.218,22.109c3.491,2.327,6.982,5.818,6.982,10.473v23.273 c0,6.982-4.655,11.636-11.636,11.636H81.454c-6.982,0-11.636-4.655-11.636-11.636v-23.273c0-4.655,2.327-8.146,6.982-10.473 l44.218-22.109c11.636-5.818,19.782-17.455,19.782-31.418c0-6.982-4.655-11.636-11.636-11.636s-11.636,4.655-11.636,11.636 c0,4.655-2.327,8.145-6.982,10.473l-44.218,22.109c-12.8,4.655-19.782,17.455-19.782,30.255v23.273 c0,19.782,15.127,34.909,34.909,34.909h209.455c19.782,0,34.909-15.127,34.909-34.909v-23.273 C325.818,441.018,318.836,428.218,306.036,422.4z"></path> </g> </g> <g> <g> <path d="M438.691,3.491C436.364,1.164,432.873,0,429.382,0s-6.982,2.327-8.145,4.655L211.782,272.291 c-3.491,4.655-3.491,12.8,2.327,16.291c2.327,1.164,4.655,2.327,6.982,2.327c3.491,0,6.982-1.164,9.309-4.655l200.145-256 c8.145,12.8,11.636,30.255,11.636,51.2c0,33.745-17.455,53.527-25.6,62.836L371.2,159.418c-3.491,1.164-6.982,4.655-8.145,9.309 c-1.164,3.491,1.164,8.145,3.491,10.473l18.618,16.291c-24.436,22.109-52.364,39.564-97.745,48.873 c-5.818,1.164-10.473,8.145-9.309,13.964c1.164,5.818,8.146,10.473,13.964,9.309c60.509-12.8,91.927-38.4,117.527-64 c2.327-2.327,3.491-6.982,3.491-10.473c0-2.327-2.327-4.655-3.491-6.982l-12.8-11.636l29.091-10.473 c1.164,0,3.491-2.327,4.655-3.491c23.273-20.945,34.909-48.873,34.909-79.127C465.455,47.709,456.145,20.945,438.691,3.491z"></path> 
+                            <use href="#icon-Inkwell">
                         </svg>
                     </div>
-                    <ul class="w" id="Fortifications"i data-tableType='lists'>
+                    <ul  id="Fortifications" data-tableType='lists'>
                     </ul>
                 </div>
             </div>
@@ -232,22 +131,9 @@
            </div>
          </div> 
         <div id="map">
-            <div id="Legend-Stonetop-1" class="indicators draggable"><p class="markers">A</p></div>
-            <div id="Legend-Stonetop-2" class="indicators draggable"><p class="markers">B</p></div>
-            <div id="Legend-Stonetop-3" class="indicators draggable"><p class="markers">C</p></div>
-            <div id="Legend-Stonetop-4" class="indicators draggable"><p class="markers">D</p></div>
-            <div id="Legend-Stonetop-5" class="indicators draggable"><p class="markers">E</p></div>
-            <div id="Legend-Stonetop-6" class="indicators draggable"><p class="markers">F</p></div>
-            <div id="Legend-Stonetop-7" class="indicators draggable"><p class="markers">F</p></div>
-            <div id="Legend-Stonetop-8" class="indicators draggable"><p class="markers">F</p></div>
-            <div class="Places">
-                <p class="columnTitle" style="display:none" >
-                Places of Interest
-                </p>
-            </div>
             <img src="assets/Stonetop.png" alt="" class="photo">
+            <div id="Legend-Stonetop-1" class="indicators draggable"><p class="markers">A</p></div>
         </div>
-        <div id="legend"style="display:none"> </div>
     </div> 
     <div id="locations" class="tabs Contain" data-contain="locationTable"style="display:flex;">
         <div id='locationSelector' > 
@@ -256,7 +142,7 @@
                     Locations 
                 </div>
                 <svg class='tabIcon' xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 512 512" xml:space="preserve">
-                    <path d="M306.036,422.4l-44.218-22.109c-3.491-2.327-6.982-5.818-6.982-10.473v-22.109c13.964-4.655,23.273-17.455,23.273-32.582 c0-19.782-15.127-34.909-34.909-34.909H128c-19.782,0-34.909,15.127-34.909,34.909c0,19.782,15.127,34.909,34.909,34.909h69.818 c6.982,0,11.636-4.655,11.636-11.636s-4.655-11.636-11.636-11.636H128c-6.982,0-11.636-4.655-11.636-11.636 s4.655-11.636,11.636-11.636h116.364c6.982,0,11.636,4.655,11.636,11.636s-4.655,11.636-11.636,11.636 s-11.636,4.655-11.636,11.636v32.582c0,12.8,6.982,25.6,19.782,31.418l44.218,22.109c3.491,2.327,6.982,5.818,6.982,10.473v23.273 c0,6.982-4.655,11.636-11.636,11.636H81.454c-6.982,0-11.636-4.655-11.636-11.636v-23.273c0-4.655,2.327-8.146,6.982-10.473 l44.218-22.109c11.636-5.818,19.782-17.455,19.782-31.418c0-6.982-4.655-11.636-11.636-11.636s-11.636,4.655-11.636,11.636 c0,4.655-2.327,8.145-6.982,10.473l-44.218,22.109c-12.8,4.655-19.782,17.455-19.782,30.255v23.273 c0,19.782,15.127,34.909,34.909,34.909h209.455c19.782,0,34.909-15.127,34.909-34.909v-23.273 C325.818,441.018,318.836,428.218,306.036,422.4z"></path> </g> </g> <g> <g> <path d="M438.691,3.491C436.364,1.164,432.873,0,429.382,0s-6.982,2.327-8.145,4.655L211.782,272.291 c-3.491,4.655-3.491,12.8,2.327,16.291c2.327,1.164,4.655,2.327,6.982,2.327c3.491,0,6.982-1.164,9.309-4.655l200.145-256 c8.145,12.8,11.636,30.255,11.636,51.2c0,33.745-17.455,53.527-25.6,62.836L371.2,159.418c-3.491,1.164-6.982,4.655-8.145,9.309 c-1.164,3.491,1.164,8.145,3.491,10.473l18.618,16.291c-24.436,22.109-52.364,39.564-97.745,48.873 c-5.818,1.164-10.473,8.145-9.309,13.964c1.164,5.818,8.146,10.473,13.964,9.309c60.509-12.8,91.927-38.4,117.527-64 c2.327-2.327,3.491-6.982,3.491-10.473c0-2.327-2.327-4.655-3.491-6.982l-12.8-11.636l29.091-10.473 c1.164,0,3.491-2.327,4.655-3.491c23.273-20.945,34.909-48.873,34.909-79.127C465.455,47.709,456.145,20.945,438.691,3.491z"></path> 
+                        <use href="#icon-Inkwell">
                 </svg>
             </div>
             <table id="locationTable" data-tabletype = 'locations'>
@@ -268,14 +154,14 @@
             <div class="characterTraits"></div>
         </div>
     </div>
-    <div id="characters" class="tabs Contain" data-contain="characterTable">
-        <div id='characterSelector' > 
+    <div data-listener="characterLst" id="characters" class="tabs Contain" data-contain="characterTable">
+        <div data-entrypoint="characters" id='characterSelector' >
             <div class="tabHeaders">
                 <div class="tabTitle">
                     Characters 
                 </div>
                 <svg class='tabIcon' xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 512 512" xml:space="preserve">
-                    <path d="M306.036,422.4l-44.218-22.109c-3.491-2.327-6.982-5.818-6.982-10.473v-22.109c13.964-4.655,23.273-17.455,23.273-32.582 c0-19.782-15.127-34.909-34.909-34.909H128c-19.782,0-34.909,15.127-34.909,34.909c0,19.782,15.127,34.909,34.909,34.909h69.818 c6.982,0,11.636-4.655,11.636-11.636s-4.655-11.636-11.636-11.636H128c-6.982,0-11.636-4.655-11.636-11.636 s4.655-11.636,11.636-11.636h116.364c6.982,0,11.636,4.655,11.636,11.636s-4.655,11.636-11.636,11.636 s-11.636,4.655-11.636,11.636v32.582c0,12.8,6.982,25.6,19.782,31.418l44.218,22.109c3.491,2.327,6.982,5.818,6.982,10.473v23.273 c0,6.982-4.655,11.636-11.636,11.636H81.454c-6.982,0-11.636-4.655-11.636-11.636v-23.273c0-4.655,2.327-8.146,6.982-10.473 l44.218-22.109c11.636-5.818,19.782-17.455,19.782-31.418c0-6.982-4.655-11.636-11.636-11.636s-11.636,4.655-11.636,11.636 c0,4.655-2.327,8.145-6.982,10.473l-44.218,22.109c-12.8,4.655-19.782,17.455-19.782,30.255v23.273 c0,19.782,15.127,34.909,34.909,34.909h209.455c19.782,0,34.909-15.127,34.909-34.909v-23.273 C325.818,441.018,318.836,428.218,306.036,422.4z"></path> </g> </g> <g> <g> <path d="M438.691,3.491C436.364,1.164,432.873,0,429.382,0s-6.982,2.327-8.145,4.655L211.782,272.291 c-3.491,4.655-3.491,12.8,2.327,16.291c2.327,1.164,4.655,2.327,6.982,2.327c3.491,0,6.982-1.164,9.309-4.655l200.145-256 c8.145,12.8,11.636,30.255,11.636,51.2c0,33.745-17.455,53.527-25.6,62.836L371.2,159.418c-3.491,1.164-6.982,4.655-8.145,9.309 c-1.164,3.491,1.164,8.145,3.491,10.473l18.618,16.291c-24.436,22.109-52.364,39.564-97.745,48.873 c-5.818,1.164-10.473,8.145-9.309,13.964c1.164,5.818,8.146,10.473,13.964,9.309c60.509-12.8,91.927-38.4,117.527-64 c2.327-2.327,3.491-6.982,3.491-10.473c0-2.327-2.327-4.655-3.491-6.982l-12.8-11.636l29.091-10.473 c1.164,0,3.491-2.327,4.655-3.491c23.273-20.945,34.909-48.873,34.909-79.127C465.455,47.709,456.145,20.945,438.691,3.491z"></path> 
+                    <use href="#icon-Inkwell">
                 </svg>
             </div>
             <table id="characterTable" data-tabletype = 'characters'>
@@ -287,7 +173,7 @@
             </table>
         </div>
         <div class= "slice"></div>
-        <div id="characterInfo"  data-editable='characters' data-field='characters'> 
+        <div data-listener="characterProfile" id="characterInfo"  data-editable='characters' data-field='characters'> 
             <div class="characterHome"> </div> 
             <div class="characterProfile"></div> 
             <div class="characterName"></div>
@@ -304,75 +190,72 @@
         </div>
         <div> Maps coming soon! </div>
     </div>
-    <div id="assets" class="tabs Contain" data-contain="Assets">
-        <div class="tabHeaders">
-            <div class="tabTitle">
-                Assets 
+    <div data-listener="stats" id="assets" class="tabs Contain" data-contain="Assets">
+        <div data-entrypoint="lists" id="Assets">
+            <div class="tabHeaders">
+                <div class="tabTitle">
+                    Assets 
+                </div>
+                <svg class='tabIcon' xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 512 512" xml:space="preserve">
+                    <use href="icon-Inkwell">
+                </svg>
             </div>
-        <svg class='tabIcon' xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 512 512" xml:space="preserve">
-            <path d="M306.036,422.4l-44.218-22.109c-3.491-2.327-6.982-5.818-6.982-10.473v-22.109c13.964-4.655,23.273-17.455,23.273-32.582 c0-19.782-15.127-34.909-34.909-34.909H128c-19.782,0-34.909,15.127-34.909,34.909c0,19.782,15.127,34.909,34.909,34.909h69.818 c6.982,0,11.636-4.655,11.636-11.636s-4.655-11.636-11.636-11.636H128c-6.982,0-11.636-4.655-11.636-11.636 s4.655-11.636,11.636-11.636h116.364c6.982,0,11.636,4.655,11.636,11.636s-4.655,11.636-11.636,11.636 s-11.636,4.655-11.636,11.636v32.582c0,12.8,6.982,25.6,19.782,31.418l44.218,22.109c3.491,2.327,6.982,5.818,6.982,10.473v23.273 c0,6.982-4.655,11.636-11.636,11.636H81.454c-6.982,0-11.636-4.655-11.636-11.636v-23.273c0-4.655,2.327-8.146,6.982-10.473 l44.218-22.109c11.636-5.818,19.782-17.455,19.782-31.418c0-6.982-4.655-11.636-11.636-11.636s-11.636,4.655-11.636,11.636 c0,4.655-2.327,8.145-6.982,10.473l-44.218,22.109c-12.8,4.655-19.782,17.455-19.782,30.255v23.273 c0,19.782,15.127,34.909,34.909,34.909h209.455c19.782,0,34.909-15.127,34.909-34.909v-23.273 C325.818,441.018,318.836,428.218,306.036,422.4z"></path> </g> </g> <g> <g> <path d="M438.691,3.491C436.364,1.164,432.873,0,429.382,0s-6.982,2.327-8.145,4.655L211.782,272.291 c-3.491,4.655-3.491,12.8,2.327,16.291c2.327,1.164,4.655,2.327,6.982,2.327c3.491,0,6.982-1.164,9.309-4.655l200.145-256 c8.145,12.8,11.636,30.255,11.636,51.2c0,33.745-17.455,53.527-25.6,62.836L371.2,159.418c-3.491,1.164-6.982,4.655-8.145,9.309 c-1.164,3.491,1.164,8.145,3.491,10.473l18.618,16.291c-24.436,22.109-52.364,39.564-97.745,48.873 c-5.818,1.164-10.473,8.145-9.309,13.964c1.164,5.818,8.146,10.473,13.964,9.309c60.509-12.8,91.927-38.4,117.527-64 c2.327-2.327,3.491-6.982,3.491-10.473c0-2.327-2.327-4.655-3.491-6.982l-12.8-11.636l29.091-10.473 c1.164,0,3.491-2.327,4.655-3.491c23.273-20.945,34.909-48.873,34.909-79.127C465.455,47.709,456.145,20.945,438.691,3.491z"></path> 
-        </svg>
+            <p class= "S">Owned by the residents of Stonetop in common. To take them on an expedition or other put them at risk, you must Requisition </p>
+            <ul id="Assets" data-tabletype='lists'></ul>
         </div>
-        <p class= "S">Owned by the residents of Stonetop in common. To take them on an expedition or other put them at risk, you must Requisition </p>
-        <ul id="Assets" data-tabletype='lists'></ul>
+
         <div class="divider"></div>
-        <div class="columnTitle">
-           Silver 
-        </div>
+        <label class="columnTitle"> Silver </label>
+
         <div class="coins">
-            <div class="numbers">
-                <div class="numbersTitle">Purses</div>
-                <input type="number" class="numsInput" name="Silver-Purses">
+            <div data-entrypoint="number-asset" class="numbers" id="Silver-Purses" >
+                <label class="numbersTitle"> Purses </label>
             </div>
-            <div class="numbers">
-                <div class="numbersTitle">Handfuls</div>
-                <input type="number" class="numsInput" name="Silver-Handfuls">
+            <div data-entrypoint="number-asset" class="numbers" id="Silver-Handfuls" >
+                <label class="numbersTitle"> Handfuls </label>
             </div>
-            <div class="numbers">
-                <div class="numbersTitle">Coins</div>
-                <input type="number" class="numsInput" name="Silver-Coins">
-            </div>
-        </div>
-        <div class="divider"></div>
-        <div class="columnTitle">
-           Gold 
-        </div>
-        <div class="coins">
-            <div class="numbers">
-                <div class="numbersTitle">Purses</div>
-                <input type="number" class="numsInput" name="Gold-Purses">
-            </div>
-            <div class="numbers">
-                <div class="numbersTitle">Handfuls</div>
-                <input type="number" class="numsInput" name="Gold-Handfuls">
-            </div>
-            <div class="numbers">
-                <div class="numbersTitle">Coins</div>
-                <input type="number" class="numsInput" name="Gold-Coins">
+            <div data-entrypoint="number-asset" class="numbers" id="Silver-Coins" >
+                <label class="numbersTitle"> Coins </label>
             </div>
         </div>
 
+        <div class="divider"></div>
+        <label class="columnTitle"> Gold </label>
+
+        <div class="coins">
+            <div data-entrypoint="number-asset" class="numbers" id="Gold-Purses" >
+                <label class="numbersTitle"> Purses </label>
+            </div>
+            <div data-entrypoint="number-asset" class="numbers" id="Gold-Handfuls" >
+                <label class="numbersTitle"> Handfuls </label>
+            </div>
+            <div data-entrypoint="number-asset" class="numbers" id="Gold-Coins" >
+                <label class="numbersTitle"> Coins </label>
+            </div>
+        </div>
     </div> 
-    <div id="addBox" style="display:none;flex-direction:row;height:1.5rem;">
-    <button type="button" name="Change">
-        <svg  viewBox="-4 0 32 32"  xmlns="http://www.w3.org/2000/svg">
-            <path id="check-mark" d="M19.375 5.063l-9.5 13.625-6.563-4.875-3.313 4.594 11.188 8.531 12.813-18.375z"></path> 
-        </svg>
-    </button>
-    <button type="buttons" name="Delete" >
-        <svg viewBox="0 -0.5 8 8"  xmlns="http://www.w3.org/2000/svg">
-            <g id="cross-mark" transform="translate(-385.000000, -206.000000)"> 
-            <g transform="translate(56.000000, 160.000000)"> 
-            <polygon  points="334.6 49.5 337 51.6 335.4 53 333 50.9 330.6 53 329 51.6 331.4 49.5 329 47.4 330.6 46 333 48.1 335.4 46 337 47.4"> 
-            </polygon> 
-            </g> 
-            </g> 
-        </svg>
-    </button>
-</div>
+
+    <template id="addBoxTemplate">
+        <div style="display:flex;flex-direction:row;height:1.5rem;">
+            <button type="button" name="Change">
+                <svg  viewBox="-4 0 32 32"  xmlns="http://www.w3.org/2000/svg">
+                    <path id="check-mark" d="M19.375 5.063l-9.5 13.625-6.563-4.875-3.313 4.594 11.188 8.531 12.813-18.375z"></path> 
+                </svg>
+            </button>
+            <button type="buttons" name="Delete" >
+                <svg viewBox="0 -0.5 8 8"  xmlns="http://www.w3.org/2000/svg">
+                    <g id="cross-mark" transform="translate(-385.000000, -206.000000)"> 
+                    <g transform="translate(56.000000, 160.000000)"> 
+                    <polygon  points="334.6 49.5 337 51.6 335.4 53 333 50.9 330.6 53 329 51.6 331.4 49.5 329 47.4 330.6 46 333 48.1 335.4 46 337 47.4"> 
+                    </polygon> 
+                    </g> 
+                    </g> 
+                </svg>
+            </button>
+        </div>
+    </template>
+    
 </body>
 <script type="module" src="bundle.js"></script>
 </html>
-
-
 

@@ -1,8 +1,8 @@
 import {socket , addBox} from './document.js';
 
 const listEdit = (element) => {
-    const newEntry = addBox.cloneNode(true);
-    newEntry.style.display = "flex";
+    const newEntryClone = document.querySelector("#addBoxTemplate");
+    const newEntry = document.importNode(newEntryClone.content, true);
     let newInput = document.createElement('textarea');
     let spanElement = element.querySelector('[data-field]');
     newInput.value = spanElement.textContent;
@@ -21,12 +21,12 @@ const listEdit = (element) => {
             order: order, 
             text: newInput.value
         })
-        newEntry.remove()
+        element.lastElementChild.remove();
     });
     element.querySelector('button[name="Delete"]').addEventListener('click', (e)=> {
             if (!window.confirm("Delete Item? \n Item:" + newInput.dataset.original )) {
                 revertEditing(newInput);
-                newEntry.remove(); 
+                element.lastElementChild.remove(); 
                 return;
             }
             socket.emit( 'delete',  {
@@ -34,7 +34,7 @@ const listEdit = (element) => {
             name: name,
             order: parseInt(order) 
         })
-        newEntry.remove(); 
+        element.lastElementChild.remove();
     });
 }
 
@@ -47,8 +47,8 @@ const characterEditables = [
     '.characterTraits']
 const characterEdit = (element) => {
     if (!element.dataset.characterId ) return;
-    const newEntry = addBox.cloneNode(true);
-    newEntry.style.display = "flex";
+    const newEntryClone = document.querySelector("#addBoxTemplate");
+    const newEntry = document.importNode(newEntryClone.content, true);
     const thing = element.children;
     for (const detail of characterEditables) {
         const exist = element.querySelector(detail);

@@ -2,40 +2,70 @@ import { DatabaseSync } from 'node:sqlite';
 
 const database = new DatabaseSync('./main.db');
 const initDatabase = `
+
 CREATE TABLE IF NOT EXISTS homes (
     homeName TEXT PRIMARY KEY,
     latestModified TEXT NOT NULL
 );
+
 INSERT OR IGNORE INTO homes (homeName, latestModified) VALUES 
 ('At World''s End',CURRENT_TIMESTAMP),
 ('Vicinity',CURRENT_TIMESTAMP),
 ('Stonetop', CURRENT_TIMESTAMP);
 
+CREATE TABLE IF NOT EXISTS homesRestrict (
+    homeName TEXT PRIMARY KEY,
+    FOREIGN KEY (homeName) REFERENCES homes(homeName) ON DELETE RESTRICT
+);
+
 CREATE TABLE IF NOT EXISTS stats (
     statName TEXT PRIMARY KEY,
     statType TEXT CHECK( statType IN ('radio','select-one','number','checkbox' )) NOT NULL,
+    statOptions TEXT,
     statValue TEXT NOT NULL DEFAULT '0',
     latestModified TEXT NOT NULL
 );
 
-INSERT OR IGNORE INTO stats (statName,statType, statValue, latestModified) VALUES 
-('Fortunes','radio', '+1',CURRENT_TIMESTAMP),
-('Surplus','radio','+1',CURRENT_TIMESTAMP),
-('Prosperity','radio','+0',CURRENT_TIMESTAMP),
-('Defenses','radio','+0',CURRENT_TIMESTAMP),
-('Stonetop-Size', 'select-one','Village',CURRENT_TIMESTAMP),
-('Population', 'number', '311',CURRENT_TIMESTAMP),
-('Silver-Purses', 'number', '0',CURRENT_TIMESTAMP),
-('Silver-Handfuls', 'number', '0',CURRENT_TIMESTAMP),
-('Silver-Coins', 'number', '0',CURRENT_TIMESTAMP),
-('Gold-Purses', 'number', '0',CURRENT_TIMESTAMP),
-('Gold-Handfuls', 'number', '0',CURRENT_TIMESTAMP),
-('Gold-Coins', 'number', '0',CURRENT_TIMESTAMP),
-('Season', 'select-one', 'Spring',CURRENT_TIMESTAMP),
-('Diminished', 'checkbox', 'false',CURRENT_TIMESTAMP),
-('Lacking', 'checkbox', 'false',CURRENT_TIMESTAMP),
-('Malcontent', 'checkbox', 'false',CURRENT_TIMESTAMP);
+CREATE TABLE IF NOT EXISTS statsRestrict (
+    statName TEXT PRIMARY KEY,
+    FOREIGN KEY (statName) REFERENCES stats(statName) ON DELETE RESTRICT
+);
 
+INSERT OR IGNORE INTO stats (statName,statType, statOptions, statValue, latestModified) VALUES 
+('Fortunes','radio','-1,+0,+1,+2,+3', '+1',CURRENT_TIMESTAMP),
+('Surplus','radio','-1,+0,+1,+2,+3','+1',CURRENT_TIMESTAMP),
+('Prosperity','radio','-1,+0,+1,+2,+3','+0',CURRENT_TIMESTAMP),
+('Defenses','radio','-1,+0,+1,+2,+3','+0',CURRENT_TIMESTAMP),
+('Stonetop-Size', 'select-one','Hamlet,Village,Town,City', 'Village',CURRENT_TIMESTAMP),
+('Population', 'number', '', '311',CURRENT_TIMESTAMP),
+('Silver-Purses', 'number','', '0',CURRENT_TIMESTAMP),
+('Silver-Handfuls', 'number','', '0',CURRENT_TIMESTAMP),
+('Silver-Coins', 'number','', '0',CURRENT_TIMESTAMP),
+('Gold-Purses', 'number','', '0',CURRENT_TIMESTAMP),
+('Gold-Handfuls', 'number','', '0',CURRENT_TIMESTAMP),
+('Gold-Coins', 'number','', '0',CURRENT_TIMESTAMP),
+('Season', 'select-one','Spring,Summer,Autumn,Winter', 'Spring',CURRENT_TIMESTAMP),
+('Diminished', 'checkbox','', 'false',CURRENT_TIMESTAMP),
+('Lacking', 'checkbox','', 'false',CURRENT_TIMESTAMP),
+('Malcontent', 'checkbox','', 'false',CURRENT_TIMESTAMP);
+
+INSERT OR IGNORE INTO statsRestrict (statName) VALUES 
+('Fortunes'),
+('Surplus'),
+('Prosperity'),
+('Defenses'),
+('Stonetop-Size'), 
+('Population'),
+('Silver-Purses'),
+('Silver-Handfuls'),
+('Silver-Coins'), 
+('Gold-Purses'), 
+('Gold-Handfuls'), 
+('Gold-Coins'),
+('Season'), 
+('Diminished'),
+('Lacking'), 
+('Malcontent');
 
 CREATE TABLE IF NOT EXISTS lists (
     listName TEXT NOT NULL,
@@ -49,7 +79,7 @@ INSERT OR IGNORE INTO lists (listName, listOrder, listText, latestModified) VALU
 ('Resources', 1, 'Farming (beans, potatoes ,oats, barley)',CURRENT_TIMESTAMP),
 ('Resources', 2, 'Hunting/trapping (fur,meat,hides)',CURRENT_TIMESTAMP),
 ('Resources', 3, 'Stone (collected from the Old Wall)',CURRENT_TIMESTAMP),
-('Resources', 4, 'Cistern (filled with rain,snow)',CURRENT_TIMESTAMP),
+('Resources', 4, 'Cistern (filled with rain, snow)',CURRENT_TIMESTAMP),
 ('Resources', 5, 'Tradesfolk (midwife, potter, publican,smith,tanner)',CURRENT_TIMESTAMP),
 ('Resources', 6, 'Trade: Gordin''s Delve (metal tools)',CURRENT_TIMESTAMP),
 ('Resources', 7, 'Trade: Marshedge (textiles, herbs, glass)',CURRENT_TIMESTAMP),
@@ -72,26 +102,25 @@ CREATE TABLE IF NOT EXISTS characters (
 );
 
 CREATE TABLE IF NOT EXISTS locations (
-    locationId TEXT NOT NULL,
     locationHome TEXT NOT NULL,
+    locationId TEXT NOT NULL,
     locationSignifier TEXT NOT NULL,
     locationName TEXT NOT NULL,
     locationInfo TEXT ,
     latestModified TEXT NOT NULL,
     FOREIGN KEY (locationHome) REFERENCES homes(homeName),
-    PRIMARY KEY (locationHome, locationId)
+    PRIMARY KEY (locationHome, locationId),
 );
 
 CREATE TABLE IF NOT EXISTS markers (
-    markerId TEXT NOT NULL,
     markerHome TEXT NOT NULL,
-    markerSignifier TEXT NOT NULL,
+    markerId TEXT NOT NULL,
     markerOrder INTEGER NOT NULL, 
     markerX REAL NOT NULL DEFAULT 0,
     markerY REAL NOT NULL DEFAULT 0,
     latestModified TEXT NOT NULL,
-    FOREIGN KEY (markerHome, markerId , markerSignifier) REFERENCES locations(locationHome, locationId, locationSignifier) ON UPDATE CASCADE ON DELETE CASCADE,
-    PRIMARY KEY (markerHome, markerId, markerOrder)
+    FOREIGN KEY (markerHome, markerId, ) REFERENCES locations(locationHome, locationId, locationSignifier) ON DELETE CASCADE,
+    PRIMARY KEY (markerHome, markerId, markerSignifier, markerOrder)
 );
 
 CREATE TABLE IF NOT EXISTS deleteRecords (

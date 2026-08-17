@@ -54,6 +54,11 @@
       return node;
     }
   };
+  var stringToHTML = (str) => {
+    const parse = new DOMParser();
+    const doc = parse.parseFromString(str, "text/html");
+    return doc.body.firstChild;
+  };
 
   // src/dataHandler/homesHandler.js
   var homesOperator = (key, value) => {
@@ -76,7 +81,80 @@
   };
 
   // src/dataHandler/statsHandler.js
+  var styleTable = {
+    "radioContainer": "radioBox,radioChoice",
+    "selectContainer": "",
+    "numbersTitle": "numsInput"
+  };
+  var statsRadio = (name, style, options) => {
+    const elementString = `
+        ${options.map((option) => `
+            <div class="${style[0]}">
+                <input type="radio" name="${name}" value="${option}">
+                <p class="${style[1]}">${option}</p>
+            </div>
+        `).join("")}`;
+    return stringToHTML(elementString);
+  };
+  var statsSelect = (name, style, options) => {
+    const elementString = `
+        <select class='${style[0]}' name="${name}" >
+            ${options.map((option) => `<option value="${option}">${option}</option>`).join("")}
+        </select>
+    `;
+    return stringToHTML(elementString);
+  };
+  var statsNumber = (name, style) => {
+    const elementString = `<input type="number" class="${style[0]}" name="${name}">`;
+    return stringToHTML(elementString);
+  };
+  var statsCheck = (name, style) => {
+    const elementString = `<input type="checkbox" class="${style[0]}" name="${name}" value="${name}">`;
+    return stringToHTML(elementString);
+  };
   var statsOperator = (key, value) => {
+    let element = null;
+    let style = null;
+    let parentElement = null;
+    let selectedElement = null;
+    switch (value.statType) {
+      case "radio":
+        parentElement = document.getElementById(key);
+        style = styleHelper(parentElement);
+        element = statsRadio(key, style, value.statOptions.split(","));
+        parentElement.innerHTML = element;
+        selectedElement = parentElement.querySelector(`[value="${value.statValue}"]`);
+        selectedElement.checked = true;
+        break;
+      case "select-one":
+        parentElement = document.getElementById(key);
+        style = styleHelper(parentElement);
+        element = statsSelect(key, style, value.statOptions.split(","));
+        parentElement.innerHTML = element;
+        selectedElement = parentElement.querySelector(`select`);
+        selectedElement.value = value.statValue;
+        break;
+      case "number":
+        parentElement = document.getElementById(key);
+        style = styleHelper(parentElement);
+        element = statsNumber(key, style);
+        element.value = value.statValue;
+        parentElement.after(element);
+        break;
+      case "checkbox":
+        parentElement = document.getElementById(key);
+        style = styleHelper(parentElement);
+        element = statsCheck(key, style);
+        element.checked = value.statValue === "true";
+        parentElement.after(element);
+        break;
+    }
+    return parentElement;
+  };
+  var styleHelper = (parent) => {
+    return parent.classList[0] ? styleTable[parent.classList[0]].split(",") : [""];
+  };
+  var statsUpdateOperator = (key, value) => {
     let element = null;
     switch (value.statType) {
       case "radio":
@@ -97,6 +175,32 @@
         break;
     }
     return element;
+  };
+  var statsDeleteOperator = (key, value) => {
+    let element = null;
+    let style = null;
+    let parentElement = null;
+    let selectedElement = null;
+    switch (value.statType) {
+      case "radio":
+        parentElement = document.getElementById(key);
+        parentElement.replaceChildren();
+        break;
+      case "select-one":
+        parentElement = document.getElementById(key);
+        parentElement.replaceChildren();
+        break;
+      case "number":
+        parentElement = document.getElementById(key);
+        element = parentElement.nextElementSibling;
+        element.remove();
+        break;
+      case "checkbox":
+        parentElement = document.getElementById(key);
+        element = parentElement.nextElementSibling;
+        element.remove();
+        break;
+    }
   };
 
   // src/dataHandler/listsHandler.js
@@ -177,72 +281,6 @@
   };
 
   // src/syncHandler.js
-  var graphNode = class {
-    constructor(name, identifiers, children, createOperator, updateOperator2, deleteOperator) {
-      this.name = name;
-      this.identifiers = identifiers;
-      this.table = {};
-      this.children = children;
-      this.createOperator = createOperator;
-      this.updateOperator = updateOperator2;
-      this.deleteOperator = deleteOperator;
-    }
-    convertRow(row) {
-      const formattedRow = this.identifiers.map((item) => {
-        const element = row[item];
-        delete row[item];
-        return element;
-      });
-      const index = formattedRow.join("/%/");
-      return { index, row };
-    }
-    createRow(value) {
-      const formattedRow = this.convertRow(value);
-      const element = this.createOperator(formattedRow.index, formattedRow.row);
-      this.table[formattedRow.index] = formattedRow.row;
-      updateIndicate(element);
-    }
-    updateRow(value) {
-      const formattedRow = this.convertRow(value);
-      const element = this.updateOperator(formattedRow.index, formattedRow.row);
-      this.table[formattedRow.index] = formattedRow.row;
-      updateIndicate(element);
-      for (const thing of this.cascade) {
-        thing.updateCascade(formattedRow.index, formattedRow.row);
-      }
-    }
-    updateCascade(id, row) {
-      for (const [key, value] of Object.entries(this.table)) {
-        if (key.startsWith(id)) {
-          for (const [subkey, subvalue] of Object.entries(row)) {
-            value[subkey] = row[subkey];
-          }
-          const element = this.updateOperator({ index: key, row: value });
-          updateIndicate(element);
-        }
-      }
-    }
-    deleteRow(deletedItem) {
-      delete this.table[deletedItem];
-      this.deleteOperator(deletedItem);
-      for (const thing of this.cascade) {
-        thing.deleteCascade(deletedItem);
-      }
-    }
-    deleteCascade(id) {
-      for (const [key, value] of Object.entries(this.table)) {
-        if (key.startsWith(id)) {
-          this.deleteRow(key);
-        }
-      }
-    }
-  };
-  var markerNode = graphNode("markers", ["markerHome", "markerId", "markerOrder"], {}, markersOperator, markersUpdateOperator, markersDeleteOperator);
-  var locationNode = graphNode("locations", ["locationHome", "locationId"], { markerNode }, locationsOperator, locationsUpdateOperator, locationsDeleteOperator);
-  var characterNode = graphNode("characters", ["characterId"], {}, charactersOperator, charactersUpdateOperator, charactersDeleteOperator);
-  var listNode = graphNode("lists", ["listName", "listOrder"], {}, listsOperator, listsUpdateOperator, listsDeleteOperator);
-  var statNode = graphNode("stats", ["statName"], {}, statsOperator, statsOperator, statsOperator);
-  var homeNode = graphNode("homes", ["homeName"], { characterNode, locationNode }, homesOperator, homesUpdateOperator, homesDeleteOperator);
   var loadTable = {
     "homes": homesOperator,
     "stats": statsOperator,
@@ -253,7 +291,7 @@
   };
   var updateTable = {
     "homes": homesUpdateOperator,
-    "stats": statsOperator,
+    "stats": statsUpdateOperator,
     "lists": listsUpdateOperator,
     "characters": charactersUpdateOperator
     //'locations': 
@@ -261,7 +299,7 @@
   };
   var deleteTable = {
     "homes": homesDeleteOperator,
-    //'stats': statsOperator,
+    "stats": statsDeleteOperator,
     "lists": listsDeleteOperator,
     "characters": charactersDeleteOperator
     // 'locations'
@@ -370,8 +408,8 @@
 
   // src/editHandler.js
   var listEdit = (element) => {
-    const newEntry = addBox.cloneNode(true);
-    newEntry.style.display = "flex";
+    const newEntryClone = document.querySelector("#addBoxTemplate");
+    const newEntry = document.importNode(newEntryClone.content, true);
     let newInput = document.createElement("textarea");
     let spanElement = element.querySelector("[data-field]");
     newInput.value = spanElement.textContent;
@@ -390,12 +428,12 @@
         order,
         text: newInput.value
       });
-      newEntry.remove();
+      element.lastElementChild.remove();
     });
     element.querySelector('button[name="Delete"]').addEventListener("click", (e) => {
       if (!window.confirm("Delete Item? \n Item:" + newInput.dataset.original)) {
         revertEditing(newInput);
-        newEntry.remove();
+        element.lastElementChild.remove();
         return;
       }
       socket.emit("delete", {
@@ -403,7 +441,7 @@
         name,
         order: parseInt(order)
       });
-      newEntry.remove();
+      element.lastElementChild.remove();
     });
   };
   var characterEditables = [
@@ -416,8 +454,8 @@
   ];
   var characterEdit = (element) => {
     if (!element.dataset.characterId) return;
-    const newEntry = addBox.cloneNode(true);
-    newEntry.style.display = "flex";
+    const newEntryClone = document.querySelector("#addBoxTemplate");
+    const newEntry = document.importNode(newEntryClone.content, true);
     const thing = element.children;
     for (const detail of characterEditables) {
       const exist = element.querySelector(detail);
@@ -639,7 +677,6 @@
   });
   var entryAdd = (input, event) => {
     const contain = input.closest(".Contain");
-    console.log(contain);
     const addItem = contain.querySelector(`#${contain.dataset.contain}`);
     const result = formatAddTable[addItem.dataset.tabletype](addItem);
     socket.emit("create", result);
