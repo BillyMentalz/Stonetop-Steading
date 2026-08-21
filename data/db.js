@@ -93,8 +93,9 @@ CREATE TABLE IF NOT EXISTS characters (
     characterId  TEXT PRIMARY KEY,
     characterHome TEXT NOT NULL DEFAULT 'At World''s End' REFERENCES homes(homeName) ON DELETE SET DEFAULT,
     characterName TEXT NOT NULL,
+    characterImage TEXT NOT NULL DEFAULT 'characters/NPC.png',
     characterPronouns TEXT, 
-    characterOccupation TEXT,
+    characterProfession TEXT,
     characterTraits TEXT,
     characterInfo TEXT,
     characterCreationDate TEXT NOT NULL,
@@ -110,16 +111,18 @@ CREATE TABLE IF NOT EXISTS locations (
     latestModified TEXT NOT NULL,
     FOREIGN KEY (locationHome) REFERENCES homes(homeName),
     PRIMARY KEY (locationHome, locationId),
+    UNIQUE(locationHome, locationId, locationSignifier)
 );
 
 CREATE TABLE IF NOT EXISTS markers (
     markerHome TEXT NOT NULL,
     markerId TEXT NOT NULL,
     markerOrder INTEGER NOT NULL, 
+    markerSignifier TEXT NOT NULL,
     markerX REAL NOT NULL DEFAULT 0,
     markerY REAL NOT NULL DEFAULT 0,
     latestModified TEXT NOT NULL,
-    FOREIGN KEY (markerHome, markerId, ) REFERENCES locations(locationHome, locationId, locationSignifier) ON DELETE CASCADE,
+    FOREIGN KEY (markerHome, markerId, markerSignifier) REFERENCES locations(locationHome, locationId, locationSignifier)ON UPDATE CASCADE ON DELETE CASCADE,
     PRIMARY KEY (markerHome, markerId, markerSignifier, markerOrder)
 );
 

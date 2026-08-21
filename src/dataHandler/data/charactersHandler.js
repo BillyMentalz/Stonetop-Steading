@@ -13,8 +13,7 @@ const characterUpdateOperator = (row)=> {
     const  characterElement = row.element;
     const newElement = charRow(row);
     characterElement.replaceWith(newElement);
-    row.element = newElement; 
-    return row.element;
+    return newElement;
 }
 
 const characterDeleteOperator = (row)=> {

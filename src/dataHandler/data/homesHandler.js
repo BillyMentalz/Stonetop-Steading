@@ -8,14 +8,13 @@ const homesCreateOperator = (row )=>{
 }
 
 const homesUpdateOperator = (row)=> {
-    const element = maps.querySelector(`[id="${row.homeName}"]`);
+    const element = row.element;
     throw Error ('WHat!?');
     return element;
 }
 
 const homesDeleteOperator = (row)=> {
-    const element = maps.querySelector(`#${row.homeName}`);
-    element.remove();
+    row.element.remove();
 }
 
 const homeNode = graphNode(

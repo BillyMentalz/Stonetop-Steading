@@ -1,3 +1,4 @@
+import {}
 
 
 const stringToHTML = (str)=> {
@@ -16,11 +17,22 @@ const EntryPointsAndStyleTable = {
     'checkbox': '',
 }
 
-
+const EntryPointTable = {
+    'radio': '' ,
+    'select': '',
+    'number': '',
+    'number-asset': '',
+    'checkbox': '',
+}
 
 
 const loadInjections = () => {
-
+    const entryPoints = document.querySelector('[data-entrypoint]')    
+    entryPoints.foreach(entryPoint => {
+        const thing = entryPoint.dataset.entrypointq
+        EntryPointTable
+        
+    })
 }
 
 const updateEntryPoints = (element, entrypoint)=> {

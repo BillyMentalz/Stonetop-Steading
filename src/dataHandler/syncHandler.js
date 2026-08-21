@@ -1,46 +1,52 @@
 import {graphNode } from '../document.js'
-import { homesOperator, homesUpdateOperator, homesDeleteOperator} from './homesHandler.js';
-import { statsOperator,statsUpdateOperator, statsDeleteOperator} from './statsHandler.js';
-import { listsOperator, listsUpdateOperator, listsDeleteOperator} from './listsHandler.js';
-import {  charactersOperator, charactersUpdateOperator, charactersDeleteOperator } from './charactersHandler.js';
-import { locationsOperator , locationsUpdateOperator, locationsDeleteOperator } from './locationsHandler.js'; 
-import { markersOperator, markersUpdateOperator, markersDeleteOperator } from './markersHandler.js'; 
+import { markerNode } from './markersHandler.js'; 
+import { statNode } from './data/statsHandler.js'
+import { listNode } from './data/listsHandler.js'
+import { characterNode  } from './charactersHandler.js';
+import { locationNode } from './locationsHandler.js'; 
+import { homeNode } from './data/homesHandler.js'
 
-const markerNode = graphNode('markers', ['markerHome', 'markerId', 'markerOrder'], [], markersOperator, markersUpdateOperator, markersDeleteOperator);
-const locationNode = graphNode('locations', [['locationHome'], 'locationId'], [markerNode] , locationsOperator, locationsUpdateOperator, locationsDeleteOperator);
-const characterNode = graphNode('characters', ['characterId'], [] , charactersOperator, charactersUpdateOperator, charactersDeleteOperator);
-const listNode = graphNode('lists', [['listName'], 'listOrder'] ,[]  , listsOperator, listsUpdateOperator, listsDeleteOperator );
-const statNode = graphNode('stats', ['statName'], [], statsOperator, statsOperator, statsOperator);
-const homeNode = graphNode('homes', ['homeName'], [characterNode , locationNode ], homesOperator, homesUpdateOperator, homesDeleteOperator);
-const classLoadTable = {
+const graphNodeList = {
     'homes':  homeNode,
-    'stats': statNode,
-    'lists': listNode, 
+    'markers': markerNode,
     'characters': characterNode, 
     'locations': locationNode,
-    'markers': markerNode
+    'stats': statNode,
+    'lists': listNode, 
 }
 
 const classLoadTables = ()=> {
-    for (const [key, operator] of Object.entries(classLoadTable)) {
+    for (const [key, operator] of Object.entries(graphNodeList)) {
         const payload = JSON.parse(localStorage.getItem(key)) || {};
         operator.table = payload;
         for (const [id, row] of Object.entries(payload)) {
-            operator.createOperator(id, row);
+            operator.createOperator(id, row); 
         }
     }
 }
 
-const storeNewRowsByClass = (check) => {
-    for (const [key, value] of Object.entries(check)) {
+const storeNewRows = (check) => {
+    for (const [key, value] in Object.entries(check)) {
         if (key == 'deleteRecords') {
-            deleteOperation(value);
+            for (const row in Object.entries(value)) {
+                const operator = graphNodeList[row.tableName];
+                operator.deleteRow(row.deletedItem);
+            }
         }
         else if (key == 'time') {
             localStorage.setItem(key,value);
         }
         else {
-            
+            const operator = graphNodeList[key];
+            for ( const row in value) {
+                const index  = operator.makeIndex(row);
+                if(operator.table !== null) {
+                    operator.updateRow(row);
+                }
+                else {
+                    operator.createRow(row);
+                }
+            }
         }
     }
 }
@@ -48,4 +54,7 @@ const storeNewRowsByClass = (check) => {
 
 
 export {
-    };
+    classLoadTables
+    storeNewRows
+    graphNodeList
+};

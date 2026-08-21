@@ -57,8 +57,11 @@ const createOperation = (creation) => {
         const info = extractFields(creation, insertSchemas[creation.table].columns );
         const result = insertSchemas[creation.table].statement.get(...info);
         database.exec('COMMIT');
-        return {[creation.table]: result};
-        }
+        return {
+            'table': creation.table
+            'result': result
+        };
+    }
     catch (e) {
         database.exec('ROLLBACK');
         console.log(`createOperation failed.Paramters: ${e.message}`);
@@ -132,7 +135,9 @@ const updateOperation = (updates) => {
         const info = extractFields(updates, updateSchemas[updates.table].columns);
         const result = updateSchemas[updates.table].statement.get(...info);
         database.exec('COMMIT');
-        return {[updates.table]: result};
+        return {
+            'table': updates.table,
+            'result':result
         }
     catch (e) {
         database.exec('ROLLBACK');

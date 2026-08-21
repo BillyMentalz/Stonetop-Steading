@@ -1,17 +1,17 @@
 import {stringToHTML} from '../inject.js'
 
-const listsRow = ( index, text) => { // I decided that at this point that using Id kinda blows. So if you want to access element, the proper way would be to select element, index to access. If this is too much for you it's not trust me.
+const listsRow = (id, index, text) => { // I decided that at this point that using Id kinda blows. So if you want to access element, the proper way would be to select element, index to access. If this is too much for you it's not trust me.
     const elementString = `
-        <li data-index="${index}">  
+        <li>
             ${text}
         </li>`
     return stringToHTML(elementString);
 }
-const lists = (id, rows) => {
+const fullList = (id, rows) => {
     const elementString = `
         <ul > 
             ${rows.map(row => `
-            <li data-index="${row.index}">
+            <li>
                 ${row.text} 
             </li>
             `).join('')} 
@@ -19,7 +19,7 @@ const lists = (id, rows) => {
     return stringToHTML(elementString);
 }
 
-const defaultLists = ()=> {
+const defaultList = ()=> {
     return `
         <ul class="w">
             <li> Add here.... </li>
@@ -27,4 +27,18 @@ const defaultLists = ()=> {
     `
 }
 
+const rowEnter  = (element) => {
+    const elementString = `
+        <li data-index="${element.dataset.index}">  
+            <textarea value=${element.textContent}>
+            </textarea>
+        </li>
+    `
+}
 
+export {
+    listsRow,
+    defaultList,
+    fullList,
+    rowEnter,
+}

@@ -1,18 +1,5 @@
 import {updateIndicate} from './animation.js';
 const socket = io();
-const templates = document.getElementById('templates')
-const sidebar = document.getElementById("sidebar");
-const topbar = document.getElementById("topbar");
-const guide = document.getElementById("guide");
-const map = document.getElementById("map");
-const guidebook = document.getElementById('guide');
-const menu = document.getElementById('menu');
-const maps = document.getElementById('worldMaps');
-const characters = document.getElementById('characters');
-const locations = document.getElementById('locations');
-const assets = document.getElementById('assets');
-const addBox = document.getElementById('addBox');
-const characterInfo = document.getElementById('characterInfo');
 
 class Node {
     constructor(element){
@@ -58,15 +45,7 @@ class LinkedList {
     }
 };
 
-/* Something possessed me to make the dataset a class with these clear defined structures. Which does have its uses, but I spend nearly a week 
- * and a half just grappling with design choices that were mostly overenginnerd and overcomplicated and over optimized. The class tool here is not the best 
- * but think of it as a Kalishnokov of a solution for taking data, creating, updating, deleting accordingly. The stuff from the backend DB is just reiterated here in json, 
- * and marked by index for ease of retrieval: You take row, you get a unique index, you search table for index, easy peasy. 
- * Now, my smartass created the backend database with composite keys and referential data between tables that aren't primary keys as well, 
- * so the following class doesn't really do the help if someone decides to update the primary key in an upstream table 
- * and then cascade it downward: No if you update the primary key get fucked. It's not robust and I hate it. Oh,
- * and I gotta make an saving mechanism I guess. Wait, I figured it out. 
- */
+
 class graphNode {
     constructor(name , identifiers,  children, cascadeRules, createOperator, updateOperator, deleteOperator ) {
         this.table = {};
@@ -127,6 +106,7 @@ class graphNode {
     };
     deleteRow(deletedItem) {
         const row = this.table[deletedItem]
+        if ( row.latestModified > deletedItem.deletedAt) return;
         this.deleteOperator(row);
         delete this.table[deletedItem];
         for ( const thing of this.cascade ){
@@ -152,18 +132,5 @@ class graphNode {
 export { 
     LinkedList,
     graphNode,
-    socket,
-    templates,
-    sidebar,  
-    topbar, 
-    guide,
-    map,
-    guidebook,
-    menu,
-    maps,
-    characters,
-    locations,
-    assets,
-    addBox,
-    characterInfo,
+    socket
     };

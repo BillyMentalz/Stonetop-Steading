@@ -2,19 +2,17 @@ import {characterRow } from 'root/inject/characters.js'
 import {graphNode} from 'root/document.js'
 import {markerNode } from './markersHandler.js'
 const locationCreateOperator = (row )=>{
-    if (false) return;  // Placeholder code 
     const element = characterRow(row);
-    parent.append(element);
+
+    if (true) parent.append(element); // Placeholder element. Please add when needed. The location element depends on some shtuff
     return element;
 };
 
 const locationsUpdateOperator = (row)=> {
-    if (false) return; 
     const locationElement = row.element;
     const newElement = characterRow(row);
-    locationElement.replaceWith(newElement);
-    row.element = newElement;
-    return row.element; 
+    if (true) locationElement.replaceWith(newElement);
+    return newElement; 
 };
 
 const locationDeleteOperator = (row) => {

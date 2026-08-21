@@ -9,10 +9,9 @@ const listsOperator = (row )=>{
 
 const listsUpdateOperator = (row)=> {
     const element = row.element;
-    const newelement = listsRow(row.listOrder, row.listText);
+    const newElement = listsRow(row.listOrder, row.listText);
     element.replaceWith(newelement);
-    row.element = newelement;
-    return row.element;
+    return newElement;
 };
 
 const listsDeleteOperator = (row) => {
