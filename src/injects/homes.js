@@ -8,4 +8,14 @@ const newHome = (row) => {
     `);
 };
 
+const newSelectionHome = (row)=> {
+    return stringToHTML(`
+        <option value="${row.homeName}">${row.homeName} </option>
+        `
+    )
+}
 
+export {
+    newHome,
+    newSelectionHome
+}

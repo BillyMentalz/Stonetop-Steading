@@ -1,6 +1,4 @@
-import {LinkedList } from './document.js';
 const indicateTimers = new Map();
-const tablists = new LinkedList();
 const updateIndicate = (el)=>  {
     const prior = indicateTimers.get(el);
     if (prior) clearTimeout(prior);

@@ -1,4 +1,4 @@
-import { radio, select, number, checkbox} from 'root/inject/stat.js'
+import { radio, select, number, checkbox} from 'root/injects/stats.js'
 import { graphNode} from 'root/document.js'
 const styleTable = {
     'radio':'radioBox,radioChoice',
@@ -17,6 +17,7 @@ const views = {
 
 const statsCreateOperator = (row) => {
     let element = null;
+    console.log(row); 
     const parentElement  = document.getElementById(row.statName);
     const style =  styleHelper(parentElement);
     let selectedElement = null;
@@ -53,6 +54,7 @@ const styleHelper = (parent)=>{
 
 const statsUpdateOperator = (row)=>{
     const element = row.element;
+    console.log(element);
     switch (row.statType){
         case 'radio':
             element.checked = true;
@@ -75,7 +77,7 @@ const statsDeleteOperator = (row) => {
     selectedElement.remove();
 }
 
-const statNode = graphNode( 
+const statNode = new graphNode( 
     'stats',
     ['statName'],
     [],

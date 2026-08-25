@@ -1,4 +1,4 @@
-import {characterRow } from 'root/inject/characters.js' 
+import {characterRow } from 'root/injects/characters.js' 
 import {graphNode} from 'root/document.js'
 import {markerNode } from './markersHandler.js'
 const locationCreateOperator = (row )=>{
@@ -19,7 +19,7 @@ const locationDeleteOperator = (row) => {
     row.element.remove();
 }
 
-const locationNode = graphNode(
+const locationNode = new graphNode(
     'location',
     ['locationName', 'locationId'],
     [markerNode],

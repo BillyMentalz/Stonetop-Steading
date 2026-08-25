@@ -1,25 +1,17 @@
-import {socket , addBoxTemplate} from 'root/document.js'
-import { rowEnter} from 'root/injects/lists.js'
+import { socket, addBoxTemplate } from 'root/document.js'
 
-const listAdd  = [
+const locationAdd  = [
     'click',
     '.tabIcon',
-    (parent, element, event)=> {
-    const last = parent.querySelector('ul').lastElementChild;
-    const num = last ? parseInt(last.dataset.index) + 1: 1 ;
-    const result = {
-        table:'lists',
-        name: parent.id,
-        order: parseInt(num),
-        text: 'Etc....'
+    (parent, element, event) => {
+        console.log( parent );
     }
-    socket.emit('create', result);
-}
-]
+];
 
-const listEdit = [
+const locationEdit = [
     'dblclick',
-    'li',
+    '.location',
+    /*
     (parent, element, event) => {
         if (element.querySelector('button')) return;
         const newEntry = document.importNode(addBoxTemplate,true);
@@ -47,13 +39,24 @@ const listEdit = [
             order: info.listOrder
         })
         });
+    } */
+    (parent, element, event) => {
+        console.log(parent);
     }
 
 ]
 
+const locationSelect = [
+    'click',
+    'div',
+    (parent,element, event )=> {
+        console.log(parent)
+    }
+
+]
 
 export {
-    listAdd,
-    listEdit
+    locationSelect,
+    locationEdit,
+    locationAdd
 }
-

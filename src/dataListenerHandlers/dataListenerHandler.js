@@ -3,9 +3,8 @@ import { statChange } from './dataListeners/stats.js'
 import { listAdd, listEdit } from './dataListeners/lists.js'
 import { characterAdd, characterEdit, characterSelect, characterFilterAndSort} from './dataListeners/characters.js'
 import { locationAdd, locationEdit, locationSelect} from './dataListeners/locations.js'
-import { markerAdd, markerEdit , markerSelect  } from './dataListeners/markers.js'
-import { mapDrag, mapSet } from './dataListeners/map.js'
-import { tabToggle, menuToggle, tabDrag, tabSet } from './dataListeners/page.js'
+import { markerAdd, markerEdit , markerSelect, mapDrag, mapSet  } from './dataListeners/markers.js'
+import { tabToggle, menuToggle, tabDrag, tabSet } from './dataListeners/tabs.js'
 
 const EventListenerRegistry = {
     'homeAdd':          (parent)=> ContainerEventFactory(parent, ...homeAdd),
@@ -44,7 +43,7 @@ function GenericEventFactory( element, rEvent, handler) {
         handler(element,e);
     })
 }
-
+/*
 const addListeners = (element)=> {
     const thing = element.dataset.listener.split(' ') 
     thing.forEach( thinglet => {
@@ -52,11 +51,14 @@ const addListeners = (element)=> {
         element.addEventListener(thinglet.event, (e)=> thinglet.operator)
     })
 }
-
+*/
 const dataListenerHandler = ()=> {
     const entryPoints = document.querySelectorAll('[data-listener]')    
-    entryPoints.foreach(entryPoint => {
-        EventListenerRegistry[entryPoint.dataset.listener](entryPoint);
+    entryPoints.forEach(entryPoint => {
+        const eventListeners = entryPoint.dataset.listener.split(' ');
+        eventListeners.forEach(eventListener => {
+            EventListenerRegistry[eventListener](entryPoint);
+        })
     })
 }
 

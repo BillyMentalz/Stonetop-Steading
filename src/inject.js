@@ -1,13 +1,8 @@
-import {}
-
-
 const stringToHTML = (str)=> {
     const parse = new DOMParser();
     const doc = parse.parseFromString(str,'text/html');
     return doc.body.firstChild;
 };
-
-
 
 const EntryPointsAndStyleTable = {
     'radio':'radioContainer,radioBox,radioChoice', // REMEMBER: AT THE END ADD A COMMA TO PREVENT BUFFER OVERFLOW
@@ -25,7 +20,6 @@ const EntryPointTable = {
     'checkbox': '',
 }
 
-
 const loadInjections = () => {
     const entryPoints = document.querySelector('[data-entrypoint]')    
     entryPoints.foreach(entryPoint => {
@@ -33,14 +27,15 @@ const loadInjections = () => {
         EntryPointTable
         
     })
-}
+};
 
 const updateEntryPoints = (element, entrypoint)=> {
-    
+   return; 
 }
 
 
 export {
-    loadInjections
+    stringToHTML,
+    loadInjections,
     updateEntryPoints
 }

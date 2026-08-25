@@ -1,4 +1,4 @@
-import { markerElement } from 'root/inject/markers.js' 
+import { markerElement } from 'root/injects/markers.js' 
 import {graphNode} from 'root/document.js'
 const markerCreateOperator = (row )=>{
     const element = markerElement(row);
@@ -8,7 +8,7 @@ const markerCreateOperator = (row )=>{
 
 const markersUpdateOperator = (row)=> {
     const markerElement = row.element;
-    const newElement = characterRow(row);
+    const newElement = markerElement(row);
     if (true) markerElement.replaceWith(newElement);
     return newElement; 
 };
@@ -17,7 +17,7 @@ const markerDeleteOperator = (row) => {
     row.element.remove();
 }
 
-const markerNode = graphNode(
+const markerNode = new graphNode(
     'markers',
     ['markerName', 'markerId', 'markerOrder', 'markerSignifier'],
     [],

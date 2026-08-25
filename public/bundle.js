@@ -1,19 +1,55 @@
 (() => {
+  // src/inject.js
+  var stringToHTML = (str) => {
+    const parse = new DOMParser();
+    const doc = parse.parseFromString(str, "text/html");
+    return doc.body.firstChild;
+  };
+
+  // src/injects/markers.js
+  var markerElement = (row) => {
+    return `
+       <div> This is an example to be fixed later </div> 
+    `;
+  };
+
+  // src/animation.js
+  var indicateTimers = /* @__PURE__ */ new Map();
+  var updateIndicate = (el) => {
+    const prior = indicateTimers.get(el);
+    if (prior) clearTimeout(prior);
+    el.style.transition = "box-shadow 0.15s ease, outline-color 0.15s ease";
+    el.style.boxShadow = "0px 0px 3px 2px lightblue";
+    el.style.outlineColor = "lightblue";
+    const t = setTimeout(() => {
+      el.style.boxShadow = "none";
+      el.style.outlineColor = "#333";
+      indicateTimers.delete(el);
+    }, 500);
+    indicateTimers.set(el, t);
+  };
+
   // src/document.js
   var socket = io();
-  var templates = document.getElementById("templates");
-  var sidebar = document.getElementById("sidebar");
-  var topbar = document.getElementById("topbar");
-  var guide = document.getElementById("guide");
-  var map = document.getElementById("map");
-  var guidebook = document.getElementById("guide");
-  var menu = document.getElementById("menu");
+  var addBoxTemplate = document.getElementById("addBoxTemplate");
   var maps = document.getElementById("worldMaps");
   var characters = document.getElementById("characters");
-  var locations = document.getElementById("locations");
-  var assets = document.getElementById("assets");
-  var addBox = document.getElementById("addBox");
-  var characterInfo = document.getElementById("characterInfo");
+  var UpdatingFromServerState = class {
+    constructor() {
+      this.isUpdatingFromServer = 0;
+    }
+    stepUp() {
+      this.isUpdatingFromServer++;
+    }
+    stepDown() {
+      this.isUpdatingFromServer--;
+    }
+    check() {
+      if (this.isUpdatingFromServer > 0) return false;
+      else return true;
+    }
+  };
+  var isUpdatingFromServerState = new UpdatingFromServerState();
   var Node = class {
     constructor(element) {
       this.element = element;
@@ -54,39 +90,121 @@
       return node;
     }
   };
-  var stringToHTML = (str) => {
-    const parse = new DOMParser();
-    const doc = parse.parseFromString(str, "text/html");
-    return doc.body.firstChild;
+  var graphNode = class {
+    constructor(name, identifiers, children, cascadeRules, createOperator, updateOperator, deleteOperator) {
+      this.table = {};
+      this.name = name;
+      this.identifiers = identifiers;
+      this.children = children;
+      this.cascadeRules = cascadeRules;
+      this.createOperator = createOperator;
+      this.updateOperator = updateOperator;
+      this.deleteOperator = deleteOperator;
+    }
+    makeIndex(row) {
+      const index = this.identifiers.map(
+        (item) => {
+          return row[item];
+        }
+      ).join("/%/");
+      return index;
+    }
+    createRow(row) {
+      const index = this.makeIndex(row);
+      const element = this.createOperator(index, row);
+      row.element = element;
+      this.table[index] = row;
+      updateIndicate(element);
+    }
+    updateRow(updateValue) {
+      const index = this.makeIndex(updateValue);
+      const row = this.table[index];
+      if (!row) throw Error(`${row} does not exist!`);
+      for (const [key, value] in Object.entries(updateValue)) {
+        row[key] = value;
+      }
+      ;
+      this.updateOperator(row);
+      updateIndicate(row.element);
+      for (const cascadent in this.cascade) {
+        cascadent.updateCascade(this.name, row);
+      }
+    }
+    updateCascade(src, updateValue) {
+      const rules = this.cascadeRules[src];
+      if (!rules) throw Error("cascadeRules mismatch!");
+      const ghostIndex = rules.ghostIndex.map(
+        (i) => {
+          return updateValue[i];
+        }
+      ).join("/%/");
+      const resultValue = {};
+      for (let i = 0; i < rules.needValues.length; i++) {
+        resultValue[rules.changeValue[i]] = updateValue[rules.needValues[i]];
+      }
+      for (const [key, pair] of Object.entries(this.table)) {
+        if (key.startsWith(ghostIndex)) {
+          for (const [subkey, subvalue] of Object.entries(resultValue)) {
+            pair[subkey] = subvalue;
+          }
+          this.updateOperator(pair);
+          updateIndicate(pair.element);
+          for (const cascadent in this.cascade) {
+            cascadent.updateCascade(this.name, pair);
+          }
+        }
+      }
+    }
+    deleteRow(deletedItem) {
+      const row = this.table[deletedItem];
+      if (row.latestModified > deletedItem.deletedAt) return;
+      this.deleteOperator(row);
+      delete this.table[deletedItem];
+      for (const thing of this.cascade) {
+        thing.deleteCascade(deletedItem);
+      }
+      ;
+    }
+    deleteCascade(id) {
+      for (const [key, value] of Object.entries(this.table)) {
+        if (key.startsWith(id)) {
+          this.deleteRow(key);
+          for (const cascadent in this.cascade) {
+            cascadent.graphNode.deleteCascade(key);
+          }
+        }
+        ;
+      }
+    }
   };
 
-  // src/dataHandler/homesHandler.js
-  var homesOperator = (key, value) => {
-    const element = document.createElement("div");
-    element.classList.add("S");
-    element.textContent = key;
-    element.id = key;
-    maps.appendChild(element);
+  // src/dataHandler/data/markersHandler.js
+  var markerCreateOperator = (row) => {
+    const element = markerElement(row);
+    if (true) parent.append(element);
     return element;
   };
-  var homesUpdateOperator = (key, value) => {
-    const element = maps.querySelector(`[id="${key}"]`);
-    element.textContent = key;
-    return element;
+  var markersUpdateOperator = (row) => {
+    const markerElement2 = row.element;
+    const newElement = markerElement2(row);
+    if (true) markerElement2.replaceWith(newElement);
+    return newElement;
   };
-  var homesDeleteOperator = (key, value) => {
-    const element = maps.getElementById(key);
-    console.log(element);
-    element.remove();
+  var markerDeleteOperator = (row) => {
+    row.element.remove();
   };
+  var markerNode = new graphNode(
+    "markers",
+    ["markerName", "markerId", "markerOrder", "markerSignifier"],
+    [],
+    {},
+    markerCreateOperator,
+    markersUpdateOperator,
+    markerDeleteOperator
+  );
 
-  // src/dataHandler/statsHandler.js
-  var styleTable = {
-    "radioContainer": "radioBox,radioChoice",
-    "selectContainer": "",
-    "numbersTitle": "numsInput"
-  };
-  var statsRadio = (name, style, options) => {
+  // src/injects/stats.js
+  var radio = (name, style, options) => {
     const elementString = `
         ${options.map((option) => `
             <div class="${style[0]}">
@@ -96,7 +214,7 @@
         `).join("")}`;
     return stringToHTML(elementString);
   };
-  var statsSelect = (name, style, options) => {
+  var select = (name, style, options) => {
     const elementString = `
         <select class='${style[0]}' name="${name}" >
             ${options.map((option) => `<option value="${option}">${option}</option>`).join("")}
@@ -104,433 +222,401 @@
     `;
     return stringToHTML(elementString);
   };
-  var statsNumber = (name, style) => {
+  var number = (name, style) => {
     const elementString = `<input type="number" class="${style[0]}" name="${name}">`;
     return stringToHTML(elementString);
   };
-  var statsCheck = (name, style) => {
+  var checkbox = (name, style) => {
     const elementString = `<input type="checkbox" class="${style[0]}" name="${name}" value="${name}">`;
     return stringToHTML(elementString);
   };
-  var statsOperator = (key, value) => {
+
+  // src/dataHandler/data/statsHandler.js
+  var styleTable = {
+    "radio": "radioBox,radioChoice",
+    "select": "",
+    "numbers": "",
+    "number-asset": "numsInput",
+    "checkbox": ""
+  };
+  var statsCreateOperator = (row) => {
     let element = null;
-    let style = null;
-    let parentElement = null;
+    console.log(row);
+    const parentElement = document.getElementById(row.statName);
+    const style = styleHelper(parentElement);
     let selectedElement = null;
-    switch (value.statType) {
+    switch (row.statType) {
       case "radio":
-        parentElement = document.getElementById(key);
-        style = styleHelper(parentElement);
-        element = statsRadio(key, style, value.statOptions.split(","));
-        parentElement.innerHTML = element;
-        selectedElement = parentElement.querySelector(`[value="${value.statValue}"]`);
+        element = radio(row.statName, style, row.statOptions.split(","));
+        parentElement.append(element);
+        selectedElement = parentElement.querySelector(`[value="${row.statValue}"]`);
         selectedElement.checked = true;
         break;
       case "select-one":
-        parentElement = document.getElementById(key);
-        style = styleHelper(parentElement);
-        element = statsSelect(key, style, value.statOptions.split(","));
-        parentElement.innerHTML = element;
+        element = select(row.statName, style, row.statOptions.split(","));
+        parentElement.append(element);
         selectedElement = parentElement.querySelector(`select`);
-        selectedElement.value = value.statValue;
+        selectedElement.value = row.statValue;
         break;
       case "number":
-        parentElement = document.getElementById(key);
-        style = styleHelper(parentElement);
-        element = statsNumber(key, style);
-        element.value = value.statValue;
-        parentElement.after(element);
+        element = number(row.statName, style);
+        element.value = row.statValue;
+        parentElement.append(element);
         break;
       case "checkbox":
-        parentElement = document.getElementById(key);
-        style = styleHelper(parentElement);
-        element = statsCheck(key, style);
-        element.checked = value.statValue === "true";
-        parentElement.after(element);
+        element = checkbox(row.statName, style);
+        element.checked = row.statValue === "true";
+        parentElement.append(element);
         break;
     }
     return parentElement;
   };
-  var styleHelper = (parent) => {
-    return parent.classList[0] ? styleTable[parent.classList[0]].split(",") : [""];
+  var styleHelper = (parent2) => {
+    return styleTable[parent2.dataset.entrypoint].split(",");
   };
-  var statsUpdateOperator = (key, value) => {
-    let element = null;
-    switch (value.statType) {
+  var statsUpdateOperator = (row) => {
+    const element = row.element;
+    console.log(element);
+    switch (row.statType) {
       case "radio":
-        element = document.querySelector(`[name="${key}"][value="${value.statValue}"]`);
         element.checked = true;
         break;
       case "select-one":
-        element = document.querySelector(`[name="${key}"]`);
-        element.value = value.statValue;
+        element.value = row.statValue;
         break;
       case "number":
-        element = document.querySelector(`[name="${key}"]`);
-        element.value = value.statValue;
+        element.value = row.statValue;
         break;
       case "checkbox":
-        element = document.querySelector(`[name=${key}]`);
-        element.checked = value.statValue === "true";
+        element.checked = row.statValue === "true";
         break;
     }
     return element;
   };
-  var statsDeleteOperator = (key, value) => {
-    let element = null;
-    let style = null;
-    let parentElement = null;
-    let selectedElement = null;
-    switch (value.statType) {
-      case "radio":
-        parentElement = document.getElementById(key);
-        parentElement.replaceChildren();
-        break;
-      case "select-one":
-        parentElement = document.getElementById(key);
-        parentElement.replaceChildren();
-        break;
-      case "number":
-        parentElement = document.getElementById(key);
-        element = parentElement.nextElementSibling;
-        element.remove();
-        break;
-      case "checkbox":
-        parentElement = document.getElementById(key);
-        element = parentElement.nextElementSibling;
-        element.remove();
-        break;
-    }
+  var statsDeleteOperator = (row) => {
+    const selectedElement = row.element;
+    selectedElement.remove();
+  };
+  var statNode = new graphNode(
+    "stats",
+    ["statName"],
+    [],
+    {},
+    statsCreateOperator,
+    statsUpdateOperator,
+    statsDeleteOperator
+  );
+
+  // src/injects/lists.js
+  var listsRow = (id, index, text) => {
+    const elementString = `
+        <li>
+            ${text}
+        </li>`;
+    return stringToHTML(elementString);
+  };
+  var rowEnter = (element) => {
+    const elementString = `
+        <li data-index="${element.dataset.index}">  
+            <textarea value=${element.textContent}>
+            </textarea>
+        </li>
+    `;
   };
 
-  // src/dataHandler/listsHandler.js
-  var listsOperator = (key, value) => {
-    const listIndex = key.split("/%/");
-    const parent = document.querySelector(`ul#${listIndex[0]}`);
-    let listElement = document.createElement("li");
-    let spanElement = document.createElement("span");
-    spanElement.textContent = value.listText;
-    spanElement.dataset.field = "listText";
-    listElement.append(spanElement);
-    listElement.dataset.index = listIndex[1];
-    listElement.dataset.editable = "lists";
-    listElement.id = key;
-    parent.append(listElement);
-    return listElement;
+  // src/dataHandler/data/listsHandler.js
+  var listsOperator = (row) => {
+    const parent2 = document.querySelector(`ul#${row.listName}`);
+    const element = listsRow(row.listOrder, row.listText);
+    parent2.append(element);
+    return element;
   };
-  var listsUpdateOperator = (key, value) => {
-    const listIndex = key.split("/%/");
-    const listElement = document.getElementById(key);
-    let para = listElement.querySelector("[data-field]");
-    let spanElement = document.createElement("span");
-    spanElement.textContent = value.listText;
-    spanElement.dataset.field = "listText";
-    para.replaceWith(spanElement);
-    return listElement;
+  var listsUpdateOperator = (row) => {
+    const element = row.element;
+    const newElement = listsRow(row.listOrder, row.listText);
+    element.replaceWith(newElement);
+    return newElement;
   };
-  var listsDeleteOperator = (key) => {
-    const listElement = document.getElementById(key);
-    listElement.remove();
+  var listsDeleteOperator = (row) => {
+    row.element.remove();
+  };
+  var listNode = new graphNode(
+    "lists",
+    ["listName", "listOrder"],
+    [],
+    {},
+    listsOperator,
+    listsUpdateOperator,
+    listsDeleteOperator
+  );
+
+  // src/injects/characters.js
+  var characterRow = (row) => {
+    return `
+       <div> This is an example to be fixed later </div> 
+    `;
+  };
+  var characterEnter = (row) => {
+    return `
+        <div> fixing when I get to it. </div>
+    `;
   };
 
-  // src/dataHandler/charactersHandler.js
-  var tableShown = ["characterName", "characterOccupation", "characterTraits"];
+  // src/dataHandler/data/charactersHandler.js
   var characterTable = characters.querySelector("#characterTable");
-  var charactersOperator = (key, value) => {
-    let characterElement = document.createElement("tr");
-    characterElement.dataset.id = key;
-    for (const [head, data] of Object.entries(value)) {
-      const tabdata = document.createElement("td");
-      tabdata.dataset.head = head;
-      tabdata.textContent = data;
-      tabdata.style.display = tableShown.includes(head) ? "flex" : "none";
-      characterElement.append(tabdata);
-    }
+  var characterCreateOperator = (row) => {
+    const characterElement = characterRow(row);
     characterTable.append(characterElement);
     return characterElement;
   };
-  var charactersUpdateOperator = (key, value) => {
-    const characterElement = document.querySelector(`[data-id="${key}"]`);
-    for (const [head, data] of Object.entries(value)) {
-      const tabdata = characterElement.querySelector(`[data-head="${head}"]`);
-      tabdata.textContent = data;
-    }
-    ;
-    return characterElement;
+  var characterUpdateOperator = (row) => {
+    const characterElement = row.element;
+    const newElement = characterRow(row);
+    characterElement.replaceWith(newElement);
+    return newElement;
   };
-  var charactersDeleteOperator = (key) => {
-    const characterElement = document.querySelector(`[data-id="${key}"]`);
+  var characterDeleteOperator = (row) => {
+    const characterElement = row.element;
     characterElement.remove();
   };
+  var characterNode = new graphNode(
+    "characters",
+    ["characterId"],
+    [],
+    {},
+    characterCreateOperator,
+    characterUpdateOperator,
+    characterDeleteOperator
+  );
 
-  // src/animation.js
-  var indicateTimers = /* @__PURE__ */ new Map();
-  var tablists = new LinkedList();
-  var updateIndicate = (el) => {
-    const prior = indicateTimers.get(el);
-    if (prior) clearTimeout(prior);
-    el.style.transition = "box-shadow 0.15s ease, outline-color 0.15s ease";
-    el.style.boxShadow = "0px 0px 3px 2px lightblue";
-    el.style.outlineColor = "lightblue";
-    const t = setTimeout(() => {
-      el.style.boxShadow = "none";
-      el.style.outlineColor = "#333";
-      indicateTimers.delete(el);
-    }, 500);
-    indicateTimers.set(el, t);
+  // src/dataHandler/data/locationsHandler.js
+  var locationCreateOperator = (row) => {
+    const element = characterRow(row);
+    if (true) parent.append(element);
+    return element;
+  };
+  var locationsUpdateOperator = (row) => {
+    const locationElement = row.element;
+    const newElement = characterRow(row);
+    if (true) locationElement.replaceWith(newElement);
+    return newElement;
+  };
+  var locationDeleteOperator = (row) => {
+    row.element.remove();
+  };
+  var locationNode = new graphNode(
+    "location",
+    ["locationName", "locationId"],
+    [markerNode],
+    {},
+    locationCreateOperator,
+    locationsUpdateOperator,
+    locationDeleteOperator
+  );
+
+  // src/injects/homes.js
+  var newHome = (row) => {
+    return stringToHTML(`
+    <div id=${row.homeName} class='S'> 
+        ${row.homeName}
+    </div>
+    `);
+  };
+  var newSelectionHome = (row) => {
+    return stringToHTML(
+      `
+        <option value="${row.homeName}">${row.homeName} </option>
+        `
+    );
   };
 
-  // src/syncHandler.js
-  var loadTable = {
-    "homes": homesOperator,
-    "stats": statsOperator,
-    "lists": listsOperator,
-    "characters": charactersOperator
-    //   'locations': locationsSync,
-    //    'markers': markersSync 
+  // src/dataHandler/data/homesHandler.js
+  var homesCreateOperator = (row) => {
+    const elements = document.querySelectorAll(`[data-entrypoint="homes"]`);
+    elements.forEach((thing) => {
+      let element = null;
+      if (thing.tagName == "SELECT") {
+        element = newSelectionHome(row);
+      } else if (thing.tagName == "DATALIST") {
+        element = newSelectionHome(row);
+      } else if (thing.tagName == "UL") {
+        element = newHome(row);
+      }
+      thing.appendChild(element);
+    });
+    return elements.item(0);
   };
-  var updateTable = {
-    "homes": homesUpdateOperator,
-    "stats": statsUpdateOperator,
-    "lists": listsUpdateOperator,
-    "characters": charactersUpdateOperator
-    //'locations': 
-    //'markers': 
+  var homesUpdateOperator = (row) => {
+    const element = row.element;
+    throw Error("WHat!?");
+    return element;
   };
-  var deleteTable = {
-    "homes": homesDeleteOperator,
-    "stats": statsDeleteOperator,
-    "lists": listsDeleteOperator,
-    "characters": charactersDeleteOperator
-    // 'locations'
-    // 'markers'
+  var homesDeleteOperator = (row) => {
+    const things = document.querySelectorAll(`[data-entrypoint="homes"]`);
+    things.forEach((thing) => {
+      let element = null;
+      if (thing.tagName == "SELECT") {
+        element = thing.querySelector(`option[value="${row.homeName}"]`);
+      } else if (thing.tagName == "DATALIST") {
+        element = thing.querySelector(`option[value="${row.homeName}"]`);
+      } else if (thing.tagName == "UL") {
+        element = thing.querySelector(`li[value="${row.homeName}"]`);
+      }
+      if (element) element.remove();
+    });
+    row.element.remove();
   };
-  var loadOperator = (create) => {
-    const [key, value] = Object.entries(create)[0];
-    localStorage.setItem("time", value.latestModified);
-    const sum = convertRow(convertTable[key], value);
-    const log = JSON.parse(localStorage.getItem(key));
-    const element = loadTable[key](sum.index, sum.row);
-    log[sum.index] = sum.row;
-    localStorage.setItem(key, JSON.stringify(log));
-    updateIndicate(element);
+  var homeNode = new graphNode(
+    "homes",
+    ["homeName"],
+    [locationNode],
+    {},
+    homesCreateOperator,
+    homesUpdateOperator,
+    homesDeleteOperator
+  );
+
+  // src/dataHandler/syncHandler.js
+  var graphNodeList = {
+    "homes": homeNode,
+    "markers": markerNode,
+    "characters": characterNode,
+    "locations": locationNode,
+    "stats": statNode,
+    "lists": listNode
   };
-  var updateOperator = (update) => {
-    console.log(update);
-    const [key, value] = Object.entries(update)[0];
-    localStorage.setItem("time", value.latestModified);
-    const sum = convertRow(convertTable[key], value);
-    const log = JSON.parse(localStorage.getItem(key));
-    const element = updateTable[key](sum.index, sum.row);
-    log[sum.index] = sum.row;
-    localStorage.setItem(key, JSON.stringify(log));
-    updateIndicate(element);
-  };
-  var convertTable = {
-    "homes": ["homeName"],
-    "stats": ["statName"],
-    "lists": ["listName", "listOrder"],
-    "characters": ["characterId"],
-    "locations": ["locationHome", "locationSignifier"],
-    "markers": ["markerHome", "markerSignifier", "markerOrder"]
-  };
-  var loadTables = () => {
-    for (const [key, value] of Object.entries(loadTable)) {
+  var dataHandlers = () => {
+    for (const [key, operator] of Object.entries(graphNodeList)) {
       const payload = JSON.parse(localStorage.getItem(key)) || {};
-      for (const [key1, value1] of Object.entries(payload)) {
-        value(key1, value1);
+      operator.table = payload;
+      for (const [id, row] of Object.entries(payload)) {
+        operator.createOperator(id, row);
       }
     }
   };
-  var convertRow = (identifiers, row) => {
-    let pendings = [];
-    const unique = identifiers.map((identifier) => {
-      const element = row[identifier];
-      delete row[identifier];
-      return element;
-    });
-    const index = unique.join("/%/");
-    return { index, row };
-  };
   var storeNewRows = (check) => {
+    console.log(check);
     for (const [key, value] of Object.entries(check)) {
+      console.log(key);
+      console.log(value);
       if (key == "deleteRecords") {
-        deleteOperation(value);
+        for (const row in Object.entries(value)) {
+          const operator = graphNodeList[row.tableName];
+          operator.deleteRow(row.deletedItem);
+        }
       } else if (key == "time") {
         localStorage.setItem(key, value);
       } else {
-        var current = JSON.parse(localStorage.getItem(key)) || {};
-        value.forEach((row) => {
-          const add = convertRow(convertTable[key], row);
-          const action = current.hasOwnProperty(add.index);
-          const element = action ? updateTable[key](add.index, add.row) : loadTable[key](add.index, add.row);
-          updateIndicate(element);
-          current[add.index] = add.row;
-        });
-        localStorage.setItem(key, JSON.stringify(current));
+        const operator = graphNodeList[key];
+        for (const row of value) {
+          const index = operator.makeIndex(row);
+          console.log(index);
+          if (operator.table[index] !== void 0) {
+            console.log(operator.table[index]);
+            operator.updateRow(row);
+          } else {
+            operator.createRow(row);
+          }
+        }
       }
     }
   };
-  var deleteOperation = (deletion) => {
-    deletion.forEach((del) => {
-      let store = null;
-      let marks = null;
-      localStorage.setItem("time", del.deletedAt);
-      switch (del.tableName) {
-        case "homes":
-          localStorage.clear();
-          location.reload();
-          break;
-        // case 'stats': break;
-        case "location":
-          store = JSON.parse(localStorage.getItem("location")) || {};
-          marks = JSON.parse(localStorage.getItem("markers")) || {};
-          let newmarks = {};
-          for (const [key, value] of Object.entries(marks)) {
-            if (!key.startsWith(del.deletedItem)) {
-              newmarks[key] = value;
-            } else {
-              delete store[deletion.deletedItem];
-            }
-          }
-          location.setItem("markers", JSON.stringify(newmarks));
-          location.setItem("location", JSON.stringify(store));
-          break;
-        default:
-          store = JSON.parse(localStorage.getItem(del.tableName)) || {};
-          delete store[del.deletedItem];
-          deleteTable[del.tableName](del.deletedItem);
-          localStorage.setItem(del.tableName, JSON.stringify(store));
-          break;
-      }
-    });
+  var saveData = () => {
+    if (localStorage.getItem("test") == "true") return;
+    for (const [key, operator] of Object.entries(graphNodeList)) {
+      localStorage.setItem(key, JSON.stringify(operator.table));
+    }
   };
 
-  // src/editHandler.js
-  var listEdit = (element) => {
-    const newEntryClone = document.querySelector("#addBoxTemplate");
-    const newEntry = document.importNode(newEntryClone.content, true);
-    let newInput = document.createElement("textarea");
-    let spanElement = element.querySelector("[data-field]");
-    newInput.value = spanElement.textContent;
-    newInput.dataset.original = spanElement.textContent;
-    newInput.id = element.id;
-    newInput.dataset.field = "listText";
-    spanElement.replaceWith(newInput);
-    element.append(newEntry);
-    const lId = newInput.id.split("/%/");
-    const name = lId[0];
-    const order = lId[1];
-    element.querySelector('button[name="Change"]').addEventListener("click", (e) => {
-      socket.emit("update", {
-        table: "lists",
-        name,
-        order,
-        text: newInput.value
-      });
-      element.lastElementChild.remove();
-    });
-    element.querySelector('button[name="Delete"]').addEventListener("click", (e) => {
-      if (!window.confirm("Delete Item? \n Item:" + newInput.dataset.original)) {
-        revertEditing(newInput);
-        element.lastElementChild.remove();
-        return;
-      }
-      socket.emit("delete", {
-        table: "lists",
-        name,
-        order: parseInt(order)
-      });
-      element.lastElementChild.remove();
-    });
-  };
-  var characterEditables = [
-    ".characterHome",
-    ".characterName",
-    ".characterPronouns",
-    ".characterOccupation",
-    ".characterInfo",
-    ".characterTraits"
+  // src/dataListenerHandlers/dataListeners/homes.js
+  var homeAdd = [
+    "click",
+    ".tabIcon",
+    (parent2, element, event) => {
+      console.log("ojoijoij");
+    }
   ];
-  var characterEdit = (element) => {
-    if (!element.dataset.characterId) return;
-    const newEntryClone = document.querySelector("#addBoxTemplate");
-    const newEntry = document.importNode(newEntryClone.content, true);
-    const thing = element.children;
-    for (const detail of characterEditables) {
-      const exist = element.querySelector(detail);
-      const newInput = document.createElement("textarea");
-      const spanElement = exist.querySelector("span");
-      newInput.dataset.original = spanElement.textContent;
-      newInput.value = spanElement.textContent;
-      spanElement.replaceWith(newInput);
+  var homeDelete = [
+    "dblclick",
+    "li",
+    (parent2, element, event) => {
+      console.log("hoioiojoij");
     }
-    element.append(newEntry);
-    element.querySelector('button[name="Change"]').addEventListener("click", (e) => {
-      socket.emit("update", {
-        table: "characters",
-        id: element.dataset.characterId,
-        home: element.querySelector(`.characterHome textarea`).value,
-        name: element.querySelector(`.characterName textarea`).value,
-        pronouns: element.querySelector(`.characterPronouns textarea`).value,
-        occupation: element.querySelector(`.characterOccupation textarea`).value,
-        info: element.querySelector(`.characterInfo textarea`).value,
-        traits: element.querySelector(`.characterTraits textarea`).value
-      });
-      newEntry.remove();
-      clear(element);
-    });
-    element.querySelector('button[name="Delete"]').addEventListener("click", (e) => {
-      if (!window.confirm("Delete Character? \n Character:")) {
-        revertEditing(element);
-        newEntry.remove();
-        return;
+  ];
+
+  // src/dataListenerHandlers/dataListeners/stats.js
+  var sidebarEvents = ["radio", "select-one", "number", "checkbox"];
+  var statChange = [
+    "change",
+    (element, event) => {
+      if (isUpdatingFromServerState.check()) return;
+      const eType = event.target.type;
+      if (sidebarEvents.include(eType)) {
+        socket.emit("update", {
+          table: "stats",
+          name: event.target.name,
+          type: event.target.type,
+          value: eType == "checkbox" ? event.target.checked.toString() : event.target.value
+        });
       }
-      socket.emit("delete", {
-        table: "characters",
-        id: element.dataset.characterId
-      });
-      newEntry.remove();
-      clear(element);
-    });
-  };
-  var clear = (element) => {
-    delete element.dataset.characterId;
-    for (const detail of characterEditables) {
-      const exist = element.querySelector(detail);
-      const damned = exist.lastElementChild;
-      const spanElement = document.createElement("span");
-      damned.replaceWith(spanElement);
     }
-  };
-  var listRevert = (element) => {
-    let spanElement = document.createElement("span");
-    spanElement.textContent = element.dataset.original;
-    spanElement.dataset.field = "listText";
-    element.replaceWith(spanElement);
-  };
-  var characterRevert = (element) => {
-    for (const detail of characterEditables) {
-      const exist = element.querySelector(detail);
-      const inputElement = exist.querySelector("textarea");
-      const spanElement = document.createElement("span");
-      spanElement.textContent = inputElement.dataset.original;
-      inputElement.replaceWith(spanElement);
-    }
-  };
-  var formatAddTable = {
-    "lists": (element) => {
-      const last = element.lastElementChild;
+  ];
+
+  // src/dataListenerHandlers/dataListeners/lists.js
+  var listAdd = [
+    "click",
+    ".tabIcon",
+    (parent2, element, event) => {
+      const last = parent2.querySelector("ul").lastElementChild;
       const num = last ? parseInt(last.dataset.index) + 1 : 1;
-      return {
+      const result = {
         table: "lists",
-        name: element.id,
+        name: parent2.id,
         order: parseInt(num),
         text: "Etc...."
       };
-    },
-    "characters": (element) => {
-      return {
+      socket.emit("create", result);
+    }
+  ];
+  var listEdit = [
+    "dblclick",
+    "li",
+    (parent2, element, event) => {
+      if (element.querySelector("button")) return;
+      const newEntry = document.importNode(addBoxTemplate, true);
+      const info = element.__rowReference;
+      if (!info) throw Error("There is no row reference, please check again");
+      const editor = rowEnter(info);
+      element.replaceWith(editor);
+      editor.append(newEntry);
+      editor.querySelector('button[name="Change"]').addEventListener("click", (e) => {
+        socket.emit("update", {
+          table: "lists",
+          name: info.listName,
+          order: info.listOrder,
+          text: editor.value
+        });
+      });
+      editor.querySelector('button[name="Delete"]').addEventListener("click", (e) => {
+        if (!window.confirm("Delete Item? \n Item:" + newInput.dataset.original)) {
+          editor.replaceWith(info.element);
+          return;
+        }
+        socket.emit("delete", {
+          table: "lists",
+          name: info.listName,
+          order: info.listOrder
+        });
+      });
+    }
+  ];
+
+  // src/dataListenerHandlers/dataListeners/characters.js
+  var characterAdd = [
+    "click",
+    ".tabIcon",
+    (parent2, element, event) => {
+      const result = {
         table: "characters",
         id: crypto.randomUUID(),
         home: `At World's End`,
@@ -540,88 +626,110 @@
         info: "New fellow...",
         traits: "Friendly"
       };
-    },
-    "locations": (element) => {
-      const last = element.lastElementChild;
-      let sig = null;
-      if (last) {
-        sig = last.querySelector(".signifier").textContent;
-        sig = String.fromCharCode(sig.charCodeAt(0) + 1);
-      } else {
-        sig = "A";
-      }
-      return {
-        table: "locations",
-        home: element.id,
-        signifier: sig,
-        name: "",
-        text: ""
-      };
+      socket.emit("create", result);
     }
-  };
-  var edit = {
-    "lists": listEdit,
-    "characters": characterEdit
-  };
-  var revert = {
-    "listText": listRevert,
-    "characters": characterRevert
-  };
-  var startEditing = (element, table) => {
-    edit[table](element);
-  };
-  var revertEditing = (element) => {
-    revert[element.dataset.field](element);
-  };
+  ];
+  var characterEdit = [
+    "dblclick",
+    "li",
+    (parent2, element, event) => {
+      if (element.querySelector("button")) return;
+      const newEntry = document.importNode(addBoxTemplate, true);
+      const info = element.__rowReference;
+      if (!info) throw Error("There is no row reference, please check again");
+      const editor = characterEnter(info);
+      element.replaceWith(editor);
+      editor.append(newEntry);
+      editor.querySelector('button[name="Change"]').addEventListener("click", (e) => {
+        socket.emit("update", {
+          table: "lists",
+          name: info.listName,
+          order: info.listOrder,
+          text: editor.value
+        });
+      });
+      editor.querySelector('button[name="Delete"]').addEventListener("click", (e) => {
+        if (!window.confirm("Delete Item? \n Item:" + newInput.dataset.original)) {
+          editor.replaceWith(info.element);
+          return;
+        }
+        socket.emit("delete", {
+          table: "lists",
+          name: info.listName,
+          order: info.listOrder
+        });
+      });
+    }
+  ];
+  var characterSelect = [
+    "click",
+    "tr",
+    (parent2, element, event) => {
+      console.log(element.__rowReference);
+    }
+  ];
+  var characterFilterAndSort = [
+    "change",
+    ".filterRow",
+    (parent2, element, event) => {
+      console.log(parent2);
+    }
+  ];
 
-  // src/start.js
-  var sidebarEvents = ["radio", "select-one", "number", "checkbox"];
-  var tablists2 = new LinkedList();
-  var isUpdatingFromServer = 0;
+  // src/dataListenerHandlers/dataListeners/locations.js
+  var locationAdd = [
+    "click",
+    ".tabIcon",
+    (parent2, element, event) => {
+      console.log(parent2);
+    }
+  ];
+  var locationEdit = [
+    "dblclick",
+    ".location",
+    /*
+    (parent, element, event) => {
+        if (element.querySelector('button')) return;
+        const newEntry = document.importNode(addBoxTemplate,true);
+        const info = element.__rowReference;
+        if (!info) throw Error( "There is no row reference, please check again");
+        const  editor = rowEnter(info) ;
+        element.replaceWith(editor);
+        editor.append(newEntry);
+        editor.querySelector('button[name="Change"]').addEventListener('click', (e)=> {
+            socket.emit( 'update', {
+                table: 'lists',
+                name: info.listName,
+                order: info.listOrder, 
+                text: editor.value
+            })
+        });
+        editor.querySelector('button[name="Delete"]').addEventListener('click', (e)=> {
+            if (!window.confirm("Delete Item? \n Item:" + newInput.dataset.original )) {
+                editor.replaceWith(info.element);
+                return;
+            }
+            socket.emit( 'delete',  {
+            table: 'lists',
+            name: info.listName,
+            order: info.listOrder
+        })
+        });
+    } */
+    (parent2, element, event) => {
+      console.log(parent2);
+    }
+  ];
+  var locationSelect = [
+    "click",
+    "div",
+    (parent2, element, event) => {
+      console.log(parent2);
+    }
+  ];
+
+  // src/dataListenerHandlers/dataListeners/markers.js
   var indicatorDragMap = /* @__PURE__ */ new Map();
-  var guideBookToggle = false;
-  function motherEventFactory(parent, mEvent, selector, handler) {
-    parent.addEventListener(mEvent, (e) => {
-      const element = e.target.closest(selector);
-      if (!element) return;
-      handler(element, e);
-    });
-  }
-  motherEventFactory(map, "mousedown", ".draggable", (draggable, e) => {
-    let dragHandler = (e2) => drags(map, e2);
-    draggable.addEventListener("mousemove", dragHandler);
-    indicatorDragMap.set(draggable, dragHandler);
-  });
-  motherEventFactory(map, "mouseup", ".draggable", (draggable, event) => {
-    for (const [key, value] of indicatorDragMap) {
-      key.removeEventListener("mousemove", value);
-      indicatorDragMap.delete(key);
-    }
-  });
-  motherEventFactory(document, "mousedown", ".tabs", (draggable, event) => {
-    tablists2.popNode(draggable.__nodeRef);
-    tablists2.append(draggable);
-    caltab();
-    draggable.addEventListener("mousemove", tabDrag);
-  });
-  motherEventFactory(document, "mouseup", ".tabs", (draggable, event) => {
-    draggable.removeEventListener("mousemove", tabDrag);
-  });
-  motherEventFactory(characters, "click", "tr", (row, event) => {
-    if (characterInfo.querySelector("button")) return;
-    characterInfo.dataset.characterId = row.dataset.id;
-    const thing = row.children;
-    for (let i = 0; i < thing.length; i++) {
-      const exist = thing.item(i);
-      const lister = characterInfo.querySelector(`.${exist.dataset.head}`);
-      if (lister) {
-        lister.innerHTML = "";
-        const spanElement = document.createElement("span");
-        spanElement.textContent = exist.textContent;
-        lister.append(spanElement);
-      }
-    }
-  });
   function drags(box, event) {
     let boundaries = box.getBoundingClientRect();
     let newleft = (event.clientX - event.currentTarget.offsetWidth / 2 - boundaries.left) / box.offsetWidth * 100;
@@ -633,70 +741,86 @@
     event.currentTarget.style.left = `${newleft}%`;
     event.currentTarget.style.top = `${newtop}%`;
   }
-  function tabDrag(event) {
-    let newleft = event.clientX;
-    let newtop = event.clientY;
-    if (newleft < event.currentTarget.offsetWidth / 2) newleft = event.currentTarget.offsetWidth / 2;
-    if (newtop < event.currentTarget.offsetHeight / 2) newtop = event.currentTarget.offsetHeight / 2;
-    if (newleft > window.innerWidth - event.currentTarget.offsetWidth / 2) newleft = window.innerWidth - event.currentTarget.offsetWidth / 2;
-    if (newtop > window.innerHeight - event.currentTarget.offsetHeight / 2) newtop = window.innerHeight - event.currentTarget.offsetHeight / 2;
-    event.currentTarget.style.left = `${newleft}px`;
-    event.currentTarget.style.top = `${newtop}px`;
-  }
-  guidebook.addEventListener("click", (e) => {
-    if (guideBookToggle) {
-      e.target.style.backgroundPosition = "100px 50px";
-      menu.style.width = "0%";
-      menu.style.overflow = "hidden";
-      guideBookToggle = false;
-    } else {
-      e.target.style.backgroundPosition = "50px 50px";
-      menu.style.width = "100%";
-      menu.style.overflow = "visible";
-      guideBookToggle = true;
+  var mapDrag = [
+    "mousedown",
+    ".draggable",
+    (parent2, element, event) => {
+      const dragHandler = (e) => drags(parent2, e);
+      element.addEventListener("mousemove", dragHandler);
+      indicatorDragMap.set(element, dragHandler);
     }
-  });
-  var statChange = (event) => {
-    if (isUpdatingFromServer > 0) return;
-    const eType = event.target.type;
-    if (sidebarEvents.includes(eType)) {
-      socket.emit("update", {
-        table: "stats",
-        name: event.target.name,
-        type: event.target.type,
-        value: eType == "checkbox" ? event.target.checked.toString() : event.target.value
-      });
+  ];
+  var mapSet = [
+    "mouseup",
+    ".draggable",
+    (parent2, element, event) => {
+      for (const [key, value] of indicatorDragMap) {
+        key.removeEventListener("mousemove", value);
+        const info = key.__rowReference;
+        socket.emit(
+          "update",
+          {
+            table: "markers",
+            home: info.markerHome,
+            id: info.markerId,
+            order: info.markerOrder,
+            markerSignifier: info.markerSignifier,
+            x: key.style.left,
+            y: key.style.top
+          }
+        );
+        indicatorDragMap.delete(key);
+      }
     }
-  };
-  sidebar.addEventListener("change", statChange);
-  assets.addEventListener("change", statChange);
-  motherEventFactory(menu, "click", ".openTab", (input, event) => {
-    const tab = document.getElementById(input.dataset.toggle);
-    if (!tab) return;
-    displayToggle(tab);
-  });
-  var entryAdd = (input, event) => {
-    const contain = input.closest(".Contain");
-    const addItem = contain.querySelector(`#${contain.dataset.contain}`);
-    const result = formatAddTable[addItem.dataset.tabletype](addItem);
-    socket.emit("create", result);
-  };
-  motherEventFactory(sidebar, "click", ".tabIcon", entryAdd);
-  motherEventFactory(assets, "click", ".tabIcon", entryAdd);
-  motherEventFactory(characters, "click", ".tabIcon", entryAdd);
+  ];
+  var markerAdd = [
+    "click",
+    ".tabIcon",
+    (parent2, element, event) => {
+      socket.emit(
+        "create",
+        {
+          table: "markers",
+          home: "temp",
+          id: "temp",
+          order: "Temp",
+          markerSignifier: "A",
+          x: "50%",
+          y: "50%"
+        }
+      );
+    }
+  ];
+  var markerEdit = [
+    "dblclick",
+    ".meaningless",
+    (parent2, element, event) => {
+      console.log("Tihihih");
+    }
+  ];
+  var markerSelect = [
+    "dblclick",
+    ".unmeaning",
+    (parent2, element, event) => {
+      console.log("htihigheiogeij");
+    }
+  ];
+
+  // src/dataListenerHandlers/dataListeners/tabs.js
+  var tablists = new LinkedList();
   function displayToggle(element) {
     if (!element) return;
     if (element.style.display == "") {
       element.style.display = "flex";
-      tablists2.append(element);
+      tablists.append(element);
       caltab();
     } else {
       element.style.display = "";
-      tablists2.popNode(element.__nodeRef.element);
+      tablists.popNode(element.__nodeRef.element);
     }
   }
   function caltab() {
-    let temp = tablists2.head;
+    let temp = tablists.head;
     let count = 10;
     while (temp != null) {
       temp.element.style.zIndex = count;
@@ -704,32 +828,119 @@
       temp = temp.next;
     }
   }
-  motherEventFactory(document, "dblclick", "[data-editable]", (editable, event) => {
-    if (editable.querySelector("button")) return;
-    startEditing(editable, editable.dataset.editable);
-  });
+  var menuToggle = [
+    "click",
+    (parent2, event) => {
+      if (parent2.style.width == "0%") {
+        event.target.style.backgroundPosition = "100px 50px";
+        parent2.style.width = "0%";
+        parent2.style.overflow = "hidden";
+      } else {
+        event.target.style.backgroundPosition = "50px 50px";
+        parent2.style.width = "100%";
+        parent2.style.overflow = "visible";
+      }
+    }
+  ];
+  var tabToggle = [
+    "click",
+    ".openTab",
+    (parent2, element, event) => {
+      const tab = document.getElementById(element.dataset.toggle);
+      if (!tab) return;
+      displayToggle(tab);
+    }
+  ];
+  var tabDrag = [
+    "mousedown",
+    ".tabs",
+    (parent2, element, event) => {
+      tablists.popNode(element.__nodeRef);
+      tablists.append(element);
+      caltab();
+      element.addEventListener("mousemove", tabDrag);
+    }
+  ];
+  var tabSet = [
+    "mouseup",
+    ".tabs",
+    (parent2, element, event) => {
+      element.removeEventListener("mouseup", tabDrag);
+    }
+  ];
+
+  // src/dataListenerHandlers/dataListenerHandler.js
+  var EventListenerRegistry = {
+    "homeAdd": (parent2) => ContainerEventFactory(parent2, ...homeAdd),
+    "homeDelete": (parent2) => ContainerEventFactory(parent2, ...homeDelete),
+    "statChange": (parent2) => GenericEventFactory(parent2, ...statChange),
+    "listAdd": (parent2) => ContainerEventFactory(parent2, ...listAdd),
+    "listEdit": (parent2) => ContainerEventFactory(parent2, ...listEdit),
+    "characterAdd": (parent2) => ContainerEventFactory(parent2, ...characterAdd),
+    "characterEdit": (parent2) => ContainerEventFactory(parent2, ...characterEdit),
+    "characterSelect": (parent2) => ContainerEventFactory(parent2, ...characterSelect),
+    "characterArrange": (parent2) => ContainerEventFactory(parent2, ...characterFilterAndSort),
+    "locationAdd": (parent2) => ContainerEventFactory(parent2, ...locationAdd),
+    "locationEdit": (parent2) => ContainerEventFactory(parent2, ...locationEdit),
+    "locationSelect": (parent2) => ContainerEventFactory(parent2, ...locationSelect),
+    "markerAdd": (parent2) => ContainerEventFactory(parent2, ...markerAdd),
+    "markerEdit": (parent2) => ContainerEventFactory(parent2, ...markerEdit),
+    "markerSelect": (parent2) => ContainerEventFactory(parent2, ...markerSelect),
+    "mapDrag": (parent2) => ContainerEventFactory(parent2, ...mapDrag),
+    "mapSet": (parent2) => ContainerEventFactory(parent2, ...mapSet),
+    "tabToggle": (parent2) => ContainerEventFactory(parent2, ...tabToggle),
+    "menuToggle": (parent2) => GenericEventFactory(parent2, ...menuToggle),
+    "tabDrag": (parent2) => ContainerEventFactory(parent2, ...tabDrag),
+    "tabSet": (parent2) => ContainerEventFactory(parent2, ...tabSet)
+  };
+  function ContainerEventFactory(parent2, mEvent, selector, handler) {
+    parent2.addEventListener(mEvent, (e) => {
+      const element = e.target.closest(selector);
+      if (!element) return;
+      handler(parent2, element, e);
+    });
+  }
+  function GenericEventFactory(element, rEvent, handler) {
+    element.addEventListener(rEvent, (e) => {
+      handler(element, e);
+    });
+  }
+  var dataListenerHandler = () => {
+    const entryPoints = document.querySelectorAll("[data-listener]");
+    entryPoints.forEach((entryPoint) => {
+      const eventListeners = entryPoint.dataset.listener.split(" ");
+      eventListeners.forEach((eventListener) => {
+        EventListenerRegistry[eventListener](entryPoint);
+      });
+    });
+  };
+
+  // src/start.js
+  dataHandlers();
+  dataListenerHandler();
   socket.on("connect", () => {
     let check = localStorage.getItem("time") || 0;
     socket.emit("checkSync", check);
   });
   socket.on("create", (create) => {
-    isUpdatingFromServer++;
-    loadOperator(create);
-    isUpdatingFromServer--;
+    graphNodeList[create.table].createRow(create.result);
   });
   socket.on("update", (update) => {
-    isUpdatingFromServer++;
-    updateOperator(update);
-    isUpdatingFromServer--;
+    isUpdatingFromServerState.stepUp();
+    graphNodeList[update.table].updateRow(update.result);
+    isUpdatingFromServerState.stepDown();
   });
   socket.on("delete", (deleted) => {
-    isUpdatingFromServer++;
-    deleteOperation([deleted]);
-    isUpdatingFromServer--;
+    graphNodeList[deleted.tableName].deleteRow(deleted.deletedItem);
   });
   socket.on("checkSync", (check) => {
     storeNewRows(check);
   });
-  loadTables();
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+      console.log("Ending session, saving data locally");
+      saveData();
+    }
+  });
 })();
 //# sourceMappingURL=bundle.js.map

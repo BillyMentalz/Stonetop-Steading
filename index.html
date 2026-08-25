@@ -20,7 +20,7 @@
         <div id="stonetop">
             Stonetop
         </div>
-        <div data-listener="stats" id="sidebar">
+        <div data-listener="statChange" id="sidebar">
             <div class="topunit">
                 <div class="subunits">
                     <img src="assets/fortune1.png" alt="">
@@ -68,7 +68,7 @@
                         <p class="S">Starts at 0</p>
                     </div>
                 </div>
-                <div data-listener="lists" data-entrypoint='lists' class="column2 Contain" data-contain='Resources'> <!-- REMEMBER TO REMOVE DATA CONTAIN! -->
+                <div data-listener="listAdd" data-entrypoint='lists' class="column2 Contain" data-contain='Resources'> <!-- REMEMBER TO REMOVE DATA CONTAIN! -->
                     <div class="tabHeaders">
                         <p class="S">Resources</p>
                         <svg class='tabIcon' xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 512 512" xml:space="preserve">
@@ -86,7 +86,7 @@
                         <p class="S">Starts at 0</p>
                     </div>
                 </div>
-                <div data-listener="entryAdd" data-entrypoint="lists" class="column2 Contain" data-contain='Fortifications'>
+                <div data-listener="listAdd" data-entrypoint="lists" class="column2 Contain" data-contain='Fortifications'>
                     <div class="tabHeaders">
                         <p class="S">
                             Fortifications, etc.
@@ -152,7 +152,7 @@
             <div class="characterTraits"></div>
         </div>
     </div>
-    <div data-listener="characterLst" id="characters" class="tabs Contain" data-contain="characterTable">
+    <div data-listener="characterAdd" id="characters" class="tabs Contain" data-contain="characterTable">
         <div data-entrypoint="characters" id='characterSelector' >
             <div class="tabHeaders">
                 <div class="tabTitle">
@@ -162,16 +162,31 @@
                     <use href="#icon-Inkwell">
                 </svg>
             </div>
+            <div>
+                <label> Home: </label>
+                <select name="homeFilter">
+                </select>
+                <label>Sort:</label> 
+                <select name="what">
+                    <option value="Name(Ascending)">Name (Ascending)</option>
+                    <option value="Name(Descending)">Name (Descending)</option>
+                    <option value="Created(Ascending)">Created (Ascending)</option>
+                    <option value="Created(Descending)">Created (Descending)</option>
+                    <option value="Latest(Ascending)">Latest (Ascending)</option>
+                    <option value="Latest(Descending)">Latest (Descending)</option>
+                </select>
+                
+            </div>
             <table id="characterTable" data-tabletype = 'characters'>
                 <tr >
                     <th>Name</th>
-                    <th>Occupation</th>
+                    <th>Profession</th>
                     <th>Traits, Relations, Etc</th>
                 </tr>
             </table>
         </div>
         <div class= "slice"></div>
-        <div data-listener="characterProfile" id="characterInfo"  data-editable='characters' data-field='characters'> 
+        <div data-listener="characterArrange" id="characterInfo"  data-editable='characters' data-field='characters'> 
             <div class="characterHome"> </div> 
             <div class="characterProfile"></div> 
             <div class="characterName"></div>
@@ -188,8 +203,8 @@
         </div>
         <div> Maps coming soon! </div>
     </div>
-    <div data-listener="stats" id="assets" class="tabs Contain" data-contain="Assets">
-        <div data-entrypoint="lists" id="Assets">
+    <div data-listener="statChange" id="assets" class="tabs Contain" data-contain="Assets">
+        <div data-entrypoint="listAdd" id="Assets">
             <div class="tabHeaders">
                 <div class="tabTitle">
                     Assets 
@@ -199,7 +214,8 @@
                 </svg>
             </div>
             <p class= "S">Owned by the residents of Stonetop in common. To take them on an expedition or other put them at risk, you must Requisition </p>
-            <ul id="Assets" data-tabletype='lists'></ul>
+            <ul>
+            </ul>
         </div>
 
         <div class="divider"></div>
@@ -216,10 +232,9 @@
                 <label class="numbersTitle"> Coins </label>
             </div>
         </div>
-
         <div class="divider"></div>
-        <label class="columnTitle"> Gold </label>
 
+        <label class="columnTitle"> Gold </label>
         <div class="coins">
             <div data-entrypoint="number-asset" class="numbers" id="Gold-Purses" >
                 <label class="numbersTitle"> Purses </label>
@@ -252,9 +267,26 @@
             </button>
         </div>
     </template>
-    
+    <datalist>
+        <option value=" "> </option>
+    </datalist>
 </body>
 <script type="module" src="bundle.js"></script>
 </html>
-
-
+<!--
+<div>
+    <div class="Portrait">
+        <img src="${row.characterImage}" alt="">
+        <div class="Name">${row.characterPronouns} </div> 
+        </div>
+        <div class"characterPronouns"> ${row.characterPronouns}
+        </div>
+        <div class="characterProfession">
+            
+        </div>
+        <div class="Character">
+            
+        </div>
+    </div>
+</div>
+-->

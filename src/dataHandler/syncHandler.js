@@ -1,9 +1,8 @@
-import {graphNode } from '../document.js'
-import { markerNode } from './markersHandler.js'; 
+import { markerNode } from './data/markersHandler.js'; 
 import { statNode } from './data/statsHandler.js'
 import { listNode } from './data/listsHandler.js'
-import { characterNode  } from './charactersHandler.js';
-import { locationNode } from './locationsHandler.js'; 
+import { characterNode  } from './data/charactersHandler.js';
+import { locationNode } from './data/locationsHandler.js'; 
 import { homeNode } from './data/homesHandler.js'
 
 const graphNodeList = {
@@ -15,7 +14,7 @@ const graphNodeList = {
     'lists': listNode, 
 }
 
-const classLoadTables = ()=> {
+const dataHandlers = ()=> {
     for (const [key, operator] of Object.entries(graphNodeList)) {
         const payload = JSON.parse(localStorage.getItem(key)) || {};
         operator.table = payload;
@@ -26,7 +25,10 @@ const classLoadTables = ()=> {
 }
 
 const storeNewRows = (check) => {
-    for (const [key, value] in Object.entries(check)) {
+    console.log(check)
+    for (const [key, value] of Object.entries(check)) {
+        console.log(key)
+        console.log(value)
         if (key == 'deleteRecords') {
             for (const row in Object.entries(value)) {
                 const operator = graphNodeList[row.tableName];
@@ -38,9 +40,11 @@ const storeNewRows = (check) => {
         }
         else {
             const operator = graphNodeList[key];
-            for ( const row in value) {
+            for ( const row of value) {
                 const index  = operator.makeIndex(row);
-                if(operator.table !== null) {
+                console.log(index);
+                if(operator.table[index] !== undefined) {
+                    console.log(operator.table[index]);
                     operator.updateRow(row);
                 }
                 else {
@@ -51,10 +55,16 @@ const storeNewRows = (check) => {
     }
 }
 
-
+const saveData  = ()=> {
+    if (localStorage.getItem('test') == "true") return;
+    for (const [key, operator] of Object.entries(graphNodeList)) {
+        localStorage.setItem(key, JSON.stringify(operator.table));
+    }
+}
 
 export {
-    classLoadTables
-    storeNewRows
-    graphNodeList
+    dataHandlers,
+    storeNewRows,
+    graphNodeList,
+    saveData
 };

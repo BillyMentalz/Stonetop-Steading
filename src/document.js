@@ -1,5 +1,27 @@
 import {updateIndicate} from './animation.js';
 const socket = io();
+const addBoxTemplate = document.getElementById('addBoxTemplate');
+const maps = document.getElementById('worldMaps');
+const characters = document.getElementById('characters');
+
+class UpdatingFromServerState {
+    constructor(){
+        this.isUpdatingFromServer = 0;
+    }
+    stepUp(){
+        this.isUpdatingFromServer++;
+    }
+    stepDown() {
+        this.isUpdatingFromServer--;
+    }
+    check() {
+        if (this.isUpdatingFromServer > 0) return false;
+        else return true;
+    }
+}
+
+const isUpdatingFromServerState = new UpdatingFromServerState();
+
 
 class Node {
     constructor(element){
@@ -132,5 +154,9 @@ class graphNode {
 export { 
     LinkedList,
     graphNode,
-    socket
+    socket,
+    isUpdatingFromServerState,
+    addBoxTemplate,
+    maps,
+    characters
     };

@@ -1,13 +1,14 @@
-import {storeNewRows, dataHandlers , graphNodeList } from './dataHandler/syncHandler.js'
+import {storeNewRows, dataHandlers , graphNodeList , saveData } from './dataHandler/syncHandler.js'
 import { dataListenerHandler} from './dataListenerHandlers/dataListenerHandler.js'
-import { dataEntryPointHandler} from './data'
-import {socket } from './document.js'
+import { isUpdatingFromServerState} from './document.js'
+import { socket } from './document.js'
+//import { dataEntryPointPreparation} from './entryPoints/entryPoints.js'
+//
 // Start Loading them first. Remember to add pre-loading for 
+// evenutally add more 
 dataHandlers();
-dataEntryPointHandler();
 dataListenerHandler();
 
-var isUpdatingFromServer = 0;
 
 // CHANGE  MANAGEMENT
 // the socket on 
@@ -16,25 +17,26 @@ socket.on('connect', () => {
     socket.emit('checkSync', check);
 });
 socket.on('create', (create)=> {
-    isUpdatingFromServer++;
     graphNodeList[create.table].createRow(create.result);
-    isUpdatingFromServer--;
 });
 socket.on('update', (update)=> {
-    isUpdatingFromServer++;
+    isUpdatingFromServerState.stepUp();
     graphNodeList[update.table].updateRow(update.result);
-    isUpdatingFromServer--;
+    isUpdatingFromServerState.stepDown();
 });
 socket.on('delete', (deleted)=> {
-    isUpdatingFromServer++;
     graphNodeList[deleted.tableName].deleteRow(deleted.deletedItem);
-    isUpdatingFromServer--;
 });
 socket.on('checkSync', (check)=>{
     storeNewRows(check);
 });
 
-
+document.addEventListener('visibilitychange', ()=> {
+    if (document.visibilityState === 'hidden') {
+        console.log("Ending session, saving data locally")
+        saveData()
+    }
+})
 
 
 

@@ -37,8 +37,8 @@ const insertSchemas = {
         'columns': ['name', 'order', 'text', 'time']
     },
     'characters':{
-        'statement':database.prepare(`INSERT INTO characters (characterId, characterHome, characterName, characterPronouns, characterOccupation,  characterTraits,  characterInfo, characterCreationDate ,latestModified) VALUES (?,?,?,?,?,?,?,?,?) RETURNING *`),
-        'columns': ['id', 'home', 'name', 'pronouns', 'occupation', 'traits',  'info', 'time','time']
+        'statement':database.prepare(`INSERT INTO characters (characterId, characterHome, characterName, characterPronouns, characterProfession,  characterTraits,  characterInfo, characterCreationDate ,latestModified) VALUES (?,?,?,?,?,?,?,?,?) RETURNING *`),
+        'columns': ['id', 'home', 'name', 'pronouns', 'profession', 'traits',  'info', 'time','time']
     },
     'locations':{
         'statement':database.prepare(`INSERT INTO locations (locationHome, locationId, locationSignifier, locationName, locationInfo, latestModified) VALUES (?,?,?,?,?,?) RETURNING *`),
@@ -58,7 +58,7 @@ const createOperation = (creation) => {
         const result = insertSchemas[creation.table].statement.get(...info);
         database.exec('COMMIT');
         return {
-            'table': creation.table
+            'table': creation.table,
             'result': result
         };
     }
@@ -114,9 +114,9 @@ const updateSchemas = {
     },
     'characters':{
         'statement':database.prepare(`UPDATE characters 
-        SET characterHome = ?, characterName = ?, characterPronouns = ?, characterOccupation = ?, characterTraits = ?, characterInfo = ?, latestModified = ? 
+        SET characterHome = ?, characterName = ?, characterPronouns = ?, characterProfession = ?, characterTraits = ?, characterInfo = ?, latestModified = ? 
         WHERE characterId = ? RETURNING *`),
-        'columns': [ 'home', 'name', 'pronouns', 'occupation', 'traits',  'info', 'time', 'id' ]
+        'columns': [ 'home', 'name', 'pronouns', 'profession', 'traits',  'info', 'time', 'id' ]
     },
     'locations':{
         'statement':database.prepare(`UPDATE locations SET locationName = ?, locationInfo = ?, latestModified = ? WHERE locationHome = ? AND locationId = ? RETURNING *`),
@@ -139,6 +139,7 @@ const updateOperation = (updates) => {
             'table': updates.table,
             'result':result
         }
+    }
     catch (e) {
         database.exec('ROLLBACK');
         console.log(e.message);

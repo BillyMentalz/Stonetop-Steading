@@ -1,5 +1,5 @@
 import {socket , addBoxTemplate} from 'root/document.js'
-import { characterEnter} from 'root/injects/lists.js'
+import { characterEnter} from 'root/injects/characters.js'
 
 const characterAdd  = [
     'click',
@@ -53,5 +53,25 @@ const characterEdit = [
 
 ]
 
+const characterSelect = [
+    'click',
+    'tr',
+    (parent, element, event) => {
+        console.log(element.__rowReference);
+    }
+]
 
+const characterFilterAndSort = [
+    'change',
+    '.filterRow',
+    (parent, element, event) => {
+        console.log(parent)
+    }
+]
 
+export {
+    characterAdd,
+    characterEdit,
+    characterSelect,
+    characterFilterAndSort
+}
