@@ -5,6 +5,7 @@ const initDatabase = `
 
 CREATE TABLE IF NOT EXISTS homes (
     homeName TEXT PRIMARY KEY,
+    homeImage TEXT,
     latestModified TEXT NOT NULL
 );
 
@@ -15,7 +16,7 @@ INSERT OR IGNORE INTO homes (homeName, latestModified) VALUES
 
 CREATE TABLE IF NOT EXISTS homesRestrict (
     homeName TEXT PRIMARY KEY,
-    FOREIGN KEY (homeName) REFERENCES homes(homeName) ON DELETE RESTRICT
+    FOREIGN KEY (homeName) REFERENCES homes(homeName) ON UPDATE RESTRICT ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS stats (

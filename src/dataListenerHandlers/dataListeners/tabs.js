@@ -1,6 +1,7 @@
 import { LinkedList  } from 'root/document.js'
 import {} from 'root/injects/lists.js'
 const tablists = new LinkedList();
+const tabDragMap = new Map();
 
 function displayToggle(element) {
     if(!element) return;
@@ -15,6 +16,17 @@ function displayToggle(element) {
     }
 };
 
+function drags(event) {
+    let newleft = event.clientX;
+    let newtop =  event.clientY;
+    if (newleft < event.currentTarget.offsetWidth/2 ) newleft = event.currentTarget.offsetWidth/2;
+    if (newtop < event.currentTarget.offsetHeight/2 ) newtop = event.currentTarget.offsetHeight/2;
+    if (newleft > (window.innerWidth - event.currentTarget.offsetWidth/2)) newleft = window.innerWidth - event.currentTarget.offsetWidth/2;
+    if (newtop > (window.innerWidth - event.currentTarget.offsetHeight/2)) newtop = window.innerHeight - event.currentTarget.offsetHeight/2;
+    event.currentTarget.style.left = `${newleft}px`;
+    event.currentTarget.style.top = `${newtop}px`;
+}
+
 function caltab () {
     let temp = tablists.head;
     let count = 10;
@@ -27,16 +39,18 @@ function caltab () {
 
 const menuToggle = [
     'click',
-    (parent, event) => {
-        if (parent.style.width == "0%") {
+    '#guide',
+    (parent,element, event) => {
+        const menuElement = parent.querySelector('#menu')
+        if (menuElement.style.width == "100%") {
             event.target.style.backgroundPosition  = "100px 50px"
-            parent.style.width = "0%";
-            parent.style.overflow = "hidden";
+            menuElement.style.width = "0%";
+            menuElement.style.overflow = "hidden";
         }
         else {
             event.target.style.backgroundPosition  = "50px 50px"
-            parent.style.width = "100%";
-            parent.style.overflow = "visible";
+            menuElement.style.width = "100%";
+            menuElement.style.overflow = "visible";
         }
     }
 ]
@@ -54,11 +68,13 @@ const tabToggle = [
 const tabDrag = [
     'mousedown',
     '.tabs',
-    (parent, element, event)=> {
+    (parent, element, event) => {
         tablists.popNode(element.__nodeRef);
         tablists.append(element);
         caltab()
-        element.addEventListener ("mousemove", tabDrag)
+        const dragHandler = (event) => drags(event)
+        element.addEventListener("mousemove", dragHandler)
+        tabDragMap.set(element, dragHandler);
     }
 ]
 
@@ -66,15 +82,26 @@ const tabSet = [
     'mouseup',
     '.tabs',
     (parent, element, event)=> {
-        element.removeEventListener("mouseup", tabDrag)
+        for (const [key, value] of tabDragMap) {
+            key.removeEventListener('mousemove', value);
+        }
     }
 ]
 
+const modalHide = [
+    'click',
+    (parent, event)=> {
+        if (event.target == parent){
+            parent.style.display = "";
+        }
+    }
+]
 
 export {
     menuToggle,
     tabToggle,
     tabDrag,
-    tabSet
+    tabSet,
+    modalHide
 }
 

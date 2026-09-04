@@ -22,22 +22,24 @@ const listEdit = [
     'li',
     (parent, element, event) => {
         if (element.querySelector('button')) return;
-        const newEntry = document.importNode(addBoxTemplate,true);
+        const newEntry = document.importNode(addBoxTemplate.content,true);
         const info = element.__rowReference;
         if (!info) throw Error( "There is no row reference, please check again");
         const  editor = rowEnter(info) ;
         element.replaceWith(editor);
+        info.element = editor;
         editor.append(newEntry);
         editor.querySelector('button[name="Change"]').addEventListener('click', (e)=> {
+            const newText = editor.querySelector('textarea').value;
             socket.emit( 'update', {
                 table: 'lists',
                 name: info.listName,
                 order: info.listOrder, 
-                text: editor.value
+                text: newText
             })
         });
         editor.querySelector('button[name="Delete"]').addEventListener('click', (e)=> {
-            if (!window.confirm("Delete Item? \n Item:" + newInput.dataset.original )) {
+            if (!window.confirm("Delete Item? \n Item:" + info.listText )) {
                 editor.replaceWith(info.element);
                 return;
             }

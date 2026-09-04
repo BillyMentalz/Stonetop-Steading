@@ -5,6 +5,7 @@ import {fileURLToPath} from 'node:url';
 import { Server } from 'socket.io';
 //import { jwt } from 'jsonwebtoken';
 import { registerSocketHandlers} from './socketHandler.js';
+import { validateAndSanitizeImage} from './validateImage.js';
 import * as esbuild  from 'esbuild';
 
 const app = express();
@@ -41,6 +42,16 @@ app.post('/login', (req,res)=> {
   //  console.log('Received form data:', req.body)
 })
 
+app.post('/api/upload', 
+    validateAndSanitizeImage ,
+    (req, res)=> {
+    const {filename, size, mimetype } = req.sanitizedImage;
+    res.json({
+        fileName:filename,
+        size:size, 
+        mimetype: mimetype
+    })
+})
 
 app.get('/home', (req,res) => {
     res.sendFile(join (__dirname, 'index.html'));

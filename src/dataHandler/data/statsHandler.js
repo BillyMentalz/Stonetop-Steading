@@ -17,7 +17,6 @@ const views = {
 
 const statsCreateOperator = (row) => {
     let element = null;
-    console.log(row); 
     const parentElement  = document.getElementById(row.statName);
     const style =  styleHelper(parentElement);
     let selectedElement = null;
@@ -45,7 +44,7 @@ const statsCreateOperator = (row) => {
             parentElement.append(element);
             break;
     }
-    return parentElement;
+    return element;
 }
 
 const styleHelper = (parent)=>{
@@ -54,10 +53,10 @@ const styleHelper = (parent)=>{
 
 const statsUpdateOperator = (row)=>{
     const element = row.element;
-    console.log(element);
     switch (row.statType){
         case 'radio':
-            element.checked = true;
+            const selectedElement = element.querySelector(`[value="${row.statValue}"]`)
+            if (selectedElement) selectedElement.checked = true;
             break;
         case 'select-one':
             element.value = row.statValue;
@@ -80,7 +79,7 @@ const statsDeleteOperator = (row) => {
 const statNode = new graphNode( 
     'stats',
     ['statName'],
-    [],
+    {},
     {},
     statsCreateOperator,
     statsUpdateOperator,

@@ -1,7 +1,8 @@
 import {listsRow} from 'root/injects/lists.js'
 import {graphNode} from 'root/document.js'
+
 const listsOperator = (row)=>{
-    const parent = document.querySelector(`ul#${row.listName}`)
+    const parent = document.querySelector(`#${row.listName} ul`)
     const element = listsRow(row.listOrder , row.listText);
     parent.append(element);
     return element;
@@ -21,7 +22,7 @@ const listsDeleteOperator = (row) => {
 const listNode = new graphNode(
     'lists',
     ['listName', 'listOrder'],
-    [],
+    {},
     {},
     listsOperator,
     listsUpdateOperator,

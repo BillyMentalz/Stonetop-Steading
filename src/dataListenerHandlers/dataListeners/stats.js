@@ -5,7 +5,7 @@ const statChange = [
     (element, event) => {
         if (isUpdatingFromServerState.check()) return; 
         const eType = event.target.type;
-        if (sidebarEvents.include(eType)) {
+        if (sidebarEvents.includes(eType)) {
             socket.emit('update', {
             table: 'stats',
             name: event.target.name,

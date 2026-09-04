@@ -2,12 +2,14 @@ import {stringToHTML } from 'root/inject.js';
 
 const radio = (name,style, options)=> {
     const elementString = `
+    <div>
         ${options.map(option => `
             <div class="${style[0]}">
                 <input type="radio" name="${name}" value="${option}">
                 <p class="${style[1]}">${option}</p>
             </div>
-        `).join('')}`;
+        `).join('')}
+    </div>`;
     return stringToHTML(elementString);
 }
 
@@ -28,10 +30,6 @@ const number = (name,style)=> {
 const checkbox = (name,style)=> {
     const elementString = `<input type="checkbox" class="${style[0]}" name="${name}" value="${name}">`
     return stringToHTML(elementString);
-}
-
-const defaultStat = (name,style)=> {
-    const elementString = `<div>Something that I don't know about </div>`
 }
 
 export {

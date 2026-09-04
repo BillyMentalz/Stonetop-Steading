@@ -4,6 +4,15 @@ const stringToHTML = (str)=> {
     return doc.body.firstChild;
 };
 
+const stringToHTMLTable = (str)=> {
+    const thing = `<table>
+        <tbody>${str} </tbody>
+    </table>`
+    const parse = new DOMParser();
+    const doc = parse.parseFromString(thing, 'text/html');
+    return doc.querySelector('tr');
+}
+
 const EntryPointsAndStyleTable = {
     'radio':'radioContainer,radioBox,radioChoice', // REMEMBER: AT THE END ADD A COMMA TO PREVENT BUFFER OVERFLOW
     'select':'selectContainer,',
@@ -36,6 +45,7 @@ const updateEntryPoints = (element, entrypoint)=> {
 
 export {
     stringToHTML,
+    stringToHTMLTable,
     loadInjections,
     updateEntryPoints
 }

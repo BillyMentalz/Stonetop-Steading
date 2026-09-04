@@ -114,13 +114,13 @@ const updateSchemas = {
     },
     'characters':{
         'statement':database.prepare(`UPDATE characters 
-        SET characterHome = ?, characterName = ?, characterPronouns = ?, characterProfession = ?, characterTraits = ?, characterInfo = ?, latestModified = ? 
+        SET characterHome = ?, characterName = ?, characterPronouns = ?, characterProfession = ?, characterTraits = ?, characterInfo = ?,characterImage = ?, latestModified = ? 
         WHERE characterId = ? RETURNING *`),
-        'columns': [ 'home', 'name', 'pronouns', 'profession', 'traits',  'info', 'time', 'id' ]
+        'columns': [ 'home', 'name', 'pronouns', 'profession', 'traits',  'info', 'image', 'time', 'id' ]
     },
     'locations':{
-        'statement':database.prepare(`UPDATE locations SET locationName = ?, locationInfo = ?, latestModified = ? WHERE locationHome = ? AND locationId = ? RETURNING *`),
-        'columns':['name','text','time', 'home', 'id']
+        'statement':database.prepare(`UPDATE locations SET locationName = ?, locationInfo = ?, locationSignifier = ?, latestModified = ? WHERE locationHome = ? AND locationId = ? RETURNING *`),
+        'columns':['name','text','locationSignifier', 'time', 'home', 'id']
     },
     'markers': {
         'statement': database.prepare(`UPDATE markers SET markerX = ? ,markerY = ?, latestModified = ? WHERE markerHome = ? AND markerId = ? AND markerOrder = ? RETURNING *`),

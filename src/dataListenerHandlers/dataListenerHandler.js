@@ -1,10 +1,11 @@
 import { homeAdd, homeDelete} from './dataListeners/homes.js'
 import { statChange } from './dataListeners/stats.js'
 import { listAdd, listEdit } from './dataListeners/lists.js'
-import { characterAdd, characterEdit, characterSelect, characterFilterAndSort} from './dataListeners/characters.js'
+import { characterAdd,  characterSelect, characterFilterAndSort} from './dataListeners/characters.js'
+import { characterFormClicker, characterFormChanger} from './dataListeners/characterCard.js';
 import { locationAdd, locationEdit, locationSelect} from './dataListeners/locations.js'
 import { markerAdd, markerEdit , markerSelect, mapDrag, mapSet  } from './dataListeners/markers.js'
-import { tabToggle, menuToggle, tabDrag, tabSet } from './dataListeners/tabs.js'
+import { tabToggle, menuToggle, tabDrag, tabSet, modalHide } from './dataListeners/tabs.js'
 
 const EventListenerRegistry = {
     'homeAdd':          (parent)=> ContainerEventFactory(parent, ...homeAdd),
@@ -12,8 +13,9 @@ const EventListenerRegistry = {
     'statChange': 		(parent)=> GenericEventFactory( parent, ...statChange),
     'listAdd': 			(parent)=> ContainerEventFactory(parent, ...listAdd),
     'listEdit': 		(parent)=> ContainerEventFactory(parent, ...listEdit),
+    'characterCard':    (parent)=> ClickContainerFactory(parent, characterFormClicker),
+    'characterChange':  (parent)=> ClickContainerFactory(parent, characterFormChanger),
     'characterAdd': 	(parent)=> ContainerEventFactory(parent, ...characterAdd),
-    'characterEdit': 	(parent)=> ContainerEventFactory(parent, ...characterEdit),
     'characterSelect': 	(parent)=> ContainerEventFactory(parent, ...characterSelect),
     'characterArrange': (parent)=> ContainerEventFactory(parent, ...characterFilterAndSort),
     'locationAdd': 		(parent)=> ContainerEventFactory(parent, ...locationAdd),
@@ -25,9 +27,11 @@ const EventListenerRegistry = {
     'mapDrag': 			(parent)=> ContainerEventFactory(parent, ...mapDrag),
     'mapSet': 			(parent)=> ContainerEventFactory(parent, ...mapSet),
     'tabToggle': 		(parent)=> ContainerEventFactory(parent, ...tabToggle),
-    'menuToggle': 		(parent)=> GenericEventFactory(parent, ...menuToggle),
+    'menuToggle': 		(parent)=> ContainerEventFactory(parent, ...menuToggle),
     'tabDrag': 		    (parent)=> ContainerEventFactory(parent, ...tabDrag),
     'tabSet': 		    (parent)=> ContainerEventFactory(parent, ...tabSet),
+    'modalHide':        (parent)=> GenericEventFactory(parent, ...modalHide),
+    
 };
 
 function ContainerEventFactory(parent, mEvent , selector , handler) {
@@ -43,15 +47,21 @@ function GenericEventFactory( element, rEvent, handler) {
         handler(element,e);
     })
 }
-/*
-const addListeners = (element)=> {
-    const thing = element.dataset.listener.split(' ') 
-    thing.forEach( thinglet => {
-        EventListenerRegistry[thing](element);
-        element.addEventListener(thinglet.event, (e)=> thinglet.operator)
+
+function ClickContainerFactory( element, clicker) {
+    const {eventName, actions} = clicker; 
+    element.addEventListener(eventName , (e)=> {
+        console.log(eventName);
+        const button = e.target.closest('[data-action]');
+        console.log(button);
+        if (!button ) return;
+        const handler = actions[button.dataset.action];
+        if (!handler) { console.log(`action ${button.dataset.action} doesn't exist! Please add`); return;}
+        handler(element, button, e);
     })
+    
 }
-*/
+
 const dataListenerHandler = ()=> {
     const entryPoints = document.querySelectorAll('[data-listener]')    
     entryPoints.forEach(entryPoint => {

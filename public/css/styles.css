@@ -8,6 +8,7 @@
     src: url(historical-felltyperoman-opentype.otf);
 }
 html {
+    box-sizing: border-box;
     font-family:historicalFell;
     background-color:var(--primary-bg-color) ;
     color:var(--primary-color);
@@ -42,15 +43,13 @@ input::-webkit-inner-spin-button {
     margin:0;
 }
 textarea {
-    max-width:12rem;
+    max-width:100%;
     background-color:inherit;
     color:inherit;
     font-family:inherit;
     border:none;
     border-bottom:0.13rem solid ;
 }
-
-
 
 input[type='text']{
     outline:none;
@@ -162,6 +161,7 @@ option {
 }
 
 .units {
+    width:100%;
     scrollbar-width:none;
     border-style:solid;
     border-width:2px;
@@ -190,7 +190,7 @@ option {
 .column1 {
     max-height: 100%;
     padding:0.3rem 0rem 1rem 0.5rem;
-    
+    width:40%;
 }
 
 .column2::-webkit-scrollbar{
@@ -215,7 +215,7 @@ option {
 }
 
 .S {
-    display: block;
+    display: flex;
     font-family:historicalFell;
     font-size:1.2rem;
     margin:0;
@@ -427,13 +427,13 @@ option {
     box-sizing: border-box;
     flex-direction:row;
     justify-content: space-around;
-    width:50rem;
+    width:27rem;
     height:30rem;
     padding: 1rem 0rem 1rem;
 }
 
 #characterSelector {
-    width:60%;
+    width:90%;
 }
 
 
@@ -462,3 +462,56 @@ option {
 #markers {
     width:50%;
 }
+
+#modal {
+    display:none;
+    position:fixed;
+    z-index: 50;
+    padding-top:15rem ;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    background-color: rbg(0,0,0);
+    background-color: rgba(0,0,0,0.4);
+}
+
+.characterCard {
+    box-sizing: border-box;
+    background-color:var(--primary-bg-color);
+    color:inherit;
+    margin: auto;
+    width:50rem;
+    height:60%;
+    padding: 1rem;
+    display:flex;
+    flex-direction:row;
+    justify-content: flex-start;
+    gap:1rem;
+}
+
+.NameCard {
+    display:flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items:flex-end;
+}
+.Infodeck {
+    width:35%;
+}
+.characterCard img {
+    width:100%;
+}
+
+.characterName {
+    font-size:2rem;
+}
+
+.fontMod {
+    font-size:2rem;
+}
+
+.characterNotes {
+    width: 60%;
+}
+

@@ -1,12 +1,13 @@
 import {stringToHTML} from '../inject.js'
 
-const listsRow = (id, index, text) => { // I decided that at this point that using Id kinda blows. So if you want to access element, the proper way would be to select element, index to access. If this is too much for you it's not trust me.
+const listsRow = (index, text) => { // I decided that at this point that using Id kinda blows. So if you want to access element, the proper way would be to select element, index to access. If this is too much for you it's not trust me.
     const elementString = `
-        <li>
+        <li data-index=${index}>
             ${text}
         </li>`
     return stringToHTML(elementString);
 }
+
 const fullList = (id, rows) => {
     const elementString = `
         <ul > 
@@ -27,13 +28,13 @@ const defaultList = ()=> {
     `
 }
 
-const rowEnter  = (element) => {
+const rowEnter  = (row) => {
     const elementString = `
-        <li data-index="${element.dataset.index}">  
-            <textarea value=${element.textContent}>
-            </textarea>
+        <li data-index="${row.listOrder}">
+            <textarea>${row.listText}</textarea>
         </li>
     `
+    return stringToHTML(elementString);
 }
 
 export {

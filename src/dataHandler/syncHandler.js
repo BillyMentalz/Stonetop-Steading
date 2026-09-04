@@ -12,25 +12,24 @@ const graphNodeList = {
     'locations': locationNode,
     'stats': statNode,
     'lists': listNode, 
-}
+};
 
 const dataHandlers = ()=> {
     for (const [key, operator] of Object.entries(graphNodeList)) {
         const payload = JSON.parse(localStorage.getItem(key)) || {};
         operator.table = payload;
         for (const [id, row] of Object.entries(payload)) {
-            operator.createOperator(id, row); 
+            const element = operator.createOperator(row); 
+            element.__rowReference = row;
+            row.element = element;
         }
     }
 }
 
 const storeNewRows = (check) => {
-    console.log(check)
     for (const [key, value] of Object.entries(check)) {
-        console.log(key)
-        console.log(value)
         if (key == 'deleteRecords') {
-            for (const row in Object.entries(value)) {
+            for (const row of value) {
                 const operator = graphNodeList[row.tableName];
                 operator.deleteRow(row.deletedItem);
             }
@@ -41,10 +40,8 @@ const storeNewRows = (check) => {
         else {
             const operator = graphNodeList[key];
             for ( const row of value) {
-                const index  = operator.makeIndex(row);
-                console.log(index);
+                const index  = operator.makeIndex(operator.identifiers,row);
                 if(operator.table[index] !== undefined) {
-                    console.log(operator.table[index]);
                     operator.updateRow(row);
                 }
                 else {
@@ -56,9 +53,18 @@ const storeNewRows = (check) => {
 }
 
 const saveData  = ()=> {
-    if (localStorage.getItem('test') == "true") return;
     for (const [key, operator] of Object.entries(graphNodeList)) {
-        localStorage.setItem(key, JSON.stringify(operator.table));
+        const obj = {};
+        for (const [index, row] of Object.entries(operator.table)){
+            const newRow = {};
+            for ( const [item, value] of Object.entries(row)) {
+                if ( typeof value !== "object" || value === null) {
+                    newRow[item] = value;
+                }
+            }
+            obj[index] = newRow;
+        }
+        localStorage.setItem(key, JSON.stringify(obj));
     }
 }
 

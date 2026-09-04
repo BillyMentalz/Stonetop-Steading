@@ -1,5 +1,7 @@
 import { markerElement } from 'root/injects/markers.js' 
+import { locationNode } from './locationsHandler.js'
 import {graphNode} from 'root/document.js'
+
 const markerCreateOperator = (row )=>{
     const element = markerElement(row);
     if (true) parent.append(element); // Placeholder element. Please add when needed. The marker element depends on some shtuff
@@ -17,11 +19,17 @@ const markerDeleteOperator = (row) => {
     row.element.remove();
 }
 
+const markerCascadeRules = {
+    up: ['locationHome', 'locationId'],
+    down: ['markerHome', 'markerId'],
+    additional: { 'locationSignifier': 'markerSignifier'}
+}
+
 const markerNode = new graphNode(
     'markers',
     ['markerName', 'markerId', 'markerOrder', 'markerSignifier'],
-    [],
-    {},
+    locationNode,
+    markerCascadeRules,
     markerCreateOperator,
     markersUpdateOperator,
     markerDeleteOperator

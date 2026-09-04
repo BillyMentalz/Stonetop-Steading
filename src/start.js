@@ -9,8 +9,6 @@ import { socket } from './document.js'
 dataHandlers();
 dataListenerHandler();
 
-
-// CHANGE  MANAGEMENT
 // the socket on 
 socket.on('connect', () => {
     let check = localStorage.getItem('time') || 0;
@@ -21,6 +19,7 @@ socket.on('create', (create)=> {
 });
 socket.on('update', (update)=> {
     isUpdatingFromServerState.stepUp();
+    console.log(update.table);
     graphNodeList[update.table].updateRow(update.result);
     isUpdatingFromServerState.stepDown();
 });

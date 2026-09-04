@@ -4,7 +4,14 @@ const locationAdd  = [
     'click',
     '.tabIcon',
     (parent, element, event) => {
-        console.log( parent );
+        const result = {
+            table:'locations',
+            name: 'New Location',
+            id: crypto.randomUUID(),
+            signifier: '?',
+            info: 'What is this new location?'
+        }
+        socket.emit('create', result);
     }
 ];
 

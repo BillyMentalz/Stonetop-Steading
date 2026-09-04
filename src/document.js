@@ -15,8 +15,8 @@ class UpdatingFromServerState {
         this.isUpdatingFromServer--;
     }
     check() {
-        if (this.isUpdatingFromServer > 0) return false;
-        else return true;
+        if (this.isUpdatingFromServer > 0) return true;
+        else return false;
     }
 }
 
@@ -67,88 +67,155 @@ class LinkedList {
     }
 };
 
+/*
+class Row {
+    constructor(node, data, element) {
+        this.node = node; 
+        this.data = data; 
+        this.element = element;
+        this.subscribers  = {};
+    }
+    update() {
 
+    }
+    delete() {
+
+    }
+    observe (isDelete , thing) {
+
+    }
+    
+}
+*/
 class graphNode {
-    constructor(name , identifiers,  children, cascadeRules, createOperator, updateOperator, deleteOperator ) {
+    constructor(name , identifiers,  parent, cascadeRules, createOperator, updateOperator, deleteOperator, attachElement ) {
         this.table = {};
         this.name = name;
         this.identifiers = identifiers; 
-        this.children = children;
+        this.parent = parent;
         this.cascadeRules = cascadeRules;
         this.createOperator = createOperator;
         this.updateOperator = updateOperator;
         this.deleteOperator = deleteOperator;
+        if (attachElement) {
+            this.attachElement = document.getElementById(attachElement);
+            this.attachElement.__graphNodeRef = this; 
+        }
     }
-    makeIndex (row) {
-        const index = this.identifiers.map(
-            (item)=> { return row[item];}
-        ).join('/%/');
+    makeIndex (requirements, row) {
+        const index = requirements.map(item=>row[item]).join('/%/');
         return index;
-    };
+    }
     createRow(row) { // Remember to add wrappers on Deparsing and Time 
-        const index = this.makeIndex(row);
-        const element = this.createOperator(index, row);
+        const element = this.createOperator(row);
+        console.log(this.identifiers)
+        const index = this.makeIndex( this.identifiers, row);
+        element.__rowReference = row;
         row.element = element;
         this.table[index] = row;
         updateIndicate(element);
+        if (Object.keys(this.cascadeRules).length !== 0) {
+            const upIndex = (this.cascadeRules.down == undefined) ? row.characterHome :this.makeIndex(this.cascadeRules.down, row);
+            const subscribeObject = {
+                self: this,
+                cascadeRules: this.cascadeRules,
+                rows: [index ]
+            }
+            this.parent.addSubscriber(upIndex, this.name,  subscribeObject);
+        }
     };
+
+    addSubscriber(index, child, subscriberWrapper) {
+        const row = this.table[index];
+        if (!row) throw Error (`Index does not exist! Gen Index: ${index} child: ${child}`)
+        if (row.subscribers === undefined) row.subscribers = {};
+        if (Object.keys(row.subscribers).length !== 0 && row.subscribers[child]) {
+            const oldrows = row.subscribers[child].rows
+            const newrows = subscriberWrapper.rows
+            row.subscribers[child].rows = [...oldrows, ...newrows]
+            }
+        else {
+            row.subscribers[child] = subscriberWrapper
+        }
+    };
+    
     updateRow(updateValue) {
-        const index = this.makeIndex(updateValue);
+        const index = this.makeIndex( this.identifiers, updateValue);
         const row = this.table[index];
         if (!row) throw Error(`${row} does not exist!`);
-        for (const [key,value] in Object.entries(updateValue)) {row[key] = value };
-        this.updateOperator(row);
+        const changes = {};
+        for (const [key,value] of Object.entries(updateValue))  {
+            if ( row[key] !== value ) {
+                changes[key] = row[key];
+                row[key] = value 
+            }
+        }
+        const element = this.updateOperator(row);
+        element.__rowReference = row;
+        row.element = element;
         updateIndicate(row.element);
-        for (const cascadent in this.cascade) {
-            cascadent.updateCascade(this.name , row);
+        if (row.subscribers) {
+            for (const [lmao, subscriber] of Object.entries(row.subscribers )) {
+                const downer = {};
+                for ( const key of subscriber.cascadeRules.up) {
+                    const newer = changes[subscriber.cascadeRules.up[key]]
+                    if (newer) downer[subscriber.cascadeRules.down[key]] =  newer;
+                }
+                for (const [key, value] of Object.entries(subscriber.cascadeRules.additional)) {
+                    if (changes[key]) downer[value] = changes[key]
+                }
+                if (downer) subscriber.self.updateCascade(subscriber,downer)
+            }
         }
     };
-    updateCascade(src, updateValue){
-        const rules = this.cascadeRules[src];
-        if (!rules) throw Error('cascadeRules mismatch!');
-        const ghostIndex = rules.ghostIndex.map(i => 
-            {return updateValue[i]}
-        ).join('/%/');
-        const resultValue = {};
-        for ( let i = 0; i < rules.needValues.length ; i++ ) {
-            resultValue[rules.changeValue[i]] = updateValue[rules.needValues[i]];
-        }
-        for ( const [key, pair] of Object.entries(this.table)) {
-            if (key.startsWith(ghostIndex)) {
-                for( const [subkey, subvalue] of Object.entries(resultValue)){
-                    pair[subkey] = subvalue;
-                }
-                this.updateOperator(pair);
-                updateIndicate(pair.element);
-                for (const cascadent in this.cascade) {
-                    cascadent.updateCascade(this.name , pair);
-                }
+    updateCascade(observer, changes){
+        const indexes = observer.rows;
+        for ( const [iterator, index] of indexes.entries) {
+            const row = this.table[index];
+            let needsIndexFix = false;
+            for ( const [key, value] of Object.entries(changes)) {
+                if (this.identifiers.includes(key)) needsIndexFix = true;
+                row[key] = value;
             }
-        } // This code doesn't actually think about what change. So basically, even if there is no change in the child, it treats it as having changed. 
+            if (needsIndexFix) {
+                const newIndex = this.makeIndex(this.identifiers, row);
+                this.table[newIndex] = row;
+                indexes[iterator]  = newIndex;
+                delete this.table[index];
+            }
+            this.updateRow(row);
+        }
     };
     deleteRow(deletedItem) {
         const row = this.table[deletedItem]
+        if (!row) return;
         if ( row.latestModified > deletedItem.deletedAt) return;
         this.deleteOperator(row);
+        if (this.table[deletedItem].subscribers) {
+            for (const subscriber of row.subscribers ) {
+                subscriber.self.deleteCascade(deletedItem)
+            }
+        }
         delete this.table[deletedItem];
-        for ( const thing of this.cascade ){
-            thing.deleteCascade(deletedItem);
-        };
         
     };
     deleteCascade(id){
-        for ( const [key, value] of Object.entries(this.table)){
-            if (key.startsWith(id)) {
-                this.deleteRow(key);
-                for ( const cascadent in this.cascade) {
-                    cascadent.graphNode.deleteCascade(key);
-                }
-            };
+        if (Object.keys(this.cascadeRules.up).length === 0) {
+            for ( const [key, value] of Object.entries(this.table)){
+                if (key.startsWith(id)) {
+                    this.deleteRow(key);
+                };
+            }
         }
-        /* A known bug that I know might happen at some point is when a location is nuked, 
-         * the character doesn't update to homeless. What this means is that the character may be editable with a location that no longer exists which will have a backend 
-         * constraint error but I'm just letting that silently happen. It's up to players to readd a the characters place of Operations.
-         */
+        else {
+            for (const [key, value] of this.table) {
+                if (value.characterHome == id) {
+                    value.characterHome = "At World's End"
+                    this.updateOperator(value);
+                }
+            }
+        }
+        /*This last part is just me being lazy. Only motherfuckers has the ability to forego death if a location is dying */
     };
 }
 export { 

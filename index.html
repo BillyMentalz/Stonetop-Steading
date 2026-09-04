@@ -11,7 +11,7 @@
 </head>
 
 <body data-listener="tabDrag tabSet">
-    <svg style="diplay:none;width:0;height:0;" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 512 512" xml:space="preserve">
+    <svg style="display:none;width:0;height:0;" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 512 512" xml:space="preserve">
         <defs>
         <g id="icon-Inkwell"> <g> <g> <path d="M306.036,422.4l-44.218-22.109c-3.491-2.327-6.982-5.818-6.982-10.473v-22.109c13.964-4.655,23.273-17.455,23.273-32.582 c0-19.782-15.127-34.909-34.909-34.909H128c-19.782,0-34.909,15.127-34.909,34.909c0,19.782,15.127,34.909,34.909,34.909h69.818 c6.982,0,11.636-4.655,11.636-11.636s-4.655-11.636-11.636-11.636H128c-6.982,0-11.636-4.655-11.636-11.636 s4.655-11.636,11.636-11.636h116.364c6.982,0,11.636,4.655,11.636,11.636s-4.655,11.636-11.636,11.636 s-11.636,4.655-11.636,11.636v32.582c0,12.8,6.982,25.6,19.782,31.418l44.218,22.109c3.491,2.327,6.982,5.818,6.982,10.473v23.273 c0,6.982-4.655,11.636-11.636,11.636H81.454c-6.982,0-11.636-4.655-11.636-11.636v-23.273c0-4.655,2.327-8.146,6.982-10.473 l44.218-22.109c11.636-5.818,19.782-17.455,19.782-31.418c0-6.982-4.655-11.636-11.636-11.636s-11.636,4.655-11.636,11.636 c0,4.655-2.327,8.145-6.982,10.473l-44.218,22.109c-12.8,4.655-19.782,17.455-19.782,30.255v23.273 c0,19.782,15.127,34.909,34.909,34.909h209.455c19.782,0,34.909-15.127,34.909-34.909v-23.273 C325.818,441.018,318.836,428.218,306.036,422.4z"></path> </g> </g> <g> <g> <path d="M438.691,3.491C436.364,1.164,432.873,0,429.382,0s-6.982,2.327-8.145,4.655L211.782,272.291 c-3.491,4.655-3.491,12.8,2.327,16.291c2.327,1.164,4.655,2.327,6.982,2.327c3.491,0,6.982-1.164,9.309-4.655l200.145-256 c8.145,12.8,11.636,30.255,11.636,51.2c0,33.745-17.455,53.527-25.6,62.836L371.2,159.418c-3.491,1.164-6.982,4.655-8.145,9.309 c-1.164,3.491,1.164,8.145,3.491,10.473l18.618,16.291c-24.436,22.109-52.364,39.564-97.745,48.873 c-5.818,1.164-10.473,8.145-9.309,13.964c1.164,5.818,8.146,10.473,13.964,9.309c60.509-12.8,91.927-38.4,117.527-64 c2.327-2.327,3.491-6.982,3.491-10.473c0-2.327-2.327-4.655-3.491-6.982l-12.8-11.636l29.091-10.473 c1.164,0,3.491-2.327,4.655-3.491c23.273-20.945,34.909-48.873,34.909-79.127C465.455,47.709,456.145,20.945,438.691,3.491z"></path> </g> </g> </g>
         </defs>
@@ -53,7 +53,7 @@
                     <div data-entrypoint="select" id="Stonetop-Size">
                         <label>Size </label>
                     </div>
-                    <div data-entrypoint="number" id="Population">
+                    <div data-entrypoint="numbers" id="Population">
                         <label>Population</label>
                     </div>
                     <div data-entrypoint="select" id="Season">
@@ -68,25 +68,25 @@
                         <p class="S">Starts at 0</p>
                     </div>
                 </div>
-                <div data-listener="listAdd" data-entrypoint='lists' class="column2 Contain" data-contain='Resources'> <!-- REMEMBER TO REMOVE DATA CONTAIN! -->
+                <div data-listener="listAdd listEdit" data-entrypoint='lists' class="column2 Contain" data-contain='Resources' id="Resources" > 
                     <div class="tabHeaders">
                         <p class="S">Resources</p>
                         <svg class='tabIcon' xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 512 512" xml:space="preserve">
                             <use href="#icon-Inkwell">
                         </svg>
                     </div>
-                    <ul  id="Resources" data-tableType='lists'>
+                    <ul>
                     </ul>
                 </div>
             </div>
             <div class="units">
                 <div data-entrypoint="radio" class="column1" id="Defenses">
                     <div class="coltitle">
-                        <p class="columnTitle"> Defenses </p>
+                        <p class="columnTitle">Defenses</p>
                         <p class="S">Starts at 0</p>
                     </div>
                 </div>
-                <div data-listener="listAdd" data-entrypoint="lists" class="column2 Contain" data-contain='Fortifications'>
+                <div data-listener="listAdd listEdit" data-entrypoint="lists" class="column2 Contain" data-contain='Fortifications' id="Fortifications">
                     <div class="tabHeaders">
                         <p class="S">
                             Fortifications, etc.
@@ -95,17 +95,17 @@
                             <use href="#icon-Inkwell">
                         </svg>
                     </div>
-                    <ul  id="Fortifications" data-tableType='lists'>
+                    <ul>
                     </ul>
                 </div>
             </div>
         </div>
     </div>
     <div id="right-side">
-         <div id="topbar">
-            <div id="guide"> 
-                </div>
-            <div id="menu">
+         <div data-listener="menuToggle" id="topbar">
+            <div  id="guide"> 
+            </div>
+            <div data-listener="tabToggle"id="menu">
                 <div class="menuItem openTab" data-toggle="locations"> Locations 
                 </div>
                 <div class="menuItem openTab"data-toggle="characters"> Characters </div>
@@ -133,8 +133,8 @@
             <div id="Legend-Stonetop-1" class="indicators draggable"><p class="markers">A</p></div>
         </div>
     </div> 
-    <div id="locations" class="tabs Contain" data-contain="locationTable"style="display:flex;">
-        <div id='locationSelector' > 
+    <div id="locations" class="tabs Contain" data-contain="locationTable" >
+        <div data-entrypoint='locations' id='locationSelector' > 
             <div class="tabHeaders">
                 <div class="tabTitle">
                     Locations 
@@ -143,8 +143,17 @@
                         <use href="#icon-Inkwell">
                 </svg>
             </div>
+            <div style="display:flex;flex-direction:row">
+                <label> Home: </label>
+                <select data-entrypoint="homes" name="thing">
+                    <option value=" "> </option>
+                </select>
+            </div>
+            <ul>
+            </ul>
             <table id="locationTable" data-tabletype = 'locations'>
             </table>
+            <span>&#10900</span>
         </div>
         <div class= "slice"></div>
         <div id="markers"  data-editable='markers' data-field='locations'> 
@@ -152,7 +161,7 @@
             <div class="characterTraits"></div>
         </div>
     </div>
-    <div data-listener="characterAdd" id="characters" class="tabs Contain" data-contain="characterTable">
+    <div data-listener="characterAdd characterArrange" id="characters" class="tabs Contain" data-contain="characterTable">
         <div data-entrypoint="characters" id='characterSelector' >
             <div class="tabHeaders">
                 <div class="tabTitle">
@@ -162,58 +171,57 @@
                     <use href="#icon-Inkwell">
                 </svg>
             </div>
-            <div>
+            <div class='filterRow' style="display:flex;flex-direction:row;">
                 <label> Home: </label>
-                <select name="homeFilter">
+                <select data-entrypoint="homes" name="Home">
+                    <option value=" "> </option>
                 </select>
                 <label>Sort:</label> 
-                <select name="what">
-                    <option value="Name(Ascending)">Name (Ascending)</option>
-                    <option value="Name(Descending)">Name (Descending)</option>
+                <select name="Sort">
+                    <option value=" "> </option>
                     <option value="Created(Ascending)">Created (Ascending)</option>
                     <option value="Created(Descending)">Created (Descending)</option>
                     <option value="Latest(Ascending)">Latest (Ascending)</option>
                     <option value="Latest(Descending)">Latest (Descending)</option>
+                    <option value="Name(Ascending)">Name (Ascending)</option>
+                    <option value="Name(Descending)">Name (Descending)</option>
                 </select>
-                
             </div>
-            <table id="characterTable" data-tabletype = 'characters'>
-                <tr >
-                    <th>Name</th>
-                    <th>Profession</th>
-                    <th>Traits, Relations, Etc</th>
-                </tr>
+            <table >
+                <thead>
+                    <tr >
+                        <th>Name</th>
+                        <th>Profession</th>
+                        <th>Traits, Relations, Etc</th>
+                    </tr>
+                </thead>
+                <tbody data-listener="characterSelect" id="characterTable">
+                </tbody>
             </table>
-        </div>
-        <div class= "slice"></div>
-        <div data-listener="characterArrange" id="characterInfo"  data-editable='characters' data-field='characters'> 
-            <div class="characterHome"> </div> 
-            <div class="characterProfile"></div> 
-            <div class="characterName"></div>
-            <div class="characterPronouns"></div>
-            <div class="characterOccupation"></div>
-            <div class="characterInfo"> </div>
-            <div class="characterTraits"></div>
         </div>
     </div> 
     </div>
-    <div id="worldMaps" class="tabs sampletab">
+    <div id="worldMaps" class="tabs ">
         <div class="columnTitle">
            Map 
         </div>
+        <ul>
+        </ul>
         <div> Maps coming soon! </div>
     </div>
     <div data-listener="statChange" id="assets" class="tabs Contain" data-contain="Assets">
-        <div data-entrypoint="listAdd" id="Assets">
+        <div data-listener="listAdd listEdit" id="Assets">
+            <div>
             <div class="tabHeaders">
                 <div class="tabTitle">
                     Assets 
                 </div>
                 <svg class='tabIcon' xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 512 512" xml:space="preserve">
-                    <use href="icon-Inkwell">
+                    <use href="#icon-Inkwell">
                 </svg>
             </div>
             <p class= "S">Owned by the residents of Stonetop in common. To take them on an expedition or other put them at risk, you must Requisition </p>
+            </div>
             <ul>
             </ul>
         </div>
@@ -250,7 +258,7 @@
 
     <template id="addBoxTemplate">
         <div style="display:flex;flex-direction:row;height:1.5rem;">
-            <button type="button" name="Change">
+            <button type="buttons" name="Change">
                 <svg  viewBox="-4 0 32 32"  xmlns="http://www.w3.org/2000/svg">
                     <path id="check-mark" d="M19.375 5.063l-9.5 13.625-6.563-4.875-3.313 4.594 11.188 8.531 12.813-18.375z"></path> 
                 </svg>
@@ -267,26 +275,9 @@
             </button>
         </div>
     </template>
-    <datalist>
-        <option value=" "> </option>
+    <datalist data-entrypoint="homes" id="homesFilter">
     </datalist>
+    <div data-listener="modalHide characterCard characterChange" id="modal"></div>
 </body>
 <script type="module" src="bundle.js"></script>
 </html>
-<!--
-<div>
-    <div class="Portrait">
-        <img src="${row.characterImage}" alt="">
-        <div class="Name">${row.characterPronouns} </div> 
-        </div>
-        <div class"characterPronouns"> ${row.characterPronouns}
-        </div>
-        <div class="characterProfession">
-            
-        </div>
-        <div class="Character">
-            
-        </div>
-    </div>
-</div>
--->
