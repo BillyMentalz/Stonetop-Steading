@@ -4,6 +4,7 @@ import { listNode } from './data/listsHandler.js'
 import { characterNode  } from './data/charactersHandler.js';
 import { locationNode } from './data/locationsHandler.js'; 
 import { homeNode } from './data/homesHandler.js'
+import { makeIndex } from 'root/document.js'
 
 const graphNodeList = {
     'homes':  homeNode,
@@ -19,7 +20,7 @@ const dataHandlers = ()=> {
         const payload = JSON.parse(localStorage.getItem(key)) || {};
         operator.table = payload;
         for (const [id, row] of Object.entries(payload)) {
-            const element = operator.createOperator(row); 
+            const element = operator.createRow(row); 
             element.__rowReference = row;
             row.element = element;
         }
@@ -40,8 +41,18 @@ const storeNewRows = (check) => {
         else {
             const operator = graphNodeList[key];
             for ( const row of value) {
-                const index  = operator.makeIndex(operator.identifiers,row);
+                const index  = makeIndex(operator.identifiers,row);
                 if(operator.table[index] !== undefined) {
+                    const final = {
+                    prev: {},
+                    next: {}
+                    };
+                    for (const [key, value] of Object.entries(row)) {
+                        if (operator.table[index][key] !== value) {
+                            final.prev[key] = operator.table[index][key];
+                            final.next[key] = value;
+                        }
+                    }
                     operator.updateRow(row);
                 }
                 else {

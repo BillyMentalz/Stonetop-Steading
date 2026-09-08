@@ -100,6 +100,33 @@ const syncOperation = (checkSync) => {
 
 //update Operations 
 
+const readSchemas = {
+    'homes':{
+        'statement': database.prepare(`SELECT * from homes WHERE homeName = ?`),
+        'columns': ['name']
+    },
+     'stats': {
+        'statement': database.prepare(`SELECT * from stats WHERE statName = ?`),
+        'columns': ['name'] 
+    },
+    'lists': {
+        'statement':database.prepare(`SELECT * from lists WHERE listName = ? AND listOrder = ? RETURNING *`),
+        'columns': ['name', 'order']
+    },
+    'characters':{
+        'statement':database.prepare(`SELECT * from characters WHERE characterId = ? RETURNING *`),
+        'columns': ['id']
+    },
+    'locations':{
+        'statement':database.prepare(`SELECT * from locations WHERE locationHome = ? AND locationId = ? RETURNING *`),
+        'columns': ['home','id']
+    }, 
+    'markers':{
+        'statement':database.prepare(`SELECT * from markers WHERE markerHome = ? AND markerId = ? AND markerOrder = ? RETURNING *`),
+        'columns':['home','id', 'order']
+    }
+}
+
 const updateSchemas = {
     /*'homes': {
         'statement': database.prepare()
@@ -132,12 +159,26 @@ const updateOperation = (updates) => {
     try {
         database.exec('BEGIN');
         updates['time'] = updateTime.get(updates.table).syncTimeStamp;
+        const oldInfo = extractFields(updates, readSchemas[update.table].columns);
         const info = extractFields(updates, updateSchemas[updates.table].columns);
+        const oldResult = readSchemas[updates.table].statment.get(..oldInfo);
+        console.log(oldResult);
         const result = updateSchemas[updates.table].statement.get(...info);
+        console.log(result);
         database.exec('COMMIT');
+        const final = {
+            prev: {},
+            next: {}
+        };
+        for (const [key, value] of Object.entries(oldResult)) {
+            if (result[key] !== value) {
+                final.prev[key] = value;
+                final.next[key] = result[key];
+            }
+        }
         return {
             'table': updates.table,
-            'result':result
+            'result':final
         }
     }
     catch (e) {

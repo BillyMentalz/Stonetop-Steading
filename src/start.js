@@ -9,6 +9,10 @@ import { socket } from './document.js'
 dataHandlers();
 dataListenerHandler();
 
+const makeLatest = (thing) => {
+    localStorage.setItem('time', thing)
+}
+
 // the socket on 
 socket.on('connect', () => {
     let check = localStorage.getItem('time') || 0;
@@ -16,15 +20,17 @@ socket.on('connect', () => {
 });
 socket.on('create', (create)=> {
     graphNodeList[create.table].createRow(create.result);
+    makeLatest(create.result.latestModified)
 });
 socket.on('update', (update)=> {
     isUpdatingFromServerState.stepUp();
-    console.log(update.table);
     graphNodeList[update.table].updateRow(update.result);
+    makeLatest(update.result.next.latestModified)
     isUpdatingFromServerState.stepDown();
 });
 socket.on('delete', (deleted)=> {
     graphNodeList[deleted.tableName].deleteRow(deleted.deletedItem);
+    makeLatest(deleted.result.deletedAt)
 });
 socket.on('checkSync', (check)=>{
     storeNewRows(check);

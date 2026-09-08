@@ -108,7 +108,6 @@ class graphNode {
     }
     createRow(row) { // Remember to add wrappers on Deparsing and Time 
         const element = this.createOperator(row);
-        console.log(this.identifiers)
         const index = this.makeIndex( this.identifiers, row);
         element.__rowReference = row;
         row.element = element;
@@ -139,61 +138,68 @@ class graphNode {
         }
     };
     
-    updateRow(updateValue) {
-        const index = this.makeIndex( this.identifiers, updateValue);
+    updateRow(index ,updateValue) {
+        //const index = this.makeIndex( this.identifiers, updateValue.prev);
+        let newIndex = index;
         const row = this.table[index];
         if (!row) throw Error(`${row} does not exist!`);
-        const changes = {};
-        for (const [key,value] of Object.entries(updateValue))  {
-            if ( row[key] !== value ) {
-                changes[key] = row[key];
-                row[key] = value 
+        let updateKey = false;
+        for (const [key,value] of Object.entries(updateValue.next))  {
+            if (this.identifiers.includes(key)) {
+                updateKey = true;
             }
+            row[key] = value 
         }
         const element = this.updateOperator(row);
         element.__rowReference = row;
         row.element = element;
         updateIndicate(row.element);
-        if (row.subscribers) {
-            for (const [lmao, subscriber] of Object.entries(row.subscribers )) {
-                const downer = {};
-                for ( const key of subscriber.cascadeRules.up) {
-                    const newer = changes[subscriber.cascadeRules.up[key]]
-                    if (newer) downer[subscriber.cascadeRules.down[key]] =  newer;
-                }
-                for (const [key, value] of Object.entries(subscriber.cascadeRules.additional)) {
-                    if (changes[key]) downer[value] = changes[key]
-                }
-                if (downer) subscriber.self.updateCascade(subscriber,downer)
-            }
-        }
-    };
-    updateCascade(observer, changes){
-        const indexes = observer.rows;
-        for ( const [iterator, index] of indexes.entries) {
-            const row = this.table[index];
-            let needsIndexFix = false;
-            for ( const [key, value] of Object.entries(changes)) {
-                if (this.identifiers.includes(key)) needsIndexFix = true;
-                row[key] = value;
-            }
-            if (needsIndexFix) {
-                const newIndex = this.makeIndex(this.identifiers, row);
+        if (updateKey) {
+                newIndex = this.makeIndex(this.identifiers, row);
                 this.table[newIndex] = row;
-                indexes[iterator]  = newIndex;
                 delete this.table[index];
-            }
-            this.updateRow(row);
         }
+        if (row.subscribers) {
+            for (const [child, group] of Object.entries(row.subscribers )) {
+                const updates = {
+                    prev: {},
+                    next: {}
+                } 
+                for ( const [key,reference] of Object.entries(group.references)) {
+                    if (updateValue.prev[reference]) {
+                        updates.prev[key] = updateValue.prev[reference];
+                        updates.next[key] = updateValue.next[reference];
+                    }
+                }
+                if (updates) {
+                    for (const [thing, subscriberIndex] of group.rows.entries()) {
+                        let newSubscriberIndex = group.self.updateRow(subscriberIndex, updates);
+                        if (newSubscriberIndex !== subscriberIndex) {
+                            group.rows[thing] = newSubscriberIndex;
+                        }
+                    }
+                }
+            }
+        }
+        return newIndex;
     };
     deleteRow(deletedItem) {
         const row = this.table[deletedItem]
         if (!row) return;
-        if ( row.latestModified > deletedItem.deletedAt) return;
+        if (row.latestModified > deletedItem.deletedAt) return;
         this.deleteOperator(row);
         if (this.table[deletedItem].subscribers) {
-            for (const subscriber of row.subscribers ) {
-                subscriber.self.deleteCascade(deletedItem)
+            for ( const [child, group] of Object.entries(row.subscribers)) {
+                if (!group.onDelete) {
+                    for ( const [thing, subscriberIndex] of group.rows.entries()) {
+                        group.self.deleteRow()
+                    }
+                }
+                else {
+                    for ( const [thing, subscriberIndex] of group.rows.entries()) {
+                        group.onDelete(subscriberIndex , row)
+                    }
+                }
             }
         }
         delete this.table[deletedItem];
