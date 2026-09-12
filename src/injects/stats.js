@@ -2,7 +2,7 @@ import {stringToHTML } from 'root/inject.js';
 
 const radio = (name,style, options)=> {
     const elementString = `
-    <div>
+    <div class="radioContainer">
         ${options.map(option => `
             <div class="${style[0]}">
                 <input type="radio" name="${name}" value="${option}">

@@ -1,6 +1,6 @@
 import {characterRow } from 'root/injects/characters.js' 
 import {graphNode} from 'root/document.js'
-import {homeNode } from './homesHandler.js'
+import { markerNode } from './markersHandler.js'
 
 const parent = document.querySelector('#locationSelector');
 const filteredList = parent.querySelector('ul');
@@ -22,17 +22,16 @@ const locationDeleteOperator = (row) => {
     row.element.remove();
 }
 
-const locationCascadeRules  = {
-    up: ['homeName'],
-    down: ['locationHome']
-}
 
+const onDelete = {
+    action:'Cascade'
+}
 
 const locationNode = new graphNode(
     'location',
     ['locationName', 'locationId'],
-    homeNode,
-    locationCascadeRules,
+    [markerNode],
+    onDelete,
     locationCreateOperator,
     locationsUpdateOperator,
     locationDeleteOperator

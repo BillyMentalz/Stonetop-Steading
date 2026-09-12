@@ -10,46 +10,46 @@
     <script src="/socket.io/socket.io.js"></script>
 </head>
 
-<body data-listener="tabDrag tabSet">
+<body data-listener="tabDrag">
     <svg style="display:none;width:0;height:0;" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 512 512" xml:space="preserve">
         <defs>
         <g id="icon-Inkwell"> <g> <g> <path d="M306.036,422.4l-44.218-22.109c-3.491-2.327-6.982-5.818-6.982-10.473v-22.109c13.964-4.655,23.273-17.455,23.273-32.582 c0-19.782-15.127-34.909-34.909-34.909H128c-19.782,0-34.909,15.127-34.909,34.909c0,19.782,15.127,34.909,34.909,34.909h69.818 c6.982,0,11.636-4.655,11.636-11.636s-4.655-11.636-11.636-11.636H128c-6.982,0-11.636-4.655-11.636-11.636 s4.655-11.636,11.636-11.636h116.364c6.982,0,11.636,4.655,11.636,11.636s-4.655,11.636-11.636,11.636 s-11.636,4.655-11.636,11.636v32.582c0,12.8,6.982,25.6,19.782,31.418l44.218,22.109c3.491,2.327,6.982,5.818,6.982,10.473v23.273 c0,6.982-4.655,11.636-11.636,11.636H81.454c-6.982,0-11.636-4.655-11.636-11.636v-23.273c0-4.655,2.327-8.146,6.982-10.473 l44.218-22.109c11.636-5.818,19.782-17.455,19.782-31.418c0-6.982-4.655-11.636-11.636-11.636s-11.636,4.655-11.636,11.636 c0,4.655-2.327,8.145-6.982,10.473l-44.218,22.109c-12.8,4.655-19.782,17.455-19.782,30.255v23.273 c0,19.782,15.127,34.909,34.909,34.909h209.455c19.782,0,34.909-15.127,34.909-34.909v-23.273 C325.818,441.018,318.836,428.218,306.036,422.4z"></path> </g> </g> <g> <g> <path d="M438.691,3.491C436.364,1.164,432.873,0,429.382,0s-6.982,2.327-8.145,4.655L211.782,272.291 c-3.491,4.655-3.491,12.8,2.327,16.291c2.327,1.164,4.655,2.327,6.982,2.327c3.491,0,6.982-1.164,9.309-4.655l200.145-256 c8.145,12.8,11.636,30.255,11.636,51.2c0,33.745-17.455,53.527-25.6,62.836L371.2,159.418c-3.491,1.164-6.982,4.655-8.145,9.309 c-1.164,3.491,1.164,8.145,3.491,10.473l18.618,16.291c-24.436,22.109-52.364,39.564-97.745,48.873 c-5.818,1.164-10.473,8.145-9.309,13.964c1.164,5.818,8.146,10.473,13.964,9.309c60.509-12.8,91.927-38.4,117.527-64 c2.327-2.327,3.491-6.982,3.491-10.473c0-2.327-2.327-4.655-3.491-6.982l-12.8-11.636l29.091-10.473 c1.164,0,3.491-2.327,4.655-3.491c23.273-20.945,34.909-48.873,34.909-79.127C465.455,47.709,456.145,20.945,438.691,3.491z"></path> </g> </g> </g>
         </defs>
     </svg>
     <div class="left-side">
-        <div id="stonetop">
+        <h1>
             Stonetop
-        </div>
+        </h1>
         <div data-listener="statChange" id="sidebar">
-            <div class="topunit">
+            <div class="Headers">
                 <div class="subunits">
-                    <img src="assets/fortune1.png" alt="">
+                    <img class="statpics" src="assets/fortune1.png" alt="">
                     <div data-entrypoint="radio" class="subdiv" id="Fortunes" >
-                        <label class="S"> Fortunes </label>
+                        <h5> Fortunes </h5>
                     </div>
                 </div>
                 <div class="subunits">
-                    <img src="assets/surplus.png" alt="">
+                    <img class="statpics" src="assets/surplus.png" alt="">
                     <div data-entrypoint="radio" class="subdiv" id="Surplus" >
-                        <label class="S"> Surplus </label>
+                        <h5> Surplus </h5>
                     </div>
                 </div>
                 <div class="subunits">
-                    <img src="assets/debilites.png" alt="">
+                    <img class="statpics" src="assets/debilites.png" alt="">
                     <div class="subdiv">
-                        <label class="S"> Debilities </label >
+                        <h5> Debilities </h5 >
+                        <label> Diminished </label>
                         <div data-entrypoint="checkbox" id="Diminished">
-                            <label> Diminished </label>
                         </div> 
+                        <label> Lacking </label>
                         <div data-entrypoint="checkbox" id="Lacking">
-                            <label> Lacking </label>
                         </div> 
+                        <label> Malcontent </label>
                         <div data-entrypoint="checkbox" id="Malcontent">
-                            <label> Malcontent </label>
                         </div> 
                     </div>
                 </div>
-                <div class="units" style="flex-grow:1;display:flex;flex-direction:column;font-size:1.8rem;">
+                <div class="dubunits">
                     <div data-entrypoint="select" id="Stonetop-Size">
                         <label>Size </label>
                     </div>
@@ -64,57 +64,54 @@
             <div class="units">
                 <div data-entrypoint="radio" class="column1" id="Prosperity" >
                     <div class="coltitle">
-                        <p class="columnTitle">Prosperity</p>
-                        <p class="S">Starts at 0</p>
+                        <h3>Prosperity</h3>
+                        <h5>Starts at 0</h5>
                     </div>
                 </div>
-                <div data-listener="listAdd listEdit" data-entrypoint='lists' class="column2 Contain" data-contain='Resources' id="Resources" > 
-                    <div class="tabHeaders">
-                        <p class="S">Resources</p>
-                        <svg class='tabIcon' xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 512 512" xml:space="preserve">
+                <div data-listener="listCard" data-entrypoint='lists' class="column2" id="Resources" > 
+                    <div class="Headers">
+                        <h5>Resources</h5>
+                        <svg data-click="Add" class='tabIcon' xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 512 512" xml:space="preserve">
                             <use href="#icon-Inkwell">
                         </svg>
                     </div>
-                    <ul>
-                    </ul>
+                    <div class="column3">
+                        <ul>
+                        </ul>
+                    </div>
                 </div>
             </div>
             <div class="units">
                 <div data-entrypoint="radio" class="column1" id="Defenses">
                     <div class="coltitle">
-                        <p class="columnTitle">Defenses</p>
-                        <p class="S">Starts at 0</p>
+                        <h3>Defenses</h3>
+                        <h5>Starts at 0</h5>
                     </div>
                 </div>
-                <div data-listener="listAdd listEdit" data-entrypoint="lists" class="column2 Contain" data-contain='Fortifications' id="Fortifications">
-                    <div class="tabHeaders">
-                        <p class="S">
-                            Fortifications, etc.
-                        </p>
-                        <svg class='tabIcon' xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 512 512" xml:space="preserve">
+                <div data-listener="listCard" data-entrypoint="lists" class="column2" id="Fortifications">
+                    <div class="Headers">
+                        <h5>Fortifications, etc.</h5>
+                        <svg data-click="Add" class='tabIcon' xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 512 512" xml:space="preserve">
                             <use href="#icon-Inkwell">
                         </svg>
                     </div>
-                    <ul>
-                    </ul>
+                    <div class="column3">
+                       <ul>
+                       </ul> 
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     <div id="right-side">
-         <div data-listener="menuToggle" id="topbar">
-            <div  id="guide"> 
+         <div data-listener="menuCard" id="topbar">
+            <div data-click="MenuToggle" id="guide"> 
             </div>
-            <div data-listener="tabToggle"id="menu">
-                <div class="menuItem openTab" data-toggle="locations"> Locations 
-                </div>
-                <div class="menuItem openTab"data-toggle="characters"> Characters </div>
-                <div class="menuItem openTab" data-toggle="worldMaps"> Maps 
-                    <div class ="menuContent">
-                        Coming soon!
-                    </div>
-                </div>
-                <div class="menuItem openTab" data-toggle="assets"> Assets </div>
+            <div id="menu">
+                <h4 data-click="TabToggle" class="menuItem" data-toggle="worldMaps">  Maps </h4>
+                <h4 data-click="TabToggle" class="menuItem" data-toggle="locations"> Locations </h4>
+                <h4 data-click="TabToggle" class="menuItem" data-toggle="characters">  Characters </h4>
+                <h4 data-click="TabToggle" class="menuItem" data-toggle="assets">  Assets </h4>
                 <div class="menuItem comingSoon"> 
                     Improvments
                     <div class ="menuContent">
@@ -133,12 +130,12 @@
             <div id="Legend-Stonetop-1" class="indicators draggable"><p class="markers">A</p></div>
         </div>
     </div> 
-    <div id="locations" class="tabs Contain" data-contain="locationTable" >
+    <div id="locations" class="tabs" >
         <div data-entrypoint='locations' id='locationSelector' > 
-            <div class="tabHeaders">
-                <div class="tabTitle">
+            <div class="Headers">
+                <h3>
                     Locations 
-                </div>
+                </h3>
                 <svg class='tabIcon' xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 512 512" xml:space="preserve">
                         <use href="#icon-Inkwell">
                 </svg>
@@ -161,20 +158,18 @@
             <div class="characterTraits"></div>
         </div>
     </div>
-    <div data-listener="characterAdd characterArrange" id="characters" class="tabs Contain" data-contain="characterTable">
+    <div data-listener="characterList" id="characters" class="tabs">
         <div data-entrypoint="characters" id='characterSelector' >
-            <div class="tabHeaders">
-                <div class="tabTitle">
-                    Characters 
-                </div>
-                <svg class='tabIcon' xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 512 512" xml:space="preserve">
+            <div class="Headers">
+                <h3>Characters</h3>
+                <svg class='tabIcon' data-click="Add" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 512 512" xml:space="preserve">
                     <use href="#icon-Inkwell">
                 </svg>
             </div>
-            <div class='filterRow' style="display:flex;flex-direction:row;">
+            <div data-change="FilterSort" style="display:flex;flex-direction:row;">
                 <label> Home: </label>
                 <select data-entrypoint="homes" name="Home">
-                    <option value=" "> </option>
+                    <option value="null"> </option>
                 </select>
                 <label>Sort:</label> 
                 <select name="Sort">
@@ -187,7 +182,7 @@
                     <option value="Name(Descending)">Name (Descending)</option>
                 </select>
             </div>
-            <table >
+            <table id="characterListTable" >
                 <thead>
                     <tr >
                         <th>Name</th>
@@ -195,40 +190,44 @@
                         <th>Traits, Relations, Etc</th>
                     </tr>
                 </thead>
-                <tbody data-listener="characterSelect" id="characterTable">
+                <tbody id="characterTable">
                 </tbody>
             </table>
         </div>
     </div> 
     </div>
-    <div id="worldMaps" class="tabs ">
-        <div class="columnTitle">
-           Map 
-        </div>
-        <ul>
-        </ul>
-        <div> Maps coming soon! </div>
-    </div>
-    <div data-listener="statChange" id="assets" class="tabs Contain" data-contain="Assets">
-        <div data-listener="listAdd listEdit" id="Assets">
-            <div>
-            <div class="tabHeaders">
-                <div class="tabTitle">
-                    Assets 
-                </div>
-                <svg class='tabIcon' xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 512 512" xml:space="preserve">
+    <div data-listener="homeForm" id="worldMaps" class="tabs">
+        <div class="mapList">
+            <div class="Headers">
+                <h3> Maps </h3>
+                <svg data-click="Add" class='tabIcon' xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 512 512" xml:space="preserve">
                     <use href="#icon-Inkwell">
                 </svg>
             </div>
-            <p class= "S">Owned by the residents of Stonetop in common. To take them on an expedition or other put them at risk, you must Requisition </p>
+            <div data-entrypoint="maps">
+                <ul>
+                </ul>
             </div>
-            <ul>
-            </ul>
         </div>
-
+        <div id="extra">
+        </div>
+    </div>
+    <div data-listener="statChange" id="assets" class="tabs">
+        <div data-listener="listCard" id="Assets">
+            <div class="Headers">
+                <h3> Assets </h3>
+                <svg data-click="Add" class='tabIcon' xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 512 512" xml:space="preserve">
+                    <use href="#icon-Inkwell">
+                </svg>
+            </div>
+            <h5>Owned by the residents of Stonetop in common. To take them on an expedition or other put them at risk, you must Requisition </h5>
+            <div class="column4">
+                <ul>
+                </ul>
+            </div>
+        </div>
         <div class="divider"></div>
-        <label class="columnTitle"> Silver </label>
-
+        <h4> Silver </h4>
         <div class="coins">
             <div data-entrypoint="number-asset" class="numbers" id="Silver-Purses" >
                 <label class="numbersTitle"> Purses </label>
@@ -242,7 +241,7 @@
         </div>
         <div class="divider"></div>
 
-        <label class="columnTitle"> Gold </label>
+        <h4> Gold </h4>
         <div class="coins">
             <div data-entrypoint="number-asset" class="numbers" id="Gold-Purses" >
                 <label class="numbersTitle"> Purses </label>
@@ -258,12 +257,12 @@
 
     <template id="addBoxTemplate">
         <div style="display:flex;flex-direction:row;height:1.5rem;">
-            <button type="buttons" name="Change">
+            <button data-click="Change" type="buttons" name="Change">
                 <svg  viewBox="-4 0 32 32"  xmlns="http://www.w3.org/2000/svg">
                     <path id="check-mark" d="M19.375 5.063l-9.5 13.625-6.563-4.875-3.313 4.594 11.188 8.531 12.813-18.375z"></path> 
                 </svg>
             </button>
-            <button type="buttons" name="Delete" >
+            <button data-click="Delete" type="buttons" name="Delete" >
                 <svg viewBox="0 -0.5 8 8"  xmlns="http://www.w3.org/2000/svg">
                     <g id="cross-mark" transform="translate(-385.000000, -206.000000)"> 
                     <g transform="translate(56.000000, 160.000000)"> 
@@ -277,7 +276,8 @@
     </template>
     <datalist data-entrypoint="homes" id="homesFilter">
     </datalist>
-    <div data-listener="modalHide characterCard characterChange" id="modal"></div>
+    <div data-listener="modalHide characterCard" id="modal"></div>
 </body>
 <script type="module" src="bundle.js"></script>
 </html>
+

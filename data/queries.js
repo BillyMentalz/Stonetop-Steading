@@ -26,27 +26,27 @@ const updateTime = database.prepare(`
 const insertSchemas = {
     'homes':{
         'statement': database.prepare(`INSERT INTO homes (homeName, latestModified) VALUES (?,?) RETURNING *`),
-        'columns': ['name','time']
+        'columns': ['homeName','time']
     },
     'stats': {
         'statement': database.prepare(`INSERT INTO stats(statName, statType, statOptions, statValue, latestModified) VALUES (?,?,?,?,?) RETURNING *`),
-        'columns': ['name', 'type','options', 'value', 'time'] 
+        'columns': ['statName', 'statType','statOptions', 'statValue', 'time'] 
     },
     'lists': {
-        'statement': database.prepare(`INSERT INTO lists (listName, listOrder, listText, latestModified) VALUES (?,?,?,?) RETURNING *`),
-        'columns': ['name', 'order', 'text', 'time']
+        'statement': database.prepare(`INSERT INTO lists (listName, listText, latestModified) VALUES (?,?,?) RETURNING *`),
+        'columns': ['listName', 'listText', 'time']
     },
     'characters':{
-        'statement':database.prepare(`INSERT INTO characters (characterId, characterHome, characterName, characterPronouns, characterProfession,  characterTraits,  characterInfo, characterCreationDate ,latestModified) VALUES (?,?,?,?,?,?,?,?,?) RETURNING *`),
-        'columns': ['id', 'home', 'name', 'pronouns', 'profession', 'traits',  'info', 'time','time']
+        'statement':database.prepare(`INSERT INTO characters (characterHome, characterName, characterPronouns, characterProfession,  characterTraits,  characterInfo, characterCreationDate ,latestModified) VALUES (?,?,?,?,?,?,?,?) RETURNING *`),
+        'columns': ['characterHome', 'characterName', 'characterPronouns', 'characterProfession', 'characterTraits',  'characterInfo', 'time','time']
     },
     'locations':{
-        'statement':database.prepare(`INSERT INTO locations (locationHome, locationId, locationSignifier, locationName, locationInfo, latestModified) VALUES (?,?,?,?,?,?) RETURNING *`),
-        'columns': ['home', 'signifier', 'name', 'text', 'time']
+        'statement':database.prepare(`INSERT INTO locations (locationHome, locationSignifier, locationName, locationInfo, latestModified) VALUES (?,?,?,?,?) RETURNING *`),
+        'columns': ['locationHome', 'locationSignifier', 'locationName', 'locationInfo', 'time']
     }, 
     'markers':{
-        'statement':database.prepare(`INSERT INTO markers (markerHome, markerId, markerSignifier, markerOrder, markerX, markerY, latestModified) VALUES (?,?,?,?,?,?,?) RETURNING *`),
-        'columns':['home', 'signifier', 'order', 'x','y', 'time']
+        'statement':database.prepare(`INSERT INTO markers (markerHome, markerId, markerOrder, markerX, markerY, latestModified) VALUES (?,?,?,?,?,?) RETURNING *`),
+        'columns': ['markerHome', 'markerId', 'markerOrder', 'markerX', 'markerY', 'time']
     } 
 };
 
@@ -77,10 +77,11 @@ const syncSchemas = {
     'lists': database.prepare('SELECT * FROM lists WHERE ? < latestModified ORDER BY listName, listOrder'),
     'characters': database.prepare('SELECT * FROM characters WHERE ? < latestModified ORDER BY characterCreationDate'),
     'locations':database.prepare('SELECT * FROM locations  WHERE ? < latestModified ORDER BY locationHome, locationSignifier'),
-    'markers':database.prepare('SELECT * FROM markers  WHERE ? < latestModified ORDER BY markerHome, markerSignifier, markerOrder, latestModified'),
+    'markers':database.prepare('SELECT * FROM markers WHERE ? < latestModified ORDER BY markerHome, markerId,  markerOrder, latestModified'),
     "deleteRecords":database.prepare(`SELECT * FROM deleteRecords WHERE ? < deletedAt `),
     'time': database.prepare(`SELECT CURRENT_TIMESTAMP`)
 };
+
 
 const syncOperation = (checkSync) => {
     try {
@@ -99,59 +100,32 @@ const syncOperation = (checkSync) => {
 }
 
 //update Operations 
-
-const readSchemas = {
-    'homes':{
-        'statement': database.prepare(`SELECT * from homes WHERE homeName = ?`),
-        'columns': ['name']
-    },
-     'stats': {
-        'statement': database.prepare(`SELECT * from stats WHERE statName = ?`),
-        'columns': ['name'] 
-    },
-    'lists': {
-        'statement':database.prepare(`SELECT * from lists WHERE listName = ? AND listOrder = ? RETURNING *`),
-        'columns': ['name', 'order']
-    },
-    'characters':{
-        'statement':database.prepare(`SELECT * from characters WHERE characterId = ? RETURNING *`),
-        'columns': ['id']
-    },
-    'locations':{
-        'statement':database.prepare(`SELECT * from locations WHERE locationHome = ? AND locationId = ? RETURNING *`),
-        'columns': ['home','id']
-    }, 
-    'markers':{
-        'statement':database.prepare(`SELECT * from markers WHERE markerHome = ? AND markerId = ? AND markerOrder = ? RETURNING *`),
-        'columns':['home','id', 'order']
-    }
-}
-
 const updateSchemas = {
-    /*'homes': {
-        'statement': database.prepare()
-    },*/
+    'homes': {
+        'statement': database.prepare(`UPDATE homes SET homeName = ?, homeImage = ?, homeTagLine = ?, latestModified = ? WHERE homeId = ? RETURNING *`),
+        'columns': ['homeName', 'homeImage', 'homeTagline', 'time', 'homeId']
+    },
     'stats': {
         'statement': database.prepare(`UPDATE stats SET statValue = ?, latestModified = ?  WHERE statName = ? AND statType = ? RETURNING *`),
-        'columns': ['value','time', 'name','type']
+        'columns': ['statValue','time', 'statName','statType']
     },
     'lists': {
-        'statement':database.prepare(`UPDATE lists SET listText = ?, latestModified = ?  WHERE listName = ? AND listOrder =? RETURNING *`),
-        'columns': ['text','time', 'name','order']
+        'statement':database.prepare(`UPDATE lists SET listText = ?, latestModified = ?  WHERE listName = ? AND listOrder = ? RETURNING *`),
+        'columns': ['listText','time', 'listName', 'listOrder']
     },
     'characters':{
         'statement':database.prepare(`UPDATE characters 
         SET characterHome = ?, characterName = ?, characterPronouns = ?, characterProfession = ?, characterTraits = ?, characterInfo = ?,characterImage = ?, latestModified = ? 
         WHERE characterId = ? RETURNING *`),
-        'columns': [ 'home', 'name', 'pronouns', 'profession', 'traits',  'info', 'image', 'time', 'id' ]
+        'columns': [ 'characterHome', 'characterName', 'characterPronouns', 'characterProfession', 'characterTraits',  'characterInfo', 'characterImage', 'time', 'characterId' ]
     },
     'locations':{
         'statement':database.prepare(`UPDATE locations SET locationName = ?, locationInfo = ?, locationSignifier = ?, latestModified = ? WHERE locationHome = ? AND locationId = ? RETURNING *`),
-        'columns':['name','text','locationSignifier', 'time', 'home', 'id']
+        'columns':['locationName','locationInfo','locationSignifier', 'time', 'locationHome', 'locationId']
     },
     'markers': {
         'statement': database.prepare(`UPDATE markers SET markerX = ? ,markerY = ?, latestModified = ? WHERE markerHome = ? AND markerId = ? AND markerOrder = ? RETURNING *`),
-        'columns':['x', 'y','time', 'home', 'id', 'number']
+        'columns':['markerX', 'markerY','time', 'markerHome', 'markerId', 'markerOrder']
     }
 }
 
@@ -159,26 +133,12 @@ const updateOperation = (updates) => {
     try {
         database.exec('BEGIN');
         updates['time'] = updateTime.get(updates.table).syncTimeStamp;
-        const oldInfo = extractFields(updates, readSchemas[update.table].columns);
         const info = extractFields(updates, updateSchemas[updates.table].columns);
-        const oldResult = readSchemas[updates.table].statment.get(..oldInfo);
-        console.log(oldResult);
         const result = updateSchemas[updates.table].statement.get(...info);
-        console.log(result);
         database.exec('COMMIT');
-        const final = {
-            prev: {},
-            next: {}
-        };
-        for (const [key, value] of Object.entries(oldResult)) {
-            if (result[key] !== value) {
-                final.prev[key] = value;
-                final.next[key] = result[key];
-            }
-        }
         return {
             'table': updates.table,
-            'result':final
+            'result':result
         }
     }
     catch (e) {
@@ -192,27 +152,27 @@ const updateOperation = (updates) => {
 const deleteSchemas  = {
     'homes':{
         'statement': database.prepare(`DELETE from homes WHERE homeName = ?`),
-        'columns': ['name']
+        'columns': ['homeName']
     },
     /* 'stats': {
         'statement': database.prepare(`DELETE from stats WHERE statName = ?`),
-        'columns': ['name', 'type', 'value', 'time'] 
+        'columns': ['statName', 'statType'] 
     },*/
     'lists': {
         'statement':database.prepare(`DELETE from lists WHERE listName = ? AND listOrder = ? RETURNING *`),
-        'columns': ['name', 'order']
+        'columns': ['listName', 'listOrder']
     },
     'characters':{
         'statement':database.prepare(`DELETE from characters WHERE characterId = ? RETURNING *`),
-        'columns': ['id']
+        'columns': ['characterId']
     },
     'locations':{
-        'statement':database.prepare(`DELETE from locations WHERE locationHome = ? AND locationId = ? RETURNING *`),
-        'columns': ['home','id']
+        'statement':database.prepare(`DELETE from locations WHERE  locationId = ? AND locationHome = ? RETURNING *`),
+        'columns': ['locationId', 'locationHome']
     }, 
     'markers':{
         'statement':database.prepare(`DELETE from markers WHERE markerHome = ? AND markerId = ? AND markerOrder = ? RETURNING *`),
-        'columns':['home','id', 'order']
+        'columns':['markerHome','markerId', 'markerOrder']
     }
 }
 const deleteRecordExists = database.prepare(`SELECT EXISTS(SELECT 1 FROM deleteRecords WHERE tableName = ? AND deletedItem = ?) AS hasOld`);
@@ -225,9 +185,7 @@ const deleteOperation  = (deletion) => {
         const time = updateTime.get('deleteRecords').syncTimeStamp;
         const result = deleteSchemas[deletion.table].statement.get(...info);
         const hasOld = deleteRecordExists.get(deletion.table, info.join('/%/'));
-        console.log(hasOld)
         const deleteRecord = hasOld.hasOld ? deleteRecordUpdate.get(time, deletion.table , info.join('/%/')): deleteRecordStatement.get(deletion.table, info.join('/%/'), time);
-        console.log(deleteRecord);
         database.exec('COMMIT');
         return deleteRecord;
         }

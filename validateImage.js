@@ -19,9 +19,8 @@ const getImageType = (buffer) => {
                 }
             }
             else {
-                    return { ext, mime, type};
-                }
-
+                return { ext, mime, type};
+            }
         }
     }
     return null;
@@ -38,11 +37,10 @@ const validateAndSanitizeImage = async(req, res, next)=> {
         const MAX_FILE_SIZE = 5* 1024 * 1024;
         if (fileBuffer.length > MAX_FILE_SIZE) return res.status(413).json({error: 'File too large (max 5mb)'});
         const imageType = getImageType(fileBuffer);
-        console.log(imageType);
         if (imageType == null) return res.status(400).json({error: 'Invalid image file type'}) 
         const safeBuffer = await sharp(fileBuffer).rotate().toBuffer();
-        const safeFilename = `${req.body.characterId}.${imageType.ext}`;
-        const uploadDir = join(__dirname, '/public/characters');
+        const safeFilename = `${req.body.filename}.${imageType.ext}`;
+        const uploadDir = join(__dirname, `public/${req.body.src}` );
         await fs.mkdir(uploadDir, { recursive: true });
         const filePath = join(uploadDir, safeFilename);
         await fs.writeFile(filePath, safeBuffer);

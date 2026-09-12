@@ -75,12 +75,14 @@ const statsDeleteOperator = (row) => {
     const selectedElement = row.element;
     selectedElement.remove();
 }
-
+const onDelete = {
+    action:'Cascade'
+}
 const statNode = new graphNode( 
     'stats',
     ['statName'],
-    {},
-    {},
+    [],
+    onDelete,
     statsCreateOperator,
     statsUpdateOperator,
     statsDeleteOperator

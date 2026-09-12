@@ -8,9 +8,9 @@ const statChange = [
         if (sidebarEvents.includes(eType)) {
             socket.emit('update', {
             table: 'stats',
-            name: event.target.name,
-            type: event.target.type,
-            value: (eType == 'checkbox') ? event.target.checked.toString() :  event.target.value
+            statName: event.target.name,
+            statType: event.target.type,
+            statValue: (eType == 'checkbox') ? event.target.checked.toString() :  event.target.value
             });
         }
     }

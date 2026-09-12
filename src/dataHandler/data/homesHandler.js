@@ -1,9 +1,12 @@
 import { maps , graphNode} from 'root/document.js'
 import { locationNode } from './locationsHandler.js'
-import { newHome, newSelectionHome } from 'root/injects/homes.js'
+import { characterNode } from './charactersHandler.js'
+import { newHome, newSelectionHome, homeCard} from 'root/injects/homes.js'
+const homeCardLocation = document.querySelector('#extra');
+const homeTab = document.getElementById('worldMaps');
+const worldMap = homeTab.querySelector('ul');
 
 const store = {};
-const worldMap = document.querySelector('#worldMaps ul');
 
 const createSelection = (row) => {
     const parents = document.querySelectorAll(`[data-entrypoint="homes"]`);
@@ -25,7 +28,7 @@ const createSelection = (row) => {
 const updateSelection = (homeStore, row)=> {
     let newHomeStore = []
     homeStore.forEach(element => {
-        let newElement  = null;
+        let newElement = null;
         if (element.tagName !== 'OPTION') return;
         newElement = newSelectionHome(row);
         element.replaceWith(newElement);
@@ -44,6 +47,15 @@ const homesCreateOperator = (row )=>{
 const homesUpdateOperator = (row)=> {
     const newHomeElement = newHome(row);
     newHomeElement.__selectionReference = updateSelection(row.element.__selectionReference, row);
+    if (row.card ) {
+        row.card = homeCard(row);
+        row.card.__rowReference = row;
+        if ( homeTab.dataset.selected == row.homeId) {
+            homeCardLocation.removeChild(homeCardLocation.firstChild);
+            homeCardLocation.append(row.card);
+
+        }
+    }
     row.element.replaceWith(newHomeElement);
     return newHomeElement;
 }
@@ -51,19 +63,43 @@ const homesUpdateOperator = (row)=> {
 const homesDeleteOperator = (row)=> {
     const removal = row.element.__selectionReference
     removal.forEach(element => { element.remove()});
+    if (row.card ) {
+        if ( homeTab.dataset.selected == row.homeId) {
+            homeCardLocation.removeChild(homeCardLocation.firstChild);
+            homeTab.classList.remove("expanded");
+            homeTab.dataset.selected = "noneAtTheMoment"
+        }
+    }
     row.element.remove();
 };
 
+const onDelete = {
+    action:'Cascade'
+}
+
 const homeNode = new graphNode(
     'homes',
-    ['homeName'],
-    {},
-    {},
+    ['homeId'],
+    [locationNode, characterNode],
+    onDelete,
     homesCreateOperator,
     homesUpdateOperator,
     homesDeleteOperator,
+    'worldMaps'
 )
 
+const getHomeName = (id)=> { return homeNode.table[id].homeName; }
+const getHomeId = (name) => { 
+    for (const [key, row] of Object.entries(homeNode.table)) {
+        if (row.homeName == name) {
+            return key;
+        }
+    }
+    throw Error(`This home does not exist! Home: ${name}`)
+}
+
 export {
-    homeNode
+    homeNode,
+    getHomeName,
+    getHomeId
 }

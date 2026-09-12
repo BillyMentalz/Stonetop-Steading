@@ -8,11 +8,11 @@ import { makeIndex } from 'root/document.js'
 
 const graphNodeList = {
     'homes':  homeNode,
-    'markers': markerNode,
     'characters': characterNode, 
-    'locations': locationNode,
     'stats': statNode,
     'lists': listNode, 
+    'locations': locationNode,
+    'markers': markerNode,
 };
 
 const dataHandlers = ()=> {
@@ -20,7 +20,7 @@ const dataHandlers = ()=> {
         const payload = JSON.parse(localStorage.getItem(key)) || {};
         operator.table = payload;
         for (const [id, row] of Object.entries(payload)) {
-            const element = operator.createRow(row); 
+            const element = operator.createOperator(row); 
             element.__rowReference = row;
             row.element = element;
         }

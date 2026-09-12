@@ -50,12 +50,12 @@ const markerAdd = [
     (parent, element, event)=> {
     socket.emit('create', {
                 table:'markers',
-                home: "temp",
-                id: "temp",
-                order: "Temp",
+                markHome: "temp",
+                markerId: "temp",
+                markerOrder: "Temp",
                 markerSignifier: "A",
-                x: "50%",
-                y: "50%"
+                markerX: "50",
+                markerY: "50"
         }
     )}
 ]

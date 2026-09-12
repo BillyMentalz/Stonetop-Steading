@@ -1,6 +1,6 @@
 import {storeNewRows, dataHandlers , graphNodeList , saveData } from './dataHandler/syncHandler.js'
 import { dataListenerHandler} from './dataListenerHandlers/dataListenerHandler.js'
-import { isUpdatingFromServerState} from './document.js'
+import { isUpdatingFromServerState, makeIndex} from './document.js'
 import { socket } from './document.js'
 //import { dataEntryPointPreparation} from './entryPoints/entryPoints.js'
 //
@@ -24,13 +24,14 @@ socket.on('create', (create)=> {
 });
 socket.on('update', (update)=> {
     isUpdatingFromServerState.stepUp();
-    graphNodeList[update.table].updateRow(update.result);
-    makeLatest(update.result.next.latestModified)
+    graphNodeList[update.table].updateRow( update.result);
+    makeLatest(update.result.latestModified)
     isUpdatingFromServerState.stepDown();
 });
 socket.on('delete', (deleted)=> {
+    console.log(deleted);
     graphNodeList[deleted.tableName].deleteRow(deleted.deletedItem);
-    makeLatest(deleted.result.deletedAt)
+    makeLatest(deleted.deletedAt)
 });
 socket.on('checkSync', (check)=>{
     storeNewRows(check);

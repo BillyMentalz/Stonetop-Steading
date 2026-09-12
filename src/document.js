@@ -87,13 +87,17 @@ class Row {
     
 }
 */
+const makeIndex  = (requirements, row) => {
+        const index = requirements.map(item=>row[item]).join('/%/');
+        return index;
+}
 class graphNode {
-    constructor(name , identifiers,  parent, cascadeRules, createOperator, updateOperator, deleteOperator, attachElement ) {
+    constructor(name , identifiers, children, onDelete, createOperator, updateOperator, deleteOperator, attachElement ) {
         this.table = {};
         this.name = name;
         this.identifiers = identifiers; 
-        this.parent = parent;
-        this.cascadeRules = cascadeRules;
+        this.children = children;
+        this.onDelete = onDelete
         this.createOperator = createOperator;
         this.updateOperator = updateOperator;
         this.deleteOperator = deleteOperator;
@@ -102,127 +106,86 @@ class graphNode {
             this.attachElement.__graphNodeRef = this; 
         }
     }
-    makeIndex (requirements, row) {
-        const index = requirements.map(item=>row[item]).join('/%/');
-        return index;
-    }
-    createRow(row) { // Remember to add wrappers on Deparsing and Time 
+
+    createRow(row) { 
+        const index = makeIndex( this.identifiers, row);
         const element = this.createOperator(row);
-        const index = this.makeIndex( this.identifiers, row);
         element.__rowReference = row;
         row.element = element;
         this.table[index] = row;
         updateIndicate(element);
-        if (Object.keys(this.cascadeRules).length !== 0) {
-            const upIndex = (this.cascadeRules.down == undefined) ? row.characterHome :this.makeIndex(this.cascadeRules.down, row);
-            const subscribeObject = {
-                self: this,
-                cascadeRules: this.cascadeRules,
-                rows: [index ]
-            }
-            this.parent.addSubscriber(upIndex, this.name,  subscribeObject);
-        }
     };
 
-    addSubscriber(index, child, subscriberWrapper) {
-        const row = this.table[index];
-        if (!row) throw Error (`Index does not exist! Gen Index: ${index} child: ${child}`)
-        if (row.subscribers === undefined) row.subscribers = {};
-        if (Object.keys(row.subscribers).length !== 0 && row.subscribers[child]) {
-            const oldrows = row.subscribers[child].rows
-            const newrows = subscriberWrapper.rows
-            row.subscribers[child].rows = [...oldrows, ...newrows]
-            }
-        else {
-            row.subscribers[child] = subscriberWrapper
-        }
-    };
-    
-    updateRow(index ,updateValue) {
-        //const index = this.makeIndex( this.identifiers, updateValue.prev);
-        let newIndex = index;
+    updateRow(updateValue) {
+        const index = makeIndex(this.identifiers, updateValue);
         const row = this.table[index];
         if (!row) throw Error(`${row} does not exist!`);
-        let updateKey = false;
-        for (const [key,value] of Object.entries(updateValue.next))  {
-            if (this.identifiers.includes(key)) {
-                updateKey = true;
-            }
+        for (const [key,value] of Object.entries(updateValue))  {
             row[key] = value 
         }
         const element = this.updateOperator(row);
         element.__rowReference = row;
         row.element = element;
         updateIndicate(row.element);
-        if (updateKey) {
-                newIndex = this.makeIndex(this.identifiers, row);
-                this.table[newIndex] = row;
-                delete this.table[index];
-        }
-        if (row.subscribers) {
-            for (const [child, group] of Object.entries(row.subscribers )) {
-                const updates = {
-                    prev: {},
-                    next: {}
-                } 
-                for ( const [key,reference] of Object.entries(group.references)) {
-                    if (updateValue.prev[reference]) {
-                        updates.prev[key] = updateValue.prev[reference];
-                        updates.next[key] = updateValue.next[reference];
-                    }
-                }
-                if (updates) {
-                    for (const [thing, subscriberIndex] of group.rows.entries()) {
-                        let newSubscriberIndex = group.self.updateRow(subscriberIndex, updates);
-                        if (newSubscriberIndex !== subscriberIndex) {
-                            group.rows[thing] = newSubscriberIndex;
-                        }
-                    }
-                }
-            }
-        }
-        return newIndex;
+        
     };
+
     deleteRow(deletedItem) {
         const row = this.table[deletedItem]
         if (!row) return;
         if (row.latestModified > deletedItem.deletedAt) return;
         this.deleteOperator(row);
-        if (this.table[deletedItem].subscribers) {
-            for ( const [child, group] of Object.entries(row.subscribers)) {
-                if (!group.onDelete) {
-                    for ( const [thing, subscriberIndex] of group.rows.entries()) {
-                        group.self.deleteRow()
-                    }
-                }
-                else {
-                    for ( const [thing, subscriberIndex] of group.rows.entries()) {
-                        group.onDelete(subscriberIndex , row)
-                    }
-                }
+        if (this.children) {
+            for ( const children of this.children ) {
+                    children.deleteCascader(row);
             }
-        }
+        };
         delete this.table[deletedItem];
-        
     };
-    deleteCascade(id){
-        if (Object.keys(this.cascadeRules.up).length === 0) {
-            for ( const [key, value] of Object.entries(this.table)){
-                if (key.startsWith(id)) {
-                    this.deleteRow(key);
-                };
+
+    deleteCascader(upStreamRow) {
+        if (this.onDelete.action == "setDefault") {
+            for (const [key, row] of Object.entries) {
+                if ( row[this.onDelete.key] == upStreamRow[this.onDelete.reference]) {
+                    row[this.onDelete.key] = this.onDelete.default
+                }
             }
         }
         else {
-            for (const [key, value] of this.table) {
-                if (value.characterHome == id) {
-                    value.characterHome = "At World's End"
-                    this.updateOperator(value);
-                }
+            for (const [key,row] of Object.entries) { if (key.startsWith(upStreamRow)) this.deleteRow(key) }
+        }
+    }
+}
+
+const filehelper =  ( folder, filename, fileInput, fileEmitFunction ) => {
+    const reader = new FileReader();
+    reader.onload = (e)=> {
+        const base64String = e.target.result; 
+        fetch('/api/upload', {
+            method:'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                src: folder ,
+                image: base64String,
+                filename: filename
+            })     
+        }).then(response => {
+            if (response.ok) {
+                return response.json()
+            }
+            else {
+                throw new Error(`Upload Failed with Response Code ${response.status}`)
             }
         }
-        /*This last part is just me being lazy. Only motherfuckers has the ability to forego death if a location is dying */
-    };
+        ).then(data => {
+            const character = folder + "/" + data.fileName;
+            fileEmitFunction(character);
+        }).catch(error => {
+                console.error('Upload Error' , error)
+        })
+    }
+    const [file] = fileInput.files
+    reader.readAsDataURL(file);
 }
 export { 
     LinkedList,
@@ -231,5 +194,7 @@ export {
     isUpdatingFromServerState,
     addBoxTemplate,
     maps,
-    characters
+    characters,
+    makeIndex,
+    filehelper
     };

@@ -13,52 +13,32 @@ const characterSort = {
     "Name(Descending)":     (a, b) => { return -(a.characterName.localeCompare(b.characterName))}
 }
 
-function mockRandomUUID() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    const r = Math.random() * 16 | 0;
-    // Set the version bit (4) and variant bit (8, 9, a, or b) to match RFC 4122 v4 specifications
-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
-}
-const characterAdd  = [
-    'click',
-    '.tabIcon',
-    (parent, element, event)=> {
+
+const characterAdd  = (element, event)=> {
         const result = {
             table:'characters',
-            id: mockRandomUUID(),
-            home: `${filterHomeValue.value !== " " ? filterHomeValue.value : "At World's End"}`,
-            name: 'New Character',
-            pronouns: 'They/them',
-            profession: '???',
-            info : 'Add more information here',
-            traits: 'Add more information here'
+            characterHome: `${filterHomeValue.value !== "null" ? filterHomeValue.value : 1 }`,
+            characterName: 'New Character',
+            characterPronouns: 'They/them',
+            characterProfession: '???',
+            characterInfo : 'Add more information here',
+            characterTraits: 'Add more information here'
         }
         socket.emit('create', result);
     }
-]
 
-const characterSelect = [
-    'click',
-    'tr',
-    (parent, element, event) => {
+const characterSelect = (element, event) => {
         const info = element.__rowReference; 
-        //if (!info.card) {
-            info.card = characterCard(info);
-            info.card.__rowReference = info;
-        //}
+        info.card = characterCard(info);
+        info.card.__rowReference = info;
         if (modal.firstChild) modal.removeChild(modal.firstChild);
         modal.append(info.card);
         modal.style.display = "block";
     }
-]
 
-const characterFilterAndSort = [
-    'change',
-    '.filterRow',
-    (parent, element, event) => {
-        const table = parent.__graphNodeRef.table;
+
+const characterFilterAndSort = (element, event) => {
+        const table = event.currentTarget.__graphNodeRef.table;
         const filteredCharacters = [];
         let child = list.lastElementChild;
         while (child) {
@@ -66,7 +46,7 @@ const characterFilterAndSort = [
             child = list.lastElementChild;
         }
         for (const [key,row] of Object.entries(table)){
-            if (filterHomeValue.value == " " || row.characterHome == filterHomeValue.value )  {
+            if (filterHomeValue.value === "null" || row.characterHome == filterHomeValue.value )  {
                 filteredCharacters.push(row);
             }
         }
@@ -76,10 +56,17 @@ const characterFilterAndSort = [
             list.append(character.element);
         }
     }
-]
+
+const characterList = {
+    'click': {
+        'Add': characterAdd,
+        'Select': characterSelect
+    },
+    'change': {
+        'FilterSort': characterFilterAndSort
+    }
+}
 
 export {
-    characterAdd,
-    characterSelect,
-    characterFilterAndSort,
+    characterList
 }

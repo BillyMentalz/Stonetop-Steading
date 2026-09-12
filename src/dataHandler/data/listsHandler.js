@@ -19,11 +19,15 @@ const listsDeleteOperator = (row) => {
     row.element.remove();
 }
 
+const onDelete = {
+    action:'Cascade'
+}
+
 const listNode = new graphNode(
     'lists',
     ['listName', 'listOrder'],
-    {},
-    {},
+    [],
+    onDelete,
     listsOperator,
     listsUpdateOperator,
     listsDeleteOperator

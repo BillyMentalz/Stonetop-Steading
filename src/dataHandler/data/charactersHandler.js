@@ -7,17 +7,16 @@ const modal = document.getElementById('modal');
 
 const filterHomeValue = characters.querySelector('select[name="Home"]');
 
-const characterCascadeRules = {
-    up:{},
-    down:{},
-    additional: {
-        'homeName': 'characterHome'
-    }
+const onDelete = {
+    action: "setDefault",
+    key:"characterHome",
+    reference:"homeName",
+    default: 1
 }
 
 const characterCreateOperator = (row )=>{
     const characterElement =  characterRow(row);
-    if (filterHomeValue.value === row.characterHome || filterHomeValue.value === " ") characterTable.append(characterElement);
+    if (filterHomeValue.value == row.characterHome || filterHomeValue.value === "null") characterTable.append(characterElement);
     return characterElement;
 }
 
@@ -51,8 +50,8 @@ const characterDeleteOperator = (row)=> {
 const characterNode = new graphNode(
     'characters',
     ['characterId'],
-    homeNode,
-    characterCascadeRules,
+    [],
+    onDelete,
     characterCreateOperator,
     characterUpdateOperator,
     characterDeleteOperator,

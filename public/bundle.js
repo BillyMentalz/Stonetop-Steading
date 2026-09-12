@@ -21,76 +21,6 @@
     `;
   };
 
-  // src/injects/characters.js
-  var characterRow = (row) => {
-    const charRow = stringToHTMLTable(`
-        <tr>
-            <td>${row.characterName}</td>
-            <td>${row.characterProfession}</td>
-            <td>${row.characterTraits}</td>
-        </tr>
-    `);
-    return charRow;
-  };
-  var characterCardForm = (row) => {
-    return stringToHTML(`
-<div class="characterCard">
-    <div class="Infodeck">
-        <img class="Portrait" src="${row.characterImage}" alt="">
-        <input type='file' accept="image/*" class="characterImageInput" data-action="Image" data-value="${row.characterImage}"> <table>
-            <tbody>
-                <tr> <td>Name: </td> <td><input type="text" name="characterName" value="${row.characterName}"></td></tr>
-                <tr> <td>Pronouns: </td> <td><input type="text" name="characterPronouns" value="${row.characterPronouns}"></td></tr>
-                <tr> <td>Profession: </td> <td><input type="text" name="characterProfession" value="${row.characterProfession}"></td></tr>
-                <tr> <td>Home: </td> <td><input data-action="Homes" type="text" list="homesFilter" name="characterHome" value="${row.characterHome}"></td></tr>
-                <tr> <td>Traits: </td> <td><input type="text" name="characterTraits" value="${row.characterTraits}"></td></tr>
-            </tbody>
-        </table>
-    </div>
-    <div class="CharacterInfo">
-        <div class="columnTitle"> History </div>
-        <textarea class="characterInfo">${row.characterInfo}</textarea>
-        <button data-action="Update" type="button" name="Submit"> Submit </button>
-        <button data-action="Delete" type="button" name="Delete"> Delete </button>
-    </div>       
-</div>`);
-  };
-  var characterCard = (row) => {
-    return stringToHTML(`
-<div class="characterCard">
-    <div class="Infodeck">
-        <img class="Portrait"src="${row.characterImage}" alt="">
-        <div class="NameCard">
-            <div class="characterName">${row.characterName} </div> 
-            <div class="characterPronouns"> (${row.characterPronouns}) </div>
-        </div>
-        <table>
-            <tbody>
-                <tr> <td>Home: </td> <td>${row.characterHome}</td></tr>
-                <tr> <td>Profession: </td> <td>${row.characterProfession}</td></tr>
-                <tr> <td>Traits: </td> <td>${row.characterTraits}</td></tr>
-            </tbody>
-        </table>
-    </div>
-    <div class="characterNotes">
-        <div class="tabHeaders">
-            <div class="tabTitle">
-                History
-            </div>
-            <div data-action="Edit" class="tabIcon fontMod">&#x270D</div>
-        </div>
-        <div class="characterInfo">${row.characterInfo}</div>
-    </div>       
-</div>`);
-  };
-  var characterLoading = () => {
-    return stringToHTML(`
-    <div class="CharacterCard">
-        <div class="ColumnTitle">Sending... </div>
-    </div>
-    `);
-  };
-
   // src/animation.js
   var indicateTimers = /* @__PURE__ */ new Map();
   var updateIndicate = (el) => {
@@ -168,13 +98,17 @@
       return node;
     }
   };
+  var makeIndex = (requirements, row) => {
+    const index = requirements.map((item) => row[item]).join("/%/");
+    return index;
+  };
   var graphNode = class {
-    constructor(name, identifiers, parent3, cascadeRules, createOperator, updateOperator, deleteOperator, attachElement) {
+    constructor(name, identifiers, children, onDelete7, createOperator, updateOperator, deleteOperator, attachElement) {
       this.table = {};
       this.name = name;
       this.identifiers = identifiers;
-      this.parent = parent3;
-      this.cascadeRules = cascadeRules;
+      this.children = children;
+      this.onDelete = onDelete7;
       this.createOperator = createOperator;
       this.updateOperator = updateOperator;
       this.deleteOperator = deleteOperator;
@@ -183,135 +117,190 @@
         this.attachElement.__graphNodeRef = this;
       }
     }
-    makeIndex(requirements, row) {
-      const index = requirements.map((item) => row[item]).join("/%/");
-      return index;
-    }
     createRow(row) {
+      const index = makeIndex(this.identifiers, row);
       const element = this.createOperator(row);
-      console.log(this.identifiers);
-      const index = this.makeIndex(this.identifiers, row);
       element.__rowReference = row;
       row.element = element;
       this.table[index] = row;
       updateIndicate(element);
-      if (Object.keys(this.cascadeRules).length !== 0) {
-        const upIndex = this.cascadeRules.down == void 0 ? row.characterHome : this.makeIndex(this.cascadeRules.down, row);
-        const subscribeObject = {
-          self: this,
-          cascadeRules: this.cascadeRules,
-          rows: [index]
-        };
-        this.parent.addSubscriber(upIndex, this.name, subscribeObject);
-      }
-    }
-    addSubscriber(index, child, subscriberWrapper) {
-      const row = this.table[index];
-      if (!row) throw Error(`Index does not exist! Gen Index: ${index} child: ${child}`);
-      if (row.subscribers === void 0) row.subscribers = {};
-      if (Object.keys(row.subscribers).length !== 0 && row.subscribers[child]) {
-        const oldrows = row.subscribers[child].rows;
-        const newrows = subscriberWrapper.rows;
-        row.subscribers[child].rows = [...oldrows, ...newrows];
-      } else {
-        row.subscribers[child] = subscriberWrapper;
-      }
     }
     updateRow(updateValue) {
-      const index = this.makeIndex(this.identifiers, updateValue);
+      const index = makeIndex(this.identifiers, updateValue);
       const row = this.table[index];
       if (!row) throw Error(`${row} does not exist!`);
-      const changes = {};
       for (const [key, value] of Object.entries(updateValue)) {
-        if (row[key] !== value) {
-          changes[key] = row[key];
-          row[key] = value;
-        }
+        row[key] = value;
       }
       const element = this.updateOperator(row);
       element.__rowReference = row;
       row.element = element;
       updateIndicate(row.element);
-      if (row.subscribers) {
-        for (const [lmao, subscriber] of Object.entries(row.subscribers)) {
-          const downer = {};
-          for (const key of subscriber.cascadeRules.up) {
-            const newer = changes[subscriber.cascadeRules.up[key]];
-            if (newer) downer[subscriber.cascadeRules.down[key]] = newer;
-          }
-          for (const [key, value] of Object.entries(subscriber.cascadeRules.additional)) {
-            if (changes[key]) downer[value] = changes[key];
-          }
-          if (downer) subscriber.self.updateCascade(subscriber, downer);
-        }
-      }
-    }
-    updateCascade(observer, changes) {
-      const indexes = observer.rows;
-      for (const [iterator, index] of indexes.entries) {
-        const row = this.table[index];
-        let needsIndexFix = false;
-        for (const [key, value] of Object.entries(changes)) {
-          if (this.identifiers.includes(key)) needsIndexFix = true;
-          row[key] = value;
-        }
-        if (needsIndexFix) {
-          const newIndex = this.makeIndex(this.identifiers, row);
-          this.table[newIndex] = row;
-          indexes[iterator] = newIndex;
-          delete this.table[index];
-        }
-        this.updateRow(row);
-      }
     }
     deleteRow(deletedItem) {
       const row = this.table[deletedItem];
       if (!row) return;
       if (row.latestModified > deletedItem.deletedAt) return;
       this.deleteOperator(row);
-      if (this.table[deletedItem].subscribers) {
-        for (const subscriber of row.subscribers) {
-          subscriber.self.deleteCascade(deletedItem);
+      if (this.children) {
+        for (const children of this.children) {
+          children.deleteCascader(row);
         }
       }
+      ;
       delete this.table[deletedItem];
     }
-    deleteCascade(id) {
-      if (Object.keys(this.cascadeRules.up).length === 0) {
-        for (const [key, value] of Object.entries(this.table)) {
-          if (key.startsWith(id)) {
-            this.deleteRow(key);
+    deleteCascader(upStreamRow) {
+      if (this.onDelete.action == "setDefault") {
+        for (const [key, row] of Object.entries) {
+          if (row[this.onDelete.key] == upStreamRow[this.onDelete.reference]) {
+            row[this.onDelete.key] = this.onDelete.default;
           }
-          ;
         }
       } else {
-        for (const [key, value] of this.table) {
-          if (value.characterHome == id) {
-            value.characterHome = "At World's End";
-            this.updateOperator(value);
-          }
+        for (const [key, row] of Object.entries) {
+          if (key.startsWith(upStreamRow)) this.deleteRow(key);
         }
       }
     }
   };
+  var filehelper = (folder, filename, fileInput, fileEmitFunction) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64String = e.target.result;
+      fetch("/api/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          src: folder,
+          image: base64String,
+          filename
+        })
+      }).then(
+        (response) => {
+          if (response.ok) {
+            return response.json();
+          } else {
+            throw new Error(`Upload Failed with Response Code ${response.status}`);
+          }
+        }
+      ).then((data) => {
+        const character = folder + "/" + data.fileName;
+        fileEmitFunction(character);
+      }).catch((error) => {
+        console.error("Upload Error", error);
+      });
+    };
+    const [file] = fileInput.files;
+    reader.readAsDataURL(file);
+  };
+
+  // src/dataHandler/data/charactersHandler.js
+  var characterTable = characters.querySelector("#characterTable");
+  var modal = document.getElementById("modal");
+  var filterHomeValue = characters.querySelector('select[name="Home"]');
+  var onDelete = {
+    action: "setDefault",
+    key: "characterHome",
+    reference: "homeName",
+    default: 1
+  };
+  var characterCreateOperator = (row) => {
+    const characterElement = characterRow(row);
+    if (filterHomeValue.value == row.characterHome || filterHomeValue.value === "null") characterTable.append(characterElement);
+    return characterElement;
+  };
+  var characterUpdateOperator = (row) => {
+    const characterElement = row.element;
+    const newElement = characterRow(row);
+    if (row.card) {
+      row.card = characterCard(row);
+      if (modal.firstChild) modal.removeChild(modal.firstChild);
+      row.card.__rowReference = row;
+      modal.append(row.card);
+    }
+    characterElement.replaceWith(newElement);
+    return newElement;
+  };
+  var characterDeleteOperator = (row) => {
+    const characterElement = row.element;
+    characterElement.remove();
+    if (row.card) {
+      if (modal.firstChild) {
+        if (modal.firstChild.__rowReference === row) {
+          modal.removeChild(modal.firstChild);
+        }
+      }
+      row.card.remove();
+      delete row.card;
+    }
+  };
+  var characterNode = new graphNode(
+    "characters",
+    ["characterId"],
+    [],
+    onDelete,
+    characterCreateOperator,
+    characterUpdateOperator,
+    characterDeleteOperator,
+    "characters"
+  );
 
   // src/injects/homes.js
   var newHome = (row) => {
     return stringToHTML(`
-    <div id="${row.homeName}" class='S'> ${row.homeName}
-    </div>
+    <li data-click="Select" id="${row.homeName}"> ${row.homeName}
+    </li>
     `);
   };
   var newSelectionHome = (row) => {
     return stringToHTML(
       `
-        <option value="${row.homeName}">${row.homeName} </option>
+        <option value="${row.homeId}">${row.homeName} </option>
         `
     );
   };
+  var homeCardForm = (row) => {
+    return stringToHTML(`
+    <div class = "house">
+        <div class="Headers">
+            <h4> 
+            <input type="text" name="homeName" value="${row.homeName}"> 
+            </h4>
+            <button data-click="Update" type="button" name="Submit"> Submit </button>
+            <button data-click="Delete" type="button" name="Delete"> Delete </button>
+        </div>
+        <div class="mapCards">
+            <label for="HomeFileInput">
+            <img src="${row.homeImage}" alt="Oops">
+            </label>
+        </div>
+        <input type="text" name="homeTagLine" value="${row.homeTagLine}">
+        <input id="HomeFileInput"type='file' accept="image/*" class="characterImageInput" data-change="Image" data-value="${row.homeImage}">
+        </div>
+    </div>    
+    `);
+  };
+  var homeCard = (row) => {
+    return stringToHTML(`
+    <div class="house">
+        <div class="Headers">
+            <h4>${row.homeName} </h4>
+            <h4 data-click="Edit" class="tabIcon">&#x270D</h4>
+        </div>
+        <div class="mapCards">
+            <img src="${row.homeImage}" alt="Oops"> 
+            ${row.homeImage != "maps/Mystery.png" ? `<h4 data-click="Go" class="GoTo"> Go &#8608</h4>` : ""}
+        </div>           
+        <div class="homeTagLine">${row.homeTagLine} </div>
+    </div>
+    `);
+  };
 
   // src/dataHandler/data/homesHandler.js
-  var worldMap = document.querySelector("#worldMaps ul");
+  var homeCardLocation = document.querySelector("#extra");
+  var homeTab = document.getElementById("worldMaps");
+  var worldMap = homeTab.querySelector("ul");
   var createSelection = (row) => {
     const parents = document.querySelectorAll(`[data-entrypoint="homes"]`);
     let homeStore = [];
@@ -347,6 +336,14 @@
   var homesUpdateOperator = (row) => {
     const newHomeElement = newHome(row);
     newHomeElement.__selectionReference = updateSelection(row.element.__selectionReference, row);
+    if (row.card) {
+      row.card = homeCard(row);
+      row.card.__rowReference = row;
+      if (homeTab.dataset.selected == row.homeId) {
+        homeCardLocation.removeChild(homeCardLocation.firstChild);
+        homeCardLocation.append(row.card);
+      }
+    }
     row.element.replaceWith(newHomeElement);
     return newHomeElement;
   };
@@ -355,17 +352,109 @@
     removal.forEach((element) => {
       element.remove();
     });
+    if (row.card) {
+      if (homeTab.dataset.selected == row.homeId) {
+        homeCardLocation.removeChild(homeCardLocation.firstChild);
+        homeTab.classList.remove("expanded");
+        homeTab.dataset.selected = "noneAtTheMoment";
+      }
+    }
     row.element.remove();
+  };
+  var onDelete2 = {
+    action: "Cascade"
   };
   var homeNode = new graphNode(
     "homes",
-    ["homeName"],
-    {},
-    {},
+    ["homeId"],
+    [locationNode, characterNode],
+    onDelete2,
     homesCreateOperator,
     homesUpdateOperator,
-    homesDeleteOperator
+    homesDeleteOperator,
+    "worldMaps"
   );
+  var getHomeName = (id) => {
+    return homeNode.table[id].homeName;
+  };
+  var getHomeId = (name) => {
+    for (const [key, row] of Object.entries(homeNode.table)) {
+      if (row.homeName == name) {
+        return key;
+      }
+    }
+    throw Error(`This home does not exist! Home: ${name}`);
+  };
+
+  // src/injects/characters.js
+  var characterRow = (row) => {
+    const charRow = stringToHTMLTable(`
+        <tr data-click="Select">
+            <td>${row.characterName}</td>
+            <td>${row.characterProfession}</td>
+            <td>${row.characterTraits}</td>
+        </tr>
+    `);
+    return charRow;
+  };
+  var characterCardForm = (row) => {
+    return stringToHTML(`
+<div class="characterCard">
+    <div class="Infodeck">
+        <label for="CharacterFileInput${row.characterId}">
+        <img src="${row.characterImage}" alt="">
+        </label>
+        <input type='file' accept="image/*" class="characterImageInput" id="CharacterFileInput${row.characterId}" data-change="Image" data-value="${row.characterImage}"> <table>
+            <tbody>
+                <tr> <td>Name: </td> <td><input type="text" name="characterName" value="${row.characterName}"></td></tr>
+                <tr> <td>Pronouns: </td> <td><input type="text" name="characterPronouns" value="${row.characterPronouns}"></td></tr>
+                <tr> <td>Profession: </td> <td><input type="text" name="characterProfession" value="${row.characterProfession}"></td></tr>
+                <tr> <td>Home: </td> <td><input data-change="Homes" data-homeName=${row.characterHome} type="text" list="homesFilter" name="characterHome" value="${getHomeName(row.characterHome)}"></td></tr>
+                <tr> <td>Traits: </td> <td><input type="text" name="characterTraits" value="${row.characterTraits}"></td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="CharacterInfo">
+        <h2> History </h2>
+        <textarea class="characterInfo">${row.characterInfo}</textarea>
+        <button data-click="Update" type="button" name="Submit"> Submit </button>
+        <button data-click="Delete" type="button" name="Delete"> Delete </button>
+    </div>       
+</div>`);
+  };
+  var characterCard = (row) => {
+    return stringToHTML(`
+<div class="characterCard">
+    <div class="Infodeck">
+        <img class="Portrait" src="${row.characterImage}" alt="">
+        <div class="Headers">
+            <h3>${row.characterName} </h3> 
+            <div class="characterPronouns"> (${row.characterPronouns}) </div>
+        </div>
+        <table>
+            <tbody>
+                <tr> <td>Home: </td> <td data-homeName='${row.characterHome}'>${getHomeName(row.characterHome)}</td></tr>
+                <tr> <td>Profession: </td> <td>${row.characterProfession}</td></tr>
+                <tr> <td>Traits: </td> <td>${row.characterTraits}</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="characterNotes">
+        <div class="Headers">
+            <h2> History </h2>
+            <h2 data-click="Edit" class="tabIcon">&#x270D</h2>
+        </div>
+        <div class="characterInfo">${row.characterInfo}</div>
+    </div>       
+</div>`);
+  };
+  var characterLoading = () => {
+    return stringToHTML(`
+    <div class="CharacterCard">
+        <div class="ColumnTitle">Sending... </div>
+    </div>
+    `);
+  };
 
   // src/dataHandler/data/locationsHandler.js
   var parent2 = document.querySelector("#locationSelector");
@@ -385,15 +474,14 @@
   var locationDeleteOperator = (row) => {
     row.element.remove();
   };
-  var locationCascadeRules = {
-    up: ["homeName"],
-    down: ["locationHome"]
+  var onDelete3 = {
+    action: "Cascade"
   };
   var locationNode = new graphNode(
     "location",
     ["locationName", "locationId"],
-    homeNode,
-    locationCascadeRules,
+    [markerNode],
+    onDelete3,
     locationCreateOperator,
     locationsUpdateOperator,
     locationDeleteOperator
@@ -414,16 +502,14 @@
   var markerDeleteOperator = (row) => {
     row.element.remove();
   };
-  var markerCascadeRules = {
-    up: ["locationHome", "locationId"],
-    down: ["markerHome", "markerId"],
-    additional: { "locationSignifier": "markerSignifier" }
+  var onDelete4 = {
+    action: "Cascade"
   };
   var markerNode = new graphNode(
     "markers",
     ["markerName", "markerId", "markerOrder", "markerSignifier"],
-    locationNode,
-    markerCascadeRules,
+    [],
+    onDelete4,
     markerCreateOperator,
     markersUpdateOperator,
     markerDeleteOperator
@@ -432,7 +518,7 @@
   // src/injects/stats.js
   var radio = (name, style, options) => {
     const elementString = `
-    <div>
+    <div class="radioContainer">
         ${options.map((option) => `
             <div class="${style[0]}">
                 <input type="radio" name="${name}" value="${option}">
@@ -524,11 +610,14 @@
     const selectedElement = row.element;
     selectedElement.remove();
   };
+  var onDelete5 = {
+    action: "Cascade"
+  };
   var statNode = new graphNode(
     "stats",
     ["statName"],
-    {},
-    {},
+    [],
+    onDelete5,
     statsCreateOperator,
     statsUpdateOperator,
     statsDeleteOperator
@@ -537,7 +626,7 @@
   // src/injects/lists.js
   var listsRow = (index, text) => {
     const elementString = `
-        <li data-index=${index}>
+        <li data-dblclick="Edit" data-index=${index}>
             ${text}
         </li>`;
     return stringToHTML(elementString);
@@ -567,76 +656,27 @@
   var listsDeleteOperator = (row) => {
     row.element.remove();
   };
+  var onDelete6 = {
+    action: "Cascade"
+  };
   var listNode = new graphNode(
     "lists",
     ["listName", "listOrder"],
-    {},
-    {},
+    [],
+    onDelete6,
     listsOperator,
     listsUpdateOperator,
     listsDeleteOperator
   );
 
-  // src/dataHandler/data/charactersHandler.js
-  var characterTable = characters.querySelector("#characterTable");
-  var modal = document.getElementById("modal");
-  var filterHomeValue = characters.querySelector('select[name="Home"]');
-  var characterCascadeRules = {
-    up: {},
-    down: {},
-    additional: {
-      "homeName": "characterHome"
-    }
-  };
-  var characterCreateOperator = (row) => {
-    const characterElement = characterRow(row);
-    if (filterHomeValue.value === row.characterHome || filterHomeValue.value === " ") characterTable.append(characterElement);
-    return characterElement;
-  };
-  var characterUpdateOperator = (row) => {
-    const characterElement = row.element;
-    const newElement = characterRow(row);
-    if (row.card) {
-      row.card = characterCard(row);
-      if (modal.firstChild) modal.removeChild(modal.firstChild);
-      row.card.__rowReference = row;
-      modal.append(row.card);
-    }
-    characterElement.replaceWith(newElement);
-    return newElement;
-  };
-  var characterDeleteOperator = (row) => {
-    const characterElement = row.element;
-    characterElement.remove();
-    if (row.card) {
-      if (modal.firstChild) {
-        if (modal.firstChild.__rowReference === row) {
-          modal.removeChild(modal.firstChild);
-        }
-      }
-      row.card.remove();
-      delete row.card;
-    }
-  };
-  var characterNode = new graphNode(
-    "characters",
-    ["characterId"],
-    homeNode,
-    characterCascadeRules,
-    characterCreateOperator,
-    characterUpdateOperator,
-    characterDeleteOperator,
-    "characters"
-  );
-
   // src/dataHandler/syncHandler.js
   var graphNodeList = {
     "homes": homeNode,
-    "markers": markerNode,
     "characters": characterNode,
-    "locations": locationNode,
     "stats": statNode,
-    "lists": listNode
+    "lists": listNode,
+    "locations": locationNode,
+    "markers": markerNode
   };
   var dataHandlers = () => {
     for (const [key, operator] of Object.entries(graphNodeList)) {
@@ -661,8 +701,18 @@
       } else {
         const operator = graphNodeList[key];
         for (const row of value) {
-          const index = operator.makeIndex(operator.identifiers, row);
+          const index = makeIndex(operator.identifiers, row);
           if (operator.table[index] !== void 0) {
+            const final = {
+              prev: {},
+              next: {}
+            };
+            for (const [key2, value2] of Object.entries(row)) {
+              if (operator.table[index][key2] !== value2) {
+                final.prev[key2] = operator.table[index][key2];
+                final.next[key2] = value2;
+              }
+            }
             operator.updateRow(row);
           } else {
             operator.createRow(row);
@@ -688,20 +738,106 @@
   };
 
   // src/dataListenerHandlers/dataListeners/homes.js
-  var homeAdd = [
-    "click",
-    ".tabIcon",
-    (parent3, element, event) => {
-      console.log("ojoijoij");
+  var homeCardLocation2 = document.querySelector("#extra");
+  var mapImage = document.querySelector("#map img");
+  var homeAdd = (element, event) => {
+    const last = event.currentTarget.querySelector("ul").lastElementChild;
+    if (window.confirm("Add new site?")) {
+      const result = {
+        table: "homes",
+        homeName: "..."
+      };
+      socket.emit("create", result);
     }
-  ];
-  var homeDelete = [
-    "dblclick",
-    "li",
-    (parent3, element, event) => {
-      console.log("hoioiojoij");
+  };
+  var homeSelect = (element, event) => {
+    const parentData = event.currentTarget.dataset;
+    const info = element.__rowReference;
+    info.card = homeCard(info);
+    info.card.__rowReference = info;
+    if (parentData.selected == info.homeId) {
+      homeCardLocation2.removeChild(homeCardLocation2.firstChild);
+      event.currentTarget.classList.remove("expanded");
+      parentData.selected = "noneAtTheMoment";
+    } else {
+      if (parentData.selected != "noneAtTheMoment") {
+        homeCardLocation2.removeChild(homeCardLocation2.firstChild);
+      }
+      event.currentTarget.classList.add("expanded");
+      homeCardLocation2.append(info.card);
+      parentData.selected = info.homeId;
     }
-  ];
+  };
+  var homeEdit = (element, event) => {
+    const thing = homeCardLocation2.firstChild;
+    const info = thing.__rowReference;
+    const homeForm2 = homeCardForm(info);
+    thing.replaceWith(homeForm2);
+    homeForm2.__rowReference = info;
+  };
+  var homeMapChange = (element, event) => {
+    const image = homeCardLocation2.querySelector("img");
+    const [file] = element.files;
+    if (file) {
+      image.src = URL.createObjectURL(file);
+      element.dataset.value = file.name;
+      if (file.size > 5 * 1024 * 1024) {
+        window.alert("This file is too large for actual upload. Please keep the size of the image >5mb to actually update this.");
+      }
+    }
+  };
+  var homeUpdate = (element, event) => {
+    const homeForm2 = homeCardLocation2.firstChild;
+    const formGet = (name) => homeForm2.querySelector(`input[name="${name}"]`).value;
+    const emitHomeUpdate = (eventualUrl) => {
+      socket.emit("update", {
+        table: "homes",
+        homeId: homeForm2.__rowReference.homeId,
+        homeName: formGet("homeName"),
+        homeTagline: formGet("homeTagLine"),
+        homeImage: eventualUrl
+      });
+    };
+    const fileInput = homeForm2.querySelector('input[type="file"]');
+    if (fileInput.dataset.value == homeForm2.__rowReference.homeImage) {
+      emitHomeUpdate(homeForm2.__rowReference.homeImage);
+    } else {
+      filehelper("maps", homeForm2.__rowReference.homeId, fileInput, emitHomeUpdate);
+    }
+  };
+  var homeDelete = (element, event) => {
+    const info = homeCardLocation2.firstChild.__rowReference;
+    if (!window.confirm("Delete Character?")) {
+      return;
+    }
+    socket.emit("delete", {
+      table: "home",
+      characterId: info.homeId
+    });
+  };
+  var homeGoTo = (element, event) => {
+    const info = element.closest(".house").__rowReference;
+    if (info.homeImage == "") {
+      window.alert("There is no map to go to");
+      return;
+    } else {
+      console.log(info.homeImage);
+      mapImage.src = info.homeImage;
+    }
+  };
+  var homeForm = {
+    "click": {
+      "Add": homeAdd,
+      "Edit": homeEdit,
+      "Go": homeGoTo,
+      "Select": homeSelect,
+      "Update": homeUpdate,
+      "Delete": homeDelete
+    },
+    "change": {
+      "Image": homeMapChange
+    }
+  };
 
   // src/dataListenerHandlers/dataListeners/stats.js
   var sidebarEvents = ["radio", "select-one", "number", "checkbox"];
@@ -713,64 +849,66 @@
       if (sidebarEvents.includes(eType)) {
         socket.emit("update", {
           table: "stats",
-          name: event.target.name,
-          type: event.target.type,
-          value: eType == "checkbox" ? event.target.checked.toString() : event.target.value
+          statName: event.target.name,
+          statType: event.target.type,
+          statValue: eType == "checkbox" ? event.target.checked.toString() : event.target.value
         });
       }
     }
   ];
 
   // src/dataListenerHandlers/dataListeners/lists.js
-  var listAdd = [
-    "click",
-    ".tabIcon",
-    (parent3, element, event) => {
-      const last = parent3.querySelector("ul").lastElementChild;
-      const num = last ? parseInt(last.dataset.index) + 1 : 1;
-      const result = {
-        table: "lists",
-        name: parent3.id,
-        order: parseInt(num),
-        text: "Etc...."
-      };
-      socket.emit("create", result);
+  var listAdd = (element, event) => {
+    const result = {
+      table: "lists",
+      listName: event.currentTarget.id,
+      listText: "Etc...."
+    };
+    socket.emit("create", result);
+  };
+  var listEdit = (element, event) => {
+    if (element.querySelector("button")) return;
+    const newEntry = document.importNode(addBoxTemplate.content, true);
+    const info = element.__rowReference;
+    if (!info) throw Error("There is no row reference, please check again");
+    const editor = rowEnter(info);
+    element.replaceWith(editor);
+    info.element = editor;
+    editor.__rowReference = info;
+    editor.append(newEntry);
+  };
+  var listChange = (element, event) => {
+    const editor = event.target.closest("li");
+    const newText = editor.querySelector("textarea").value;
+    const info = editor.__rowReference;
+    socket.emit("update", {
+      table: "lists",
+      listName: info.listName,
+      listOrder: info.listOrder,
+      listText: newText
+    });
+  };
+  var listDelete = (element, event) => {
+    const info = event.target.closest("li").__rowReference;
+    if (!window.confirm("Delete Item? \n Item:" + info.listText)) {
+      return;
     }
-  ];
-  var listEdit = [
-    "dblclick",
-    "li",
-    (parent3, element, event) => {
-      if (element.querySelector("button")) return;
-      const newEntry = document.importNode(addBoxTemplate.content, true);
-      const info = element.__rowReference;
-      if (!info) throw Error("There is no row reference, please check again");
-      const editor = rowEnter(info);
-      element.replaceWith(editor);
-      info.element = editor;
-      editor.append(newEntry);
-      editor.querySelector('button[name="Change"]').addEventListener("click", (e) => {
-        const newText = editor.querySelector("textarea").value;
-        socket.emit("update", {
-          table: "lists",
-          name: info.listName,
-          order: info.listOrder,
-          text: newText
-        });
-      });
-      editor.querySelector('button[name="Delete"]').addEventListener("click", (e) => {
-        if (!window.confirm("Delete Item? \n Item:" + info.listText)) {
-          editor.replaceWith(info.element);
-          return;
-        }
-        socket.emit("delete", {
-          table: "lists",
-          name: info.listName,
-          order: info.listOrder
-        });
-      });
+    socket.emit("delete", {
+      table: "lists",
+      listName: info.listName,
+      listOrder: info.listOrder
+    });
+  };
+  var listCard = {
+    "click": {
+      "Add": listAdd,
+      "Change": listChange,
+      "Delete": listDelete
+    },
+    "dblclick": {
+      "Edit": listEdit
     }
-  ];
+  };
 
   // src/dataListenerHandlers/dataListeners/characters.js
   var filterHomeValue2 = characters.querySelector('select[name="Home"]');
@@ -797,141 +935,108 @@
       return -a.characterName.localeCompare(b.characterName);
     }
   };
-  function mockRandomUUID() {
-    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
-      const r = Math.random() * 16 | 0;
-      const v = c === "x" ? r : r & 3 | 8;
-      return v.toString(16);
-    });
-  }
-  var characterAdd = [
-    "click",
-    ".tabIcon",
-    (parent3, element, event) => {
-      const result = {
-        table: "characters",
-        id: mockRandomUUID(),
-        home: `${filterHomeValue2.value !== " " ? filterHomeValue2.value : "At World's End"}`,
-        name: "New Character",
-        pronouns: "They/them",
-        profession: "???",
-        info: "Add more information here",
-        traits: "Add more information here"
-      };
-      socket.emit("create", result);
+  var characterAdd = (element, event) => {
+    const result = {
+      table: "characters",
+      characterHome: `${filterHomeValue2.value !== "null" ? filterHomeValue2.value : 1}`,
+      characterName: "New Character",
+      characterPronouns: "They/them",
+      characterProfession: "???",
+      characterInfo: "Add more information here",
+      characterTraits: "Add more information here"
+    };
+    socket.emit("create", result);
+  };
+  var characterSelect = (element, event) => {
+    const info = element.__rowReference;
+    info.card = characterCard(info);
+    info.card.__rowReference = info;
+    if (modal2.firstChild) modal2.removeChild(modal2.firstChild);
+    modal2.append(info.card);
+    modal2.style.display = "block";
+  };
+  var characterFilterAndSort = (element, event) => {
+    const table = event.currentTarget.__graphNodeRef.table;
+    const filteredCharacters = [];
+    let child = list.lastElementChild;
+    while (child) {
+      list.removeChild(child);
+      child = list.lastElementChild;
     }
-  ];
-  var characterSelect = [
-    "click",
-    "tr",
-    (parent3, element, event) => {
-      const info = element.__rowReference;
-      info.card = characterCard(info);
-      info.card.__rowReference = info;
-      if (modal2.firstChild) modal2.removeChild(modal2.firstChild);
-      modal2.append(info.card);
-      modal2.style.display = "block";
-    }
-  ];
-  var characterFilterAndSort = [
-    "change",
-    ".filterRow",
-    (parent3, element, event) => {
-      const table = parent3.__graphNodeRef.table;
-      const filteredCharacters = [];
-      let child = list.lastElementChild;
-      while (child) {
-        list.removeChild(child);
-        child = list.lastElementChild;
-      }
-      for (const [key, row] of Object.entries(table)) {
-        if (filterHomeValue2.value == " " || row.characterHome == filterHomeValue2.value) {
-          filteredCharacters.push(row);
-        }
-      }
-      const eventSort = sortValue.value !== " " ? characterSort[sortValue.value] : characterSort["Created(Ascending)"];
-      filteredCharacters.sort(eventSort);
-      for (const character of filteredCharacters) {
-        list.append(character.element);
+    for (const [key, row] of Object.entries(table)) {
+      if (filterHomeValue2.value === "null" || row.characterHome == filterHomeValue2.value) {
+        filteredCharacters.push(row);
       }
     }
-  ];
+    const eventSort = sortValue.value !== " " ? characterSort[sortValue.value] : characterSort["Created(Ascending)"];
+    filteredCharacters.sort(eventSort);
+    for (const character of filteredCharacters) {
+      list.append(character.element);
+    }
+  };
+  var characterList = {
+    "click": {
+      "Add": characterAdd,
+      "Select": characterSelect
+    },
+    "change": {
+      "FilterSort": characterFilterAndSort
+    }
+  };
 
   // src/dataListenerHandlers/dataListeners/characterCard.js
   var datalist = document.getElementById("homesFilter");
-  var characterEdit = (parent3, element, event) => {
-    const thing = parent3.firstChild;
+  var characterEdit = (element, event) => {
+    const thing = event.currentTarget.firstChild;
     const info = thing.__rowReference;
-    const characterForm = characterCardForm(info);
-    thing.replaceWith(characterForm);
-    characterForm.__rowReference = info;
+    const characterForm2 = characterCardForm(info);
+    thing.replaceWith(characterForm2);
+    characterForm2.__rowReference = info;
   };
-  var characterUpdate = (parent3, element, event) => {
-    const characterForm = parent3.firstChild;
+  var characterUpdate = (element, event) => {
+    const characterForm2 = event.currentTarget.firstChild;
     const thing = characterLoading();
-    characterForm.replaceWith(thing);
+    characterForm2.replaceWith(thing);
     const emitCharacterUpdate = (eventualUrl) => {
       socket.emit("update", {
         table: "characters",
-        name: characterForm.querySelector('input[name="characterName"]').value,
-        home: characterForm.querySelector('input[name="characterHome"]').value,
-        pronouns: characterForm.querySelector('input[name="characterPronouns"]').value,
-        profession: characterForm.querySelector('input[name="characterProfession"]').value,
-        traits: characterForm.querySelector('input[name="characterTraits"]').value,
-        info: characterForm.querySelector('textarea[class="characterInfo"]').value,
-        image: eventualUrl,
-        id: characterForm.__rowReference.characterId
+        characterName: characterForm2.querySelector('input[name="characterName"]').value,
+        characterHome: getHomeId(characterForm2.querySelector('input[name="characterHome"]').value),
+        characterPronouns: characterForm2.querySelector('input[name="characterPronouns"]').value,
+        characterProfession: characterForm2.querySelector('input[name="characterProfession"]').value,
+        characterTraits: characterForm2.querySelector('input[name="characterTraits"]').value,
+        characterInfo: characterForm2.querySelector('textarea[class="characterInfo"]').value,
+        characterImage: eventualUrl,
+        characterId: characterForm2.__rowReference.characterId
       });
     };
-    const fileInput = characterForm.querySelector('input[type="file"]');
-    if (fileInput.dataset.value == characterForm.__rowReference.characterImage) {
-      emitCharacterUpdate(characterForm.__rowReference.characterImage);
+    const fileInput = characterForm2.querySelector('input[type="file"]');
+    if (fileInput.dataset.value == characterForm2.__rowReference.characterImage) {
+      emitCharacterUpdate(characterForm2.__rowReference.characterImage);
     } else {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const base64String = e.target.result;
-        fetch("/api/upload", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            image: base64String,
-            characterId: characterForm.__rowReference.characterId
-          })
-        }).then(
-          (response) => {
-            if (response.ok) {
-              return response.json();
-            } else {
-              throw new Error(`Upload Failed with Response Code ${response.status}`);
-            }
-          }
-        ).then((data) => {
-          const character = "characters/" + data.fileName;
-          emitCharacterUpdate(character);
-        }).catch((error) => {
-          console.error("Upload Error", error);
-        });
-      };
-      const [file] = fileInput.files;
-      reader.readAsDataURL(file);
+      filehelper("characters", characterForm2.__rowReference.characterId, fileInput, emitCharacterUpdate);
     }
   };
-  var characterImageChange = (parent3, element, event) => {
-    const image = parent3.querySelector("img");
+  var characterImageChange = (element, event) => {
+    const image = event.currentTarget.querySelector("img");
     const [file] = element.files;
     if (file) {
       image.src = URL.createObjectURL(file);
       element.dataset.value = file.name;
+      if (file.size > 5 * 1024 * 1024) {
+        window.alert("This file is too large for actual upload. Please keep the size of the image >5mb to actually update this.");
+      }
     }
   };
-  var characterDelete = (parent3, element, event) => {
-    const info = parent3.firstChild.__rowReference;
+  var characterDelete = (element, event) => {
+    const info = event.currentTarget.firstChild.__rowReference;
     if (!window.confirm("Delete Character?")) {
       return;
     }
+    console.log(info);
     socket.emit("delete", {
       table: "characters",
-      id: info.characterId
+      characterId: info.characterId
     });
   };
   var isValueInDatalist = (value) => {
@@ -939,7 +1044,7 @@
     const options = datalist.querySelectorAll("option");
     return Array.from(options).find((option) => option.value.trim().toLowerCase() === trimmedValue);
   };
-  var characterHomeChange = (parent3, element, event) => {
+  var characterHomeChange = (element, event) => {
     const finalInput = isValueInDatalist(element.value);
     if (finalInput !== void 0) element.value = finalInput.value;
     else {
@@ -948,22 +1053,18 @@
       } else {
         socket.emit("create", {
           table: "homes",
-          name: element.value
+          homeName: element.value
         });
       }
     }
   };
-  var characterFormClicker = {
-    eventName: "click",
-    actions: {
+  var characterForm = {
+    "click": {
       "Edit": characterEdit,
       "Update": characterUpdate,
       "Delete": characterDelete
-    }
-  };
-  var characterFormChanger = {
-    eventName: "change",
-    actions: {
+    },
+    "change": {
       "Image": characterImageChange,
       "Homes": characterHomeChange
     }
@@ -1081,12 +1182,12 @@
         "create",
         {
           table: "markers",
-          home: "temp",
-          id: "temp",
-          order: "Temp",
+          markHome: "temp",
+          markerId: "temp",
+          markerOrder: "Temp",
           markerSignifier: "A",
-          x: "50%",
-          y: "50%"
+          markerX: "50",
+          markerY: "50"
         }
       );
     }
@@ -1108,7 +1209,6 @@
 
   // src/dataListenerHandlers/dataListeners/tabs.js
   var tablists = new LinkedList();
-  var tabDragMap = /* @__PURE__ */ new Map();
   function displayToggle(element) {
     if (!element) return;
     if (element.style.display == "") {
@@ -1120,13 +1220,9 @@
       tablists.popNode(element.__nodeRef.element);
     }
   }
-  function drags2(event) {
-    let newleft = event.clientX;
-    let newtop = event.clientY;
-    if (newleft < event.currentTarget.offsetWidth / 2) newleft = event.currentTarget.offsetWidth / 2;
-    if (newtop < event.currentTarget.offsetHeight / 2) newtop = event.currentTarget.offsetHeight / 2;
-    if (newleft > window.innerWidth - event.currentTarget.offsetWidth / 2) newleft = window.innerWidth - event.currentTarget.offsetWidth / 2;
-    if (newtop > window.innerWidth - event.currentTarget.offsetHeight / 2) newtop = window.innerHeight - event.currentTarget.offsetHeight / 2;
+  function drags2(event, offsetX, offsetY) {
+    let newleft = event.pageX - offsetX;
+    let newtop = event.pageY - offsetY;
     event.currentTarget.style.left = `${newleft}px`;
     event.currentTarget.style.top = `${newtop}px`;
   }
@@ -1139,31 +1235,22 @@
       temp = temp.next;
     }
   }
-  var menuToggle = [
-    "click",
-    "#guide",
-    (parent3, element, event) => {
-      const menuElement = parent3.querySelector("#menu");
-      if (menuElement.style.width == "100%") {
-        event.target.style.backgroundPosition = "100px 50px";
-        menuElement.style.width = "0%";
-        menuElement.style.overflow = "hidden";
-      } else {
-        event.target.style.backgroundPosition = "50px 50px";
-        menuElement.style.width = "100%";
-        menuElement.style.overflow = "visible";
-      }
+  var menuToggle = (element, event) => {
+    const menuElement = event.currentTarget.querySelector("#menu");
+    if (menuElement.style.width == "100%") {
+      event.target.style.backgroundPosition = "100px 50px";
+      menuElement.style.width = "1%";
+      menuElement.style.overflow = "hidden";
+    } else {
+      event.target.style.backgroundPosition = "50px 50px";
+      menuElement.style.width = "100%";
     }
-  ];
-  var tabToggle = [
-    "click",
-    ".openTab",
-    (parent3, element, event) => {
-      const tab = document.getElementById(element.dataset.toggle);
-      if (!tab) return;
-      displayToggle(tab);
-    }
-  ];
+  };
+  var tabToggle = (element, event) => {
+    const tab = document.getElementById(element.dataset.toggle);
+    if (!tab) return;
+    displayToggle(tab);
+  };
   var tabDrag = [
     "mousedown",
     ".tabs",
@@ -1171,18 +1258,15 @@
       tablists.popNode(element.__nodeRef);
       tablists.append(element);
       caltab();
-      const dragHandler = (event2) => drags2(event2);
+      const offsetX = event.clientX - element.offsetLeft;
+      const offsetY = event.clientY - element.offsetTop;
+      const dragHandler = (moveEvent) => drags2(moveEvent, offsetX, offsetY);
       element.addEventListener("mousemove", dragHandler);
-      tabDragMap.set(element, dragHandler);
-    }
-  ];
-  var tabSet = [
-    "mouseup",
-    ".tabs",
-    (parent3, element, event) => {
-      for (const [key, value] of tabDragMap) {
-        key.removeEventListener("mousemove", value);
-      }
+      const cleanup = () => {
+        element.removeEventListener("mousemove", dragHandler);
+        document.removeEventListener("mouseup", cleanup);
+      };
+      document.addEventListener("mouseup", cleanup);
     }
   ];
   var modalHide = [
@@ -1193,19 +1277,20 @@
       }
     }
   ];
+  var menuCard = {
+    "click": {
+      "MenuToggle": menuToggle,
+      "TabToggle": tabToggle
+    }
+  };
 
   // src/dataListenerHandlers/dataListenerHandler.js
   var EventListenerRegistry = {
-    "homeAdd": (parent3) => ContainerEventFactory(parent3, ...homeAdd),
-    "homeDelete": (parent3) => ContainerEventFactory(parent3, ...homeDelete),
     "statChange": (parent3) => GenericEventFactory(parent3, ...statChange),
-    "listAdd": (parent3) => ContainerEventFactory(parent3, ...listAdd),
-    "listEdit": (parent3) => ContainerEventFactory(parent3, ...listEdit),
-    "characterCard": (parent3) => ClickContainerFactory(parent3, characterFormClicker),
-    "characterChange": (parent3) => ClickContainerFactory(parent3, characterFormChanger),
-    "characterAdd": (parent3) => ContainerEventFactory(parent3, ...characterAdd),
-    "characterSelect": (parent3) => ContainerEventFactory(parent3, ...characterSelect),
-    "characterArrange": (parent3) => ContainerEventFactory(parent3, ...characterFilterAndSort),
+    "homeForm": (parent3) => EventContainerFactory(parent3, homeForm),
+    "listCard": (parent3) => EventContainerFactory(parent3, listCard),
+    "characterCard": (parent3) => EventContainerFactory(parent3, characterForm),
+    "characterList": (parent3) => EventContainerFactory(parent3, characterList),
     "locationAdd": (parent3) => ContainerEventFactory(parent3, ...locationAdd),
     "locationEdit": (parent3) => ContainerEventFactory(parent3, ...locationEdit),
     "locationSelect": (parent3) => ContainerEventFactory(parent3, ...locationSelect),
@@ -1214,10 +1299,8 @@
     "markerSelect": (parent3) => ContainerEventFactory(parent3, ...markerSelect),
     "mapDrag": (parent3) => ContainerEventFactory(parent3, ...mapDrag),
     "mapSet": (parent3) => ContainerEventFactory(parent3, ...mapSet),
-    "tabToggle": (parent3) => ContainerEventFactory(parent3, ...tabToggle),
-    "menuToggle": (parent3) => ContainerEventFactory(parent3, ...menuToggle),
+    "menuCard": (parent3) => EventContainerFactory(parent3, menuCard),
     "tabDrag": (parent3) => ContainerEventFactory(parent3, ...tabDrag),
-    "tabSet": (parent3) => ContainerEventFactory(parent3, ...tabSet),
     "modalHide": (parent3) => GenericEventFactory(parent3, ...modalHide)
   };
   function ContainerEventFactory(parent3, mEvent, selector, handler) {
@@ -1232,20 +1315,19 @@
       handler(element, e);
     });
   }
-  function ClickContainerFactory(element, clicker) {
-    const { eventName, actions } = clicker;
-    element.addEventListener(eventName, (e) => {
-      console.log(eventName);
-      const button = e.target.closest("[data-action]");
-      console.log(button);
-      if (!button) return;
-      const handler = actions[button.dataset.action];
-      if (!handler) {
-        console.log(`action ${button.dataset.action} doesn't exist! Please add`);
-        return;
-      }
-      handler(element, button, e);
-    });
+  function EventContainerFactory(element, container) {
+    for (const [eventName, actions] of Object.entries(container)) {
+      element.addEventListener(eventName, (e) => {
+        const button = e.target.closest(`[data-${eventName}]`);
+        if (!button) return;
+        const handler = actions[button.dataset[eventName]];
+        if (!handler) {
+          console.log(`action ${button.dataset[eventName]} doesn't exist! Please add`);
+          return;
+        }
+        handler(button, e);
+      });
+    }
   }
   var dataListenerHandler = () => {
     const entryPoints = document.querySelectorAll("[data-listener]");
@@ -1260,21 +1342,27 @@
   // src/start.js
   dataHandlers();
   dataListenerHandler();
+  var makeLatest = (thing) => {
+    localStorage.setItem("time", thing);
+  };
   socket.on("connect", () => {
     let check = localStorage.getItem("time") || 0;
     socket.emit("checkSync", check);
   });
   socket.on("create", (create) => {
     graphNodeList[create.table].createRow(create.result);
+    makeLatest(create.result.latestModified);
   });
   socket.on("update", (update) => {
     isUpdatingFromServerState.stepUp();
-    console.log(update.table);
     graphNodeList[update.table].updateRow(update.result);
+    makeLatest(update.result.latestModified);
     isUpdatingFromServerState.stepDown();
   });
   socket.on("delete", (deleted) => {
+    console.log(deleted);
     graphNodeList[deleted.tableName].deleteRow(deleted.deletedItem);
+    makeLatest(deleted.deletedAt);
   });
   socket.on("checkSync", (check) => {
     storeNewRows(check);

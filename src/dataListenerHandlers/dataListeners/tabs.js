@@ -16,13 +16,9 @@ function displayToggle(element) {
     }
 };
 
-function drags(event) {
-    let newleft = event.clientX;
-    let newtop =  event.clientY;
-    if (newleft < event.currentTarget.offsetWidth/2 ) newleft = event.currentTarget.offsetWidth/2;
-    if (newtop < event.currentTarget.offsetHeight/2 ) newtop = event.currentTarget.offsetHeight/2;
-    if (newleft > (window.innerWidth - event.currentTarget.offsetWidth/2)) newleft = window.innerWidth - event.currentTarget.offsetWidth/2;
-    if (newtop > (window.innerWidth - event.currentTarget.offsetHeight/2)) newtop = window.innerHeight - event.currentTarget.offsetHeight/2;
+function drags(event, offsetX, offsetY) {
+    let newleft = event.pageX - offsetX;
+    let newtop =  event.pageY - offsetY;
     event.currentTarget.style.left = `${newleft}px`;
     event.currentTarget.style.top = `${newtop}px`;
 }
@@ -37,33 +33,26 @@ function caltab () {
     }
 };
 
-const menuToggle = [
-    'click',
-    '#guide',
-    (parent,element, event) => {
-        const menuElement = parent.querySelector('#menu')
+
+const menuToggle = (element, event) => {
+        const menuElement = event.currentTarget.querySelector('#menu')
         if (menuElement.style.width == "100%") {
             event.target.style.backgroundPosition  = "100px 50px"
-            menuElement.style.width = "0%";
+            menuElement.style.width = "1%";
             menuElement.style.overflow = "hidden";
         }
         else {
             event.target.style.backgroundPosition  = "50px 50px"
             menuElement.style.width = "100%";
-            menuElement.style.overflow = "visible";
         }
     }
-]
 
-const tabToggle = [
-    'click',
-    '.openTab',
-    (parent, element, event)=> {
+
+const tabToggle = (element, event)=> {
         const tab = document.getElementById(element.dataset.toggle);
         if (!tab) return;
         displayToggle(tab)
     }
-]
 
 const tabDrag = [
     'mousedown',
@@ -72,19 +61,15 @@ const tabDrag = [
         tablists.popNode(element.__nodeRef);
         tablists.append(element);
         caltab()
-        const dragHandler = (event) => drags(event)
+        const offsetX = event.clientX - element.offsetLeft;
+        const offsetY = event.clientY - element.offsetTop;
+        const dragHandler = (moveEvent) => drags(moveEvent, offsetX, offsetY)
         element.addEventListener("mousemove", dragHandler)
-        tabDragMap.set(element, dragHandler);
-    }
-]
-
-const tabSet = [
-    'mouseup',
-    '.tabs',
-    (parent, element, event)=> {
-        for (const [key, value] of tabDragMap) {
-            key.removeEventListener('mousemove', value);
+        const cleanup = ()=> {
+            element.removeEventListener('mousemove', dragHandler);
+            document.removeEventListener('mouseup', cleanup);
         }
+        document.addEventListener('mouseup', cleanup);
     }
 ]
 
@@ -96,12 +81,15 @@ const modalHide = [
         }
     }
 ]
-
+const menuCard = {
+    'click': { 
+        'MenuToggle': menuToggle,
+        'TabToggle': tabToggle
+    }
+}
 export {
-    menuToggle,
-    tabToggle,
+    menuCard,
     tabDrag,
-    tabSet,
     modalHide
 }
 

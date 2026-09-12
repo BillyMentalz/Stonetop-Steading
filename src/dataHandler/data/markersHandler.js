@@ -18,18 +18,14 @@ const markersUpdateOperator = (row)=> {
 const markerDeleteOperator = (row) => {
     row.element.remove();
 }
-
-const markerCascadeRules = {
-    up: ['locationHome', 'locationId'],
-    down: ['markerHome', 'markerId'],
-    additional: { 'locationSignifier': 'markerSignifier'}
+const onDelete = {
+    action:'Cascade'
 }
-
 const markerNode = new graphNode(
     'markers',
     ['markerName', 'markerId', 'markerOrder', 'markerSignifier'],
-    locationNode,
-    markerCascadeRules,
+    [],
+    onDelete,
     markerCreateOperator,
     markersUpdateOperator,
     markerDeleteOperator
